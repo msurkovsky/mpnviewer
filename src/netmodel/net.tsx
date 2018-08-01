@@ -1,10 +1,17 @@
 import * as React from 'react';
 
-export class Net extends React.Component {
+interface INetProps {
+    width: number;
+    height: number;
+}
+
+export class Net extends React.Component<INetProps, {}> {
 
     public render () {
         return (
-            <svg width={100} height={100} />
-        )
+            <svg width={this.props.width} height={this.props.height}>
+                {this.props.children}
+            </svg>
+        );
     }
 }

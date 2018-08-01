@@ -1,10 +1,34 @@
-import * as React from 'react';
+/* import { Component, SVGProps } from 'react'; */
+import * as React from 'react'
 
-export class Place extends React.Component {
+/* interface IPlaceProps { */
+/* "cx": number; */
+/* "cy": number; */
+/* "r": number; */
+/* "stroke"?: string; */
+/* "stroke-width"?: number; */
+/* "fill"?: string; */
+/* } */
+
+export class Place extends React.Component<PlaceProps, {}> {
+
+    protected static defaultProps = {
+        "fill": "#fff",
+        "stroke": "#000",
+        "strokeWidth": 2,
+    };
 
     public render () {
         return (
-            <circle cx={50} cy={50} r={40} stroke="green" stroke-width={4} fill="yellow" />
+            <circle
+                cx={this.props.cx}
+                cy={this.props.cy}
+                r={this.props.r}
+                stroke={this.props.stroke}
+                strokeWidth={this.props.strokeWidth}
+                fill={this.props.fill} />
         );
     }
 }
+
+export type PlaceProps = React.SVGProps<SVGCircleElement>;
