@@ -4,10 +4,16 @@ import {ViewElement} from './netelement'
 
 /* export type ViewPlaceProps = React.SVGProps<SVGCircleElement>;*/
 
-interface ViewPlaceProps extends React.SVGProps<SVGCircleElement> {
-    cx: number;
-    cy: number;
-    r: number;
+type color = string;
+
+interface ViewPlaceProps {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    stroke?: color;
+    strokeWidth?: number;
+    fill?: color;
 };
 
 export class Place extends React.Component<ViewPlaceProps, {}> {
@@ -19,23 +25,20 @@ export class Place extends React.Component<ViewPlaceProps, {}> {
     };
 
     public render () {
-        const {cx, cy, r} = this.props;
-        const position = {
-            x: cx - r,
-            y: cy - r,
-        };
+        const {x, y, width, height} = this.props;
 
-        const size = {
-            height: 2 * r,
-            width: 2 * r,
-        };
+        const rx = width / 2;
+        const ry = height / 2;
+        const cx = x + rx;
+        const cy = y + ry;
 
         return (
-            <ViewElement position={position} size={size}>
+            // NOTE: {x,y} == {x: x, y: y}; this is called property shorthand
+            <ViewElement position={{x, y}} size={{width, height}}>
                 <circle
-                    cx={this.props.cx}
-                    cy={this.props.cy}
-                    r={this.props.r}
+                    cx={cx}
+                    cy={cy}
+                    r={rx/* TODO: use both rx and ry*/}
                     stroke={this.props.stroke}
                     strokeWidth={this.props.strokeWidth}
                     fill={this.props.fill} />

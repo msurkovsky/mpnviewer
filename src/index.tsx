@@ -10,7 +10,7 @@ import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(
         <Net width={1000} height={500}>
-            <Place cx={50} cy={50} r={40} />
+            <Place x={50} y={50} width={40} height={40} />
         </Net>,
     document.getElementById('root') as HTMLElement
 );
