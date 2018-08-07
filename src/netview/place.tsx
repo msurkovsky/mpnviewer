@@ -10,9 +10,15 @@ export interface ViewPlaceProps extends ViewElemProps {
     stroke?: color;
     strokeWidth?: number;
     fill?: color;
-};
+    onClick?: (e: any) => void;
+}
 
-export class Place extends React.Component<ViewPlaceProps, {}> {
+export interface ViewPlaceState extends ViewElemProps {
+    relX: number;
+    relY: number;
+}
+
+export class Place extends React.Component<ViewPlaceProps, ViewPlaceState> {
 
     protected static defaultProps = {
         "fill": "#fff",
@@ -20,22 +26,35 @@ export class Place extends React.Component<ViewPlaceProps, {}> {
         "strokeWidth": 2
     };
 
-    constructor (props: ViewPlaceProps) {
+    public constructor (props: ViewPlaceProps) {
         super(props);
 
+        const {x, y, width, height} = this.props;
+
+        const bbox = ViewElement.computeBoundingBox([{x, y, width, height}]); // TODO: later on add more inner elements
+
+        this.state = {
+            ...bbox,
+            relX: bbox.x - x,
+            relY: bbox.y - y,
+        }
+        console.log("BBOX", this.state);
     }
 
     public render () {
-        const {x, y, width, height, ...other} = this.props;
+        const {x, y, width, height, relX, relY} = this.state;
 
         const rx = width / 2;
         const ry = height / 2;
 
         return (
-            // NOTE: {x,y} == {x: x, y: y}; this is called property shorthand
-            <ViewElement {...{x, y, width, height}} >
-                <rect {...other} {...{x, y, rx, ry, width, height}} />
+            <ViewElement {...this.state} >
+                <rect {...{x: x+relX, y: y+relY, rx, ry, width, height}} />
             </ViewElement>
         );
+    }
+
+    public computeMove (e: any): void {
+        console.log("compute move", e);
     }
 }
