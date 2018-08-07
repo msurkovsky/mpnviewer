@@ -1,38 +1,65 @@
 import * as React from 'react'
 
-/* import {PlaceProps} from '../netmodel/place'*/
-import {Position, Size} from './types'
-
-interface Props {
-    position: Position;
-    size: Size;
-    /* children: React.ReactElement<Place>[] */
+export interface ViewElemProps {
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+    onClick?: (e: any) => void;
 }
 
-export class ViewElement extends React.Component<Props, {}> {
+export class ViewElement extends React.Component<ViewElemProps, {}> {
+
+    protected static defaultProps = {
+        fillOpacity: 0,
+        stroke: "#000",
+        strokeWidth: 1,
+    };
+
+    constructor(props: ViewElemProps) {
+        super(props);
+
+        this.handleMainChildClick = this.handleMainChildClick.bind(this);
+    }
 
     public render() {
-        const {x, y} = this.props.position;
-        const {width, height} = this.props.size;
+        const {x, y, width, height, onClick, ...other} = this.props;
 
         return (
             <g>
-                <rect x={x} y={y} width={width} height={height} fill="white" stroke="black" strokeWidth={2} />
-                {this.props.children}
+                <rect {...other} {...{x, y, width, height}} />
 
+                {/*this.props.children*/}
+
+                {React.Children.map(
+                    this.props.children,
+                    (child: React.ReactElement<ViewElemProps>) => {
+                        if (!React.isValidElement(child)) {
+                            return;
+                        }
+
+                        return React.cloneElement(child, {onClick: this.handleMainChildClick});
+                    }
+                )}
+
+                {/* TODO: reuse this with group moving, i.e., if move with place all connected things moves with it */}
                 {/*React.Children.map(
                     this.props.children,
-                    (child: React.ReactElement<PlaceProps>) => {
+                    (child: React.ReactElement<ViewPlaceProps>) => {
                         if (!React.isValidElement(child)) {
                             return;
                         }
 
                         console.log(child.props);
-                        const elemX = x + (child.props.cx as number);
-                        const elemY = y + (child.props.cy as number);
-                        return React.cloneElement(child, {cx: elemX, cy: elemY});
+                        const elemX = x + 10;
+                        const elemY = y + 20;
+                        return React.cloneElement(child, {x: elemX, y: elemY});
                     })*/}
             </g>
         );
+    }
+
+    protected handleMainChildClick (e: any) {
+        console.log("handle main");
     }
 }
