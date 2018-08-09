@@ -47,7 +47,6 @@ export function ViewElement<T extends {}> (Element: any) {
                     height: bbox.height,
                 }
             });
-            console.log(this.state);
         }
 
         protected handleRelatedMove = () => {

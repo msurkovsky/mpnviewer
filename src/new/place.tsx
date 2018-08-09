@@ -21,7 +21,6 @@ interface Props {
 
 interface State {
     place: PlaceType;
-    bbox: BoundingBox;
     placeBox: BoundingBox;
     typeBox?: BoundingBox;
     initBox?: BoundingBox;
@@ -46,7 +45,6 @@ class CorePlace extends React.Component<Props, State> {
         };
 
         this.state = {
-            bbox,
             initBox: place.initExpr !== "" ? {x: bbox.width, y: 0, width:30, height: 20} : undefined, // TODO: compute width and height
             place,
             placeBox,
@@ -55,7 +53,8 @@ class CorePlace extends React.Component<Props, State> {
     }
 
     public componentDidMount () {
-        const {place, bbox, ...others} = this.state;
+        const bbox = this.props.bbox;
+        const {place, ...others} = this.state;
 
         // take only valid boxes as a list
         const boxes = Object.keys(others)
@@ -72,7 +71,8 @@ class CorePlace extends React.Component<Props, State> {
     }
 
     public render () {
-        const {bbox, placeBox} = this.state;
+        const bbox = this.props.bbox;
+        const placeBox = this.state.placeBox;
 
         const width = placeBox.width;
         const height = placeBox.height;
