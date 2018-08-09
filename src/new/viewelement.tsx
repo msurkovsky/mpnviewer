@@ -17,7 +17,6 @@ export function ViewElement<T extends {}> (Element: any) {
                                                        // YES: it works but has to explicitely retype as any
 
             this.state = {...data, bbox: {...bbox}};
-            console.log(this.state); // TODO: during the second render the state is enriched by x, y parameters.
         }
 
         public render() {
