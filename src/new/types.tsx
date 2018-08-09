@@ -8,12 +8,6 @@ export interface BoundingBox {
 
 export class UID {
 
-    private static ids: Map<any, UID>;
-
-    private constructor(value: any) {
-        this.value = value;
-    }
-
     public static get(value: any) {
         if (!UID.ids[value]) {
             const uid = new UID(value);
@@ -23,5 +17,13 @@ export class UID {
         throw new Error("ID with value '" + value + "' already exists!");
     }
 
+    private static ids: Map<any, UID> = new Map();
+
     public value: Readonly<any>;
+
+    private constructor(value: any) {
+        this.value = value;
+    }
+
+
 }

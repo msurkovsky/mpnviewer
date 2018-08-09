@@ -1,7 +1,8 @@
 import * as React from 'react'
 
-import {ViewElement} from './viewelement'
 import {BoundingBox, UID} from './types'
+import * as Utils from './utils'
+import {ViewElement} from './viewelement'
 
 interface PlaceType { // TODO: move into 'model' package
     id: UID
@@ -19,6 +20,7 @@ interface Props {
 }
 
 interface State {
+    place: PlaceType;
     bbox: BoundingBox;
     placeBox: BoundingBox;
     typeBox?: BoundingBox;
@@ -33,26 +35,40 @@ class CorePlace extends React.Component<Props, State> {
 
     constructor(props: any) {
         super(props);
+        const {place, bbox} = this.props;
+
+        const placeBox = {...bbox, x: 0, y: 0};
+        const typeBox = {
+            height: 2,
+            width: 5,
+            x: placeBox.width,
+            y: placeBox.height,
+        };
+
         this.state = {
-            bbox: this.props.bbox,
-            placeBox: {...this.props.bbox, x: 0, y: 0}
+            bbox,
+            initBox: place.initExpr !== "" ? {x: bbox.width, y: 0, width:30, height: 20} : undefined, // TODO: compute width and height
+            place,
+            placeBox,
+            typeBox: place.type !== "" ? typeBox : undefined,
         }
     }
 
     public componentDidMount () {
-        const {bbox, placeBox, typeBox, initBox} = this.state;
-        const newBbox = [placeBox, typeBox, initBox]
-                            .filter((e) => e !== undefined)
-                            .reduce((a: NonNullable<BoundingBox>, b: NonNullable<BoundingBox>) => {
-                                return {
-                                    x: a.x < b.x ? a.x : b.x,
-                                    y: a.y < b.y ? a.y : b.y,
-                                    width: a.x + a.width < b.x + b.width ? a.x + a.width : b.x + b.width,
-                                    height: a.y + a.height < b.y + b.height ? a.y + a.height : b.y + b.height,
-                                }
-                            }, bbox);
+        const {place, bbox, ...others} = this.state;
 
-        this.props.handleResize(newBbox!);
+        // take only valid boxes as a list
+        const boxes = Object.keys(others)
+                            .map(key => others[key])
+                            .filter(b => b !== undefined);
+
+        // The positions of boxes are relative to the provided bounding box `bbox`.
+        // To compute bounding box correctly all of them have to abosolutized.
+        const absBoxes = Utils.absolutizeBouningBoxes(bbox, boxes);
+        const newBbox = Utils.computeBoundingBox(bbox, absBoxes);
+
+        // propagate the new bounding box to the parrent
+        this.props.handleResize(newBbox);
     }
 
     public render () {
@@ -60,13 +76,13 @@ class CorePlace extends React.Component<Props, State> {
 
         const width = placeBox.width;
         const height = placeBox.height;
-        const rx = width / 2;
         const ry = height / 2;
+        const rx = ry;
 
         return (
             <g>
             <rect
-                x={bbox.x+placeBox.y}
+                x={bbox.x+placeBox.x}
                 y={bbox.y+placeBox.y}
                 rx={rx}
                 ry={ry}
@@ -84,6 +100,7 @@ class CorePlace extends React.Component<Props, State> {
         this.moving = true;
         this.startX = e.clientX;
         this.startY = e.clientY;
+        console.log("down");
     }
 
     private handlePlaceMouseMove = (e: any) => {
@@ -105,4 +122,4 @@ class CorePlace extends React.Component<Props, State> {
     }
 }
 
-export const Place = ViewElement(CorePlace, undefined);
+export const Place = ViewElement<{place: PlaceType}>(CorePlace);
