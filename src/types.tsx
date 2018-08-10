@@ -1,11 +1,4 @@
 
-export interface BoundingBox {
-    y: number;
-    x: number;
-    width: number;
-    height: number;
-}
-
 export class UID {
 
     public static get(value: any) {
@@ -24,6 +17,30 @@ export class UID {
     private constructor(value: any) {
         this.value = value;
     }
+}
 
+export class DataType {
 
+    private name: string;
+
+    constructor (name: string) {
+        this.name = name;
+    }
+
+    public toString(): string {
+        return this.name;
+    }
+}
+
+export class Expression {
+
+    private expr: string;
+
+    constructor(expr: string) {
+        this.expr = expr;
+    }
+
+    public toString(): string {
+        return this.expr;
+    }
 }
