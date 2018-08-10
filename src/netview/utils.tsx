@@ -1,5 +1,5 @@
 
-import {BoundingBox} from './types'
+import {BoundingBox} from './viewelement'
 
 type constbbox = Readonly<BoundingBox>;
 

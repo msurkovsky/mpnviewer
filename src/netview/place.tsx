@@ -1,60 +1,59 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import {BoundingBox, UID} from './types'
-import * as Utils from './utils'
-import {ViewElement} from './viewelement'
+import * as Utils from './utils';
 
-interface PlaceType { // TODO: move into 'model' package
-    id: UID
-    name: string;
-    type: string;
-    initExpr: string;
-}
+import {TPlace} from '../netmodel';
+import {mpnUnit} from '../types';
+import {BoundingBox, ViewElement} from './viewelement';
+
 
 interface Props {
-    place: PlaceType;
+    place: TPlace;
     bbox: BoundingBox;
     handleMainMove: (dx: number, dy: number) => void;
     handleRelatedMove: () => void;
     handleResize: (bbox: BoundingBox) => void;
 }
 
+
 interface State {
-    place: PlaceType;
-    placeBox: BoundingBox;
-    typeBox?: BoundingBox;
-    initBox?: BoundingBox;
+    placeBbox: BoundingBox;
+    typeBbox?: BoundingBox;
+    exprBbox?: BoundingBox;
 }
 
-class CorePlace extends React.Component<Props, State> {
 
-    private startX: number | null = null;
-    private startY: number | null = null;
-    private moving: boolean = false;
+class CorePlace extends React.Component<Props, State> {
 
     constructor(props: any) {
         super(props);
         const {place, bbox} = this.props;
 
-        const placeBox = {...bbox, x: 0, y: 0};
-        const typeBox = {
-            height: 2,
-            width: 5,
-            x: placeBox.width,
-            y: placeBox.height,
+        const placeBbox = {...bbox, x: 0, y: 0};
+        // TODO: compute width and height of the following bbox based on texts
+        const exprBbox = {
+            x: placeBbox.width,
+            y: 0,
+            width: 30,
+            height: 20,
+        };
+        const typeBbox = {
+            x: placeBbox.width,
+            y: placeBbox.height,
+            width: 30,
+            height: 20,
         };
 
         this.state = {
-            initBox: place.initExpr !== "" ? {x: bbox.width, y: 0, width:30, height: 20} : undefined, // TODO: compute width and height
-            place,
-            placeBox,
-            typeBox: place.type !== "" ? typeBox : undefined,
+            placeBbox,
+            exprBbox: place.initExpr.isEmpty() ? exprBbox : undefined,
+            typeBbox: place.type !== mpnUnit ? typeBbox : undefined,
         }
     }
 
     public componentDidMount () {
         const bbox = this.props.bbox;
-        const {place, ...others} = this.state;
+        const {...others} = this.state;
 
         // take only valid boxes as a list
         const boxes = Object.keys(others)
@@ -72,54 +71,35 @@ class CorePlace extends React.Component<Props, State> {
 
     public render () {
         const bbox = this.props.bbox;
-        const placeBox = this.state.placeBox;
+        const {placeBbox, typeBbox, exprBbox} = this.state;
 
-        const width = placeBox.width;
-        const height = placeBox.height;
+        const height = placeBbox.height;
         const ry = height / 2;
         const rx = ry;
 
-        return (
-            <g>
+        const placeSVG = (
             <rect
-                x={bbox.x+placeBox.x}
-                y={bbox.y+placeBox.y}
+                {...Utils.absolutizeBouningBoxes(bbox, [placeBbox])[0]}
                 rx={rx}
                 ry={ry}
-                width={width}
-                height={height}
-                onMouseDown={this.handlePlaceMouseDown}
-                onMouseMove={this.handlePlaceMouseMove}
-                onMouseUp={this.handlePlaceMouseUp}
             />
+        );
+
+        const getTmpBox = (relbbox: BoundingBox | undefined) => { // TODO: later on use containers for both elements
+            if (relbbox !== undefined) {
+                return <rect {...Utils.absolutizeBouningBoxes(bbox, [relbbox])[0]} />
+            }
+            return null;
+        }
+
+        return (
+            <g>
+                {placeSVG}
+                {getTmpBox(typeBbox)}
+                {getTmpBox(exprBbox)}
             </g>
         );
     }
-
-    private handlePlaceMouseDown = (e: any) => {
-        this.moving = true;
-        this.startX = e.clientX;
-        this.startY = e.clientY;
-        console.log("down");
-    }
-
-    private handlePlaceMouseMove = (e: any) => {
-        if (!this.moving) {
-            return;
-        }
-
-        const cbMove = this.props.handleMainMove;
-        if (this.startX !== null && this.startY !== null) {
-            cbMove(e.clientX-this.startX, e.clientY-this.startY);
-        }
-        this.startX = e.clientX;
-        this.startY = e.clientY;
-    }
-
-    private handlePlaceMouseUp = (e: any) => {
-        this.startY = this.startX = null;
-        this.moving = false;
-    }
 }
 
-export const Place = ViewElement<{place: PlaceType}>(CorePlace);
+export const Place = ViewElement<{place: TPlace}>(CorePlace);

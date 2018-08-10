@@ -1,26 +1,39 @@
 import * as React from 'react'
 
-import {BoundingBox} from './types'
 
-export interface ViewElementProps {
+interface ViewElementData {
     bbox: BoundingBox;
 }
 
+
+export interface BoundingBox {
+    y: number;
+    x: number;
+    width: number;
+    height: number;
+}
+
+
 export function ViewElement<T extends {}> (Element: any) {
 
-    return class extends React.Component<ViewElementProps & T, any> {
+    type Props = ViewElementData & T;
+    type State = Props;
 
-        constructor (props: any) {
-            super (props);
+    return class extends React.Component<Props, State> {
 
-            const {bbox, ...data} = this.props as any; // TODO: why does not work 'this.props"? (problem of spreading generic types)
-                                                       // YES: it works but has to explicitely retype as any
+        constructor (props: Props) {
+            super(props);
 
-            this.state = {...data, bbox: {...bbox}};
+            const {bbox, ...data} = this.props as any; // FIXME: with a new version of typescript remove casting
+            this.state = {
+                bbox,   // state of the group's  bounding box
+                ...data // State of the inner object data, modified via the handler;
+                        // view element keeps the sate but know nothing about it.
+            };
         }
 
         public render() {
-            const {bbox, ...data} = this.state;
+            const {bbox, ...data} = this.state as any; // FIXME: the same problem as before
 
             return (
                 <g>
