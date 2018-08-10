@@ -1,4 +1,4 @@
-import {Expression, DataType, UID} from './types';
+import {DataType, Expression, UID} from './types';
 
 
 export interface TPlace {
