@@ -11,7 +11,7 @@ interface Props {
     place: TPlace;
     bbox: BoundingBox;
     handleMainMove: (dx: number, dy: number) => void;
-    handleRelatedMove: () => void;
+    handleRelatedMove: (dx: number, dy: number) => void;
     handleResize: (bbox: BoundingBox) => void;
 }
 
@@ -73,31 +73,36 @@ class CorePlace extends React.Component<Props, State> {
         const bbox = this.props.bbox;
         const {placeBbox, typeBbox, exprBbox} = this.state;
 
-        const height = placeBbox.height;
-        const ry = height / 2;
-        const rx = ry;
+        return (
+            <g>
+                {this.renderPlace(bbox, placeBbox)}
+                {this.renderText(bbox, typeBbox)}
+                {this.renderText(bbox, exprBbox)}
+            </g>
+        );
+    }
 
-        const placeSVG = (
+    protected renderPlace(bbox: BoundingBox, placeBbox: BoundingBox) {
+        const radius = placeBbox.height / 2;
+
+        return (
             <rect
                 {...Utils.absolutizeBouningBoxes(bbox, [placeBbox])[0]}
-                rx={rx}
-                ry={ry}
+                rx={radius}
+                ry={radius}
             />
         );
+    }
 
-        const getTmpBox = (relbbox: BoundingBox | undefined) => { // TODO: later on use containers for both elements
-            if (relbbox !== undefined) {
-                return <rect {...Utils.absolutizeBouningBoxes(bbox, [relbbox])[0]} />
-            }
+    protected renderText(bbox: BoundingBox, textBbox: BoundingBox | undefined) {
+        if (textBbox === undefined) {
             return null;
         }
 
         return (
-            <g>
-                {placeSVG}
-                {getTmpBox(typeBbox)}
-                {getTmpBox(exprBbox)}
-            </g>
+            <rect
+                {...Utils.absolutizeBouningBoxes(bbox, [textBbox])[0]}
+            />
         );
     }
 }
