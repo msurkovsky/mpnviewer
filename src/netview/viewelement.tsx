@@ -14,7 +14,7 @@ export interface BoundingBox {
 }
 
 
-export function ViewElement<T extends {}> (Element: any) {
+export function createViewElement<T extends {}> (Element: any) {
 
     type Props = ViewElementData & T;
     type State = Props;
@@ -41,33 +41,37 @@ export function ViewElement<T extends {}> (Element: any) {
                     <Element
                         {...data}
                         bbox={bbox}
-                        handleMainMove={this.handleMainMove}
-                        handleRelatedMove={this.handleRelatedMove}
+                        handleGroupMove={this.handleGroupMove}
                         handleResize={this.handleResize}
                     />
                 </g>
             );
         }
 
-        protected handleMainMove = (dx: number, dy: number) => {
-            const {bbox} = this.state;
+        public handleGroupMove = (dx: number, dy: number) => {
+            const {bbox, ...data} = this.state as any; // FIXME: get rid of any
+            const {x, y, ...size} = bbox;
 
             this.setState({
+                ...data,
                 bbox: {
-                    x: bbox.x + dx,
-                    y: bbox.y + dy,
-                    width: bbox.width,
-                    height: bbox.height,
-                }
+                    x: x + dx,
+                    y: y + dy,
+                    ...size}
             });
         }
 
-        protected handleRelatedMove = () => {
-            console.log("related move");
+        public handleIndividualMove = (dx: number, dy: number) => {
+            // nothing yet
         }
 
-        protected handleResize = (bbox: BoundingBox) => {
-            this.setState({bbox});
+        public handleResize = (newBbox: BoundingBox) => {
+            const {bbox, ...data} = this.state as any; // FIXME: get rid of any
+
+            this.setState({
+                ...data,
+                bbox: newBbox
+            });
         }
     };
 }
