@@ -1,110 +1,53 @@
 import * as React from 'react';
 
-import * as Utils from './utils';
+import {PlaceData} from '../netmodel';
+import {Dict, Position, Size} from '../types';
+import {createMovable, MouseTriggers, PositionTriggers} from './movable';
+import {TextElement} from './textelement';
 
-import {TPlace} from '../netmodel';
-import {mpnUnit} from '../types';
-import {BoundingBox, ViewElement} from './viewelement';
 
-
-interface Props {
-    place: TPlace;
-    bbox: BoundingBox;
-    handleMainMove: (dx: number, dy: number) => void;
-    handleRelatedMove: (dx: number, dy: number) => void;
-    handleResize: (bbox: BoundingBox) => void;
+type PlacePositions = Dict<Position> & {
+    type: { position:  Position },
+    initExpr: { position: Position },
 }
 
+type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
+    path: string[],
+    relatedPositions: PlacePositions;
+};
 
-interface State {
-    placeBbox: BoundingBox;
-    typeBbox?: BoundingBox;
-    exprBbox?: BoundingBox;
-}
-
-
-class CorePlace extends React.Component<Props, State> {
-
-    constructor(props: any) {
-        super(props);
-        const {place, bbox} = this.props;
-
-        const placeBbox = {...bbox, x: 0, y: 0};
-        // TODO: compute width and height of the following bbox based on texts
-        const exprBbox = {
-            x: placeBbox.width,
-            y: 0,
-            width: 30,
-            height: 20,
-        };
-        const typeBbox = {
-            x: placeBbox.width,
-            y: placeBbox.height,
-            width: 30,
-            height: 20,
-        };
-
-        this.state = {
-            placeBbox,
-            exprBbox: place.initExpr.isEmpty() ? exprBbox : undefined,
-            typeBbox: place.type !== mpnUnit ? typeBbox : undefined,
-        }
-    }
-
-    public componentDidMount () {
-        const bbox = this.props.bbox;
-        const {...others} = this.state;
-
-        // take only valid boxes as a list
-        const boxes = Object.keys(others)
-                            .map(key => others[key])
-                            .filter(b => b !== undefined);
-
-        // The positions of boxes are relative to the provided bounding box `bbox`.
-        // To compute bounding box correctly all of them have to abosolutized.
-        const absBoxes = Utils.absolutizeBouningBoxes(bbox, boxes);
-        const newBbox = Utils.computeBoundingBox(bbox, absBoxes);
-
-        // propagate the new bounding box to the parrent
-        this.props.handleResize(newBbox);
-    }
+class CorePlace extends React.PureComponent<Props> {
 
     public render () {
-        const bbox = this.props.bbox;
-        const {placeBbox, typeBbox, exprBbox} = this.state;
+
+        const {path, type, initExpr, x, y, width, height, relatedPositions,
+               triggerMouseDown, triggerMouseUp,
+               triggerPositionChanged} = this.props;
+
+        const radius = height / 2;
 
         return (
             <g>
-                {this.renderPlace(bbox, placeBbox)}
-                {this.renderText(bbox, typeBbox)}
-                {this.renderText(bbox, exprBbox)}
+                <rect x={x} y={y} width={width} height={height} rx={radius} ry={radius}
+                      onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp} />
+                <TextElement
+                    path={path.concat(["relatedPositions", "type"])}
+                    data={{text: type}}
+                    parentPosition={{x, y}}
+                    x={relatedPositions.type.position.x}
+                    y={relatedPositions.type.position.y}
+                    triggerPositionChanged={triggerPositionChanged}/>
+                <TextElement
+                    path={path.concat(["relatedPositions", "initExpr"])}
+                    data={{text: initExpr}}
+                    parentPosition={{x, y}}
+                    x={relatedPositions.initExpr.position.x}
+                    y={relatedPositions.initExpr.position.y}
+                    triggerPositionChanged={triggerPositionChanged}/>
+                {/* TODO: name of the place will always be aligned to the center */}
             </g>
-        );
-    }
-
-    protected renderPlace(bbox: BoundingBox, placeBbox: BoundingBox) {
-        const radius = placeBbox.height / 2;
-
-        return (
-            <rect
-                {...Utils.absolutizeBouningBoxes(bbox, [placeBbox])[0]}
-                rx={radius}
-                ry={radius}
-            />
-        );
-    }
-
-    protected renderText(bbox: BoundingBox, textBbox: BoundingBox | undefined) {
-        if (textBbox === undefined) {
-            return null;
-        }
-
-        return (
-            <rect
-                {...Utils.absolutizeBouningBoxes(bbox, [textBbox])[0]}
-            />
         );
     }
 }
 
-export const Place = ViewElement<{place: TPlace}>(CorePlace);
+export const Place = createMovable<Props, PlaceData>(CorePlace);

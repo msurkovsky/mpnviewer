@@ -1,9 +1,18 @@
-import {DataType, Expression, UID} from './types';
+import {DataType, Dict, Position, Size} from './types'
 
-
-export interface TPlace {
-    id: UID;
+export interface PlaceData {
+    id: string;
     name: string;
     type: DataType;
-    initExpr: Expression;
+    initExpr: string;
+}
+
+
+export interface Net {
+    places: Dict<{
+        data: PlaceData;
+        position: Position;
+        size: Size;
+        relatedPositions?: Dict<{[key: string]: {position: Position}}>;
+    }>
 }
