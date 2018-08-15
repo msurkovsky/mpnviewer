@@ -1,9 +1,12 @@
-import {DataType, Expression, UID} from './types';
+import {BoundingBox, DataType, Dict, Position} from './types'
 
-
-export interface TPlace {
-    id: UID;
+export interface PlaceData {
+    id: string;
     name: string;
     type: DataType;
-    initExpr: Expression;
+    initExpr: string;
+}
+
+export interface Net {
+    places: Dict<{data: PlaceData, bboxes: {major: BoundingBox, minors?: Dict<Position>}}>
 }

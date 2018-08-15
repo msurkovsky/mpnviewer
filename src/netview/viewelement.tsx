@@ -14,30 +14,28 @@ export interface BoundingBox {
 // 'element description' are obligatory.
 interface ViewElementProps<T extends {}> {
     data: T,
-    bbox: BoundingBox;
+    bboxes: {major: BoundingBox, minors?: {[key: string]: BoundingBox}};
+    update: (element: {
+        data: T,
+        bboxes: {
+            major: BoundingBox,
+            minors?: {[key: string]: BoundingBox}
+        }
+    }) => void;
+
     handlers?: {
         dataChange?: (data: T) => void;
         batchMove?: (dx: number, dy: number) => void;
         unitMove?: (dx: number, dy: number) => void;
         resize?: (bbox: BoundingBox) => void;
     };
-    registerMinorBBoxes?: (...bboxes: [string, BoundingBox][]) => void;
 }
-
-
-interface ViewElementState<T extends {}> {
-    data: T;
-    majorBBox: BoundingBox;
-    minorBBoxes: { [key: string]: BoundingBox };
-}
-
 
 export function createViewElement<T extends {}> (Element: React.ComponentType<ViewElementProps<T> >) {
 
     type Props = ViewElementProps<T>;
-    type State = ViewElementState<T>;
 
-    return class extends React.PureComponent<Props, State> {
+    return class extends React.PureComponent<Props> {
 
         private startPosition: {x: number, y: number} | null = null;
 
@@ -76,7 +74,6 @@ export function createViewElement<T extends {}> (Element: React.ComponentType<Vi
                     <Element
                         data={data}
                         bbox={majorBBox}
-                        registerMinorBBoxes={this.registerMinorBBoxes}
                         handleBatchMove={this.handleBatchMove}
                         handleUnitMove={this.handleUnitMove}
                         handleResize={this.handleResize}
@@ -111,42 +108,16 @@ export function createViewElement<T extends {}> (Element: React.ComponentType<Vi
             });
         };
 
-        protected registerMinorBBoxes = (...bboxes: [string, BoundingBox][]) => {
 
-            const minorBBoxes = {...this.state.minorBBoxes};
-            for (const [key, bbox] of bboxes) {
-                minorBBoxes[key] = bbox;
-            }
-            this.setState({ minorBBoxes });
-        };
+        protected handleBatchMouseMoving =
+            (startPosition: {x: number, y: number}) => (e: MouseEvent) => {
 
-        protected handleMovingMouseDown = (movingHandler: (e: any) => void) => (e: any) => {
-            this.startPosition = {
-                x: e.pageX,
-                y: e.pageY,
-            };
-            document.addEventListener('mousemove', movingHandler);
-        };
-
-        protected handleMovingMouseUp = (movingHandler: (e: any) => void) => (e: any) => {
-            this.startPosition = null;
-            document.removeEventListener('mousemove', movingHandler);
-        };
-
-        protected handleBatchMouseMoving = (e: MouseEvent) => {
-            if (this.startPosition === null) {
-                return;
-            }
-
-            const dx = e.pageX - this.startPosition.x;
-            const dy = e.pageY - this.startPosition.y;
-
-            this.startPosition.x = e.pageX;
-            this.startPosition.y = e.pageY;
+            const dx = e.pageX - startPosition.x;
+            const dy = e.pageY - startPosition.y;
 
             const pHandleBatchMove = this.props.handleBatchMove;
             if (pHandleBatchMove) {
-                pHandleBatchMove(dx, dy);
+                pHandleBatchMove(dx, dy); // TODO: without reseting startPosition I have to pass absolute one
             }
         };
 
@@ -180,4 +151,49 @@ export function createViewElement<T extends {}> (Element: React.ComponentType<Vi
             return Utils.computeBoundingBox(anchorBBox, unifiedBBoxes);
         }
     };
+}
+
+
+type TCallback = (dx: number, dy: number) => void;
+
+export function createMoveable (Element: React.ComponentType) {
+
+    return class extends React.Component {
+
+
+        render() {
+
+            <Element x, y, triggerMouseDown={this.handleMouseMovingDown} />
+        }
+
+        private startPosition: {x: number, y: number} | null = null;
+
+        private handleMovingMouseDown = (e: MouseEvent) => {
+            this.startPosition = {
+                x: e.pageX,
+                y: e.pageY,
+            };
+
+            document.addEventListener('mousemove', this.handleMoving);
+        }
+
+        private handleMovingMouseUp = (e: MouseEvent) => {
+            this.startPosition = null;
+            document.removeEventListener('mousemove', this.handleMoving);
+        }
+
+        private handleMoving = (e: MouseEvent) => {
+            if (this.startPosition === null) {
+                return;
+            }
+
+            const dx = e.pageX - this.startPosition.x;
+            const dy = e.pageY - this.startPosition.y;
+
+            this.startPosition.x = e.pageX;
+            this.startPosition.x = e.pageX;
+
+            this.callback(dx, dy);
+        }
+    }
 }
