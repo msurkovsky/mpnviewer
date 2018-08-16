@@ -29,7 +29,7 @@ export class Net extends React.Component<any, any> {
             const {data, bbox} = places[key];
 
             results.push(
-                 <Place key={data.id.value} data={data} bbox={bbox} placeMoved={this.placeMoved} />
+                 <Place key={data.id} data={data} bbox={bbox} placeMoved={this.placeMoved} />
             );
         }
 

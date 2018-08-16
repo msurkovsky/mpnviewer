@@ -1,5 +1,5 @@
-import {lensPath, over} from 'ramda'
-import {Net as TNet} from './types'
+import {lensPath, over, reject} from 'ramda'
+import {Net as TNet} from './netmodel'
 
 export const getId = ((id: number) => (): string => {
     return (id++).toString();
@@ -32,3 +32,7 @@ export function computeDefaultMinors(net: TNet) {
 
     return newNet;
 };
+
+export function excludeUndefined (obj: any): any {
+    return reject((value) => value !== undefined, obj);
+}

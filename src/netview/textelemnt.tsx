@@ -1,32 +1,25 @@
 import * as React from 'react'
 
-import {reject} from 'ramda'
-
 import {createMoveable} from './moveable'
 
 interface Props {
     text: string,
     x: number,
     y: number,
-    triggerMouseDown?: (e: MouseEvent) => void;
-    triggerMouseUp?: (e: MouseEvent) => void;
+    triggerMouseDown?: (e: React.MouseEvent) => void;
+    triggerMouseUp?: (e: React.MouseEvent) => void;
 }
 
 class CoreTextElement extends React.PureComponent<Props> {
 
     public render() {
         const {text, x, y} = this.props;
-        const {triggerMouseDown: onMouseDown, triggerMouseUp: onMouseUp} = this.props;
-        const events = reject((value) => value !== undefined, {onMouseDown, onMouseUp});
+        const {triggerMouseDown, triggerMouseUp} = this.props;
 
         return (
-            <text
-                x={x}
-                y={y}
-                {...events}
-            >
-                {text}
-            </text>
+          <text x={x} y={y} onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp}>
+            {text}
+          </text>
         );
     }
 }
