@@ -8,6 +8,11 @@ export interface Position {
     y: number;
 }
 
+export interface Size {
+    width: number;
+    height: number;
+}
+
 export interface BoundingBox {
     x: number;
     y: number;

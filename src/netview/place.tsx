@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import {PlaceData} from '../netmodel';
-import {BoundingBox} from '../types';
 import {createMovable, MouseTriggers} from './movable';
+import {PlaceData} from '../netmodel';
+import {Position, Size} from '../types';
 import {TextElement} from './textelement';
 
 
-type Props = PlaceData & BoundingBox & MouseTriggers;
+type Props = PlaceData & Position & Size & MouseTriggers;
 
 class CorePlace extends React.PureComponent<Props> {
 

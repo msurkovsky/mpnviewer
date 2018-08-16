@@ -1,14 +1,10 @@
 import * as React from 'react';
 
-import {createMovable} from './movable';
+import {createMovable, MouseTriggers} from './movable';
+import {Position} from '../types';
 
-interface Props {
-    text: string;
-    x: number;
-    y: number;
-    triggerMouseDown?: (e: React.MouseEvent) => void;
-    triggerMouseUp?: (e: React.MouseEvent) => void;
-}
+type Data = {text: string}
+type Props = Data & Position & MouseTriggers;
 
 class CoreTextElement extends React.PureComponent<Props> {
 
@@ -24,4 +20,4 @@ class CoreTextElement extends React.PureComponent<Props> {
     }
 }
 
-export const TextElement = createMovable<Props, {text: string}>(CoreTextElement);
+export const TextElement = createMovable<Props, Data>(CoreTextElement);

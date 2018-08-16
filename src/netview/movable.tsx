@@ -1,25 +1,27 @@
 import * as React from 'react'
-import {excludeUndefined} from '../utils'
 
-interface Position {
-    x: number;
-    y: number;
-}
+import {Position, Size} from '../types'
+import {PositionChanged} from '../events'
+
 
 export interface MouseTriggers {
     triggerMouseDown?: (e: React.MouseEvent) => void;
     triggerMouseUp?: (e: React.MouseEvent) => void;
 }
 
-interface Props<T extends {}> {
+
+interface Props<T extends {}> { // TODO: compose it from `Position` `Size`
     data: T;
     x: number;
     y: number;
     width?: number;
     height?: number;
+    triggerPositionChanged?: (e: PositionChanged) => void;
 }
 
-export function createMovable<ComponentProps extends Position & MouseTriggers, DataType extends {}>(
+type BaseComponentProps = Position & Partial<Size> & MouseTriggers;
+
+export function createMovable<ComponentProps extends BaseComponentProps, DataType extends {}>(
 
     Component: React.ComponentType<ComponentProps>) {
 
@@ -36,14 +38,13 @@ export function createMovable<ComponentProps extends Position & MouseTriggers, D
             const {x, y} = this.state;
             const {width, height, data} = this.props;
 
-            const size = excludeUndefined({width, height})
-
             return (
                 <Component
                     {...data}
-                    {...size}
                     x={x}
                     y={y}
+                    width={width}
+                    height={height}
                     triggerMouseDown={this.handleMouseDown}
                     triggerMouseUp={this.handleMouseUp}
                 />
@@ -64,6 +65,15 @@ export function createMovable<ComponentProps extends Position & MouseTriggers, D
         private handleMouseUp = (e: React.MouseEvent) => {
             this.startPosition = null;
             // TODO: propagate state change further to parents;; similarly as in Net
+            const {data, triggerPositionChanged} = this.props;
+
+            if (triggerPositionChanged) { // trigger position changed if registered
+                triggerPositionChanged({
+                    source: data,
+                    old: {x: -1, y: -1}, // TODO: what is old position, the last one or the one at start moving?
+                    new: {x: -1, y: -1}, // TODO: compute according to the old one
+                });
+            }
             document.removeEventListener('mousemove', this.handleMoving);
         }
 
