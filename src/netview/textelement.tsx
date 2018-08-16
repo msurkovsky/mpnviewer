@@ -1,11 +1,11 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import {createMoveable} from './moveable'
+import {createMovable} from './movable';
 
 interface Props {
-    text: string,
-    x: number,
-    y: number,
+    text: string;
+    x: number;
+    y: number;
     triggerMouseDown?: (e: React.MouseEvent) => void;
     triggerMouseUp?: (e: React.MouseEvent) => void;
 }
@@ -24,4 +24,4 @@ class CoreTextElement extends React.PureComponent<Props> {
     }
 }
 
-export const TextElement = createMoveable<Props, {text: string}>(CoreTextElement);
+export const TextElement = createMovable<Props, {text: string}>(CoreTextElement);

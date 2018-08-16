@@ -6,7 +6,7 @@ interface Position {
     y: number;
 }
 
-interface MouseTriggers {
+export interface MouseTriggers {
     triggerMouseDown?: (e: React.MouseEvent) => void;
     triggerMouseUp?: (e: React.MouseEvent) => void;
 }
@@ -19,7 +19,7 @@ interface Props<T extends {}> {
     height?: number;
 }
 
-export function createMoveable<ComponentProps extends Position & MouseTriggers, DataType extends {}>(
+export function createMovable<ComponentProps extends Position & MouseTriggers, DataType extends {}>(
 
     Component: React.ComponentType<ComponentProps>) {
 
