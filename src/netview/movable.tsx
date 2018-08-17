@@ -10,19 +10,14 @@ export interface MouseTriggers {
 }
 
 
-interface Props<T extends {}> { // TODO: compose it from `Position` `Size`
-    data: T;
-    x: number;
-    y: number;
-    width?: number;
-    height?: number;
-    triggerPositionChanged?: (e: PositionChanged) => void;
-}
-
 type BaseComponentProps = Position & Partial<Size> & MouseTriggers;
 
-export function createMovable<ComponentProps extends BaseComponentProps, DataType extends {}>(
+type Props<T extends {}> = Position & Partial<Size> & {
+    data: T;
+    triggerPositionChanged: (e: PositionChanged) => void;
+};
 
+export function createMovable<ComponentProps extends BaseComponentProps, DataType extends {}>(
     Component: React.ComponentType<ComponentProps>) {
 
     return class extends React.Component<Props<DataType>, Position> {
@@ -70,7 +65,8 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
             if (triggerPositionChanged) { // trigger position changed if registered
                 triggerPositionChanged({
                     source: data,
-                    old: {x: -1, y: -1}, // TODO: what is old position, the last one or the one at start moving?
+                    old: {x: -1, y: -1}, // TODO: What is the old position?
+                                         //       The last one or the one at start moving?
                     new: {x: -1, y: -1}, // TODO: compute according to the old one
                 });
             }

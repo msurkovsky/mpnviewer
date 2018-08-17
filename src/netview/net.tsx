@@ -1,6 +1,7 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import {Place} from './place'
+import {Place} from './place';
+import {PositionChanged} from '../events';
 
 export class Net extends React.Component<any, any> {
 
@@ -29,17 +30,22 @@ export class Net extends React.Component<any, any> {
             const {data, bbox} = places[key];
 
             results.push(
-                 <Place key={data.id} data={data} bbox={bbox} placeMoved={this.placeMoved} />
+                <Place
+                    key={data.id}
+                    data={data}
+                    triggerPositionChanged={this.cbPositionChanged}
+                    {...bbox}
+                />
             );
         }
 
         return results;
     }
 
-    private placeMoved = (PlaceMovedEvent: ) => {
-
-        this.setState((prevState: any) => ({
-            places: {...prevState.places, [place.data.id.value]: place}
-        }));
+    private cbPositionChanged = (e: PositionChanged) => {
+        console.log("Position changed: ", e.source);
+        /* this.setState((prevState: any) => ({ */
+        /* places: {...prevState.places, [place.data.id.value]: place} */
+        /* })); */
     }
 }
