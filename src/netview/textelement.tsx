@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import {createMovable, MouseTriggers} from './movable';
 import {Position} from '../types';
+import {createMovable, MouseTriggers} from './movable';
 
-type Data = {text: string}
+interface Data {text: string}
 type Props = Data & Position & MouseTriggers;
 
 class CoreTextElement extends React.PureComponent<Props> {

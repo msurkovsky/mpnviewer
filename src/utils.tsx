@@ -9,7 +9,6 @@ export function computeDefaultMinors(net: TNet) {
 
     let newNet: TNet = net;
 
-    newNet.places = {};
     for (const key of Object.keys(net.places)) {
 
         const path = lensPath(["places", key, "bboxes"]);

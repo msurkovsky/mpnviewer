@@ -2,9 +2,9 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import './index.css';
 
-import {Net} from './netview';
-import {getId, computeDefaultMinors} from './utils';
 import {Net as TNet} from './netmodel';
+import {Net} from './netview';
+import {computeDefaultMinors, getId} from './utils';
 
 import registerServiceWorker from './registerServiceWorker';
 

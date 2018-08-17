@@ -1,7 +1,7 @@
 import * as React from 'react'
 
-import {Position, Size} from '../types'
 import {PositionChanged} from '../events'
+import {Position, Size} from '../types'
 
 
 export interface MouseTriggers {
@@ -22,11 +22,13 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
 
     return class extends React.Component<Props<DataType>, Position> {
 
+        private startPosition: {x: number, y: number} | null = null;
+
         constructor(props: Props<DataType>) {
             super(props);
 
             const {x, y} = this.props;
-            this.setState({x, y});
+            this.state = {x, y};
         }
 
         public render() {
@@ -45,8 +47,6 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
                 />
             );
         }
-
-        private startPosition: {x: number, y: number} | null = null;
 
         private handleMouseDown = (e: React.MouseEvent) => {
             this.startPosition = {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import {Place} from './place';
 import {PositionChanged} from '../events';
+import {Place} from './place';
 
 export class Net extends React.Component<any, any> {
 
@@ -13,12 +13,12 @@ export class Net extends React.Component<any, any> {
     }
 
     public render() {
-        const {net, ...setting} = this.props;
+        const {net, x, y, width, height} = this.props;
         return (
-            <svg>
+            <svg width={width} height={height}>
 
-                <rect {...setting} fill="#ccc" />
-                {...this.renderPlaces(net.places)}
+                <rect x={x} y={y} width={width} height={height} fill="#ccc" />
+                {this.renderPlaces(net.places)}
             </svg>
         );
     }
@@ -26,15 +26,15 @@ export class Net extends React.Component<any, any> {
     protected renderPlaces (places: any) {
 
         const results = [];
-        for (const key in places) {
-            const {data, bbox} = places[key];
+        for (const key of Object.keys(places)) {
+            const {data, bboxes} = places[key];
 
             results.push(
                 <Place
                     key={data.id}
                     data={data}
                     triggerPositionChanged={this.cbPositionChanged}
-                    {...bbox}
+                    {...bboxes.major}
                 />
             );
         }
