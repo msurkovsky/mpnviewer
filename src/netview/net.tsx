@@ -1,3 +1,4 @@
+import {lensPath, over} from 'ramda'
 import * as React from 'react';
 
 import {PositionChanged} from '../events';
@@ -27,14 +28,18 @@ export class Net extends React.Component<any, any> {
 
         const results = [];
         for (const key of Object.keys(places)) {
-            const {data, bboxes} = places[key];
+            const {data, position, size, relatedPositions} = places[key];
 
             results.push(
                 <Place
                     key={data.id}
+                    path={["places", key, "position"]}
                     data={data}
+                    parentPosition={{x: 0, y: 0}}
+                    {...position}
+                    {...size}
+                    relatedPositions={relatedPositions}
                     triggerPositionChanged={this.cbPositionChanged}
-                    {...bboxes.major}
                 />
             );
         }
@@ -43,7 +48,11 @@ export class Net extends React.Component<any, any> {
     }
 
     private cbPositionChanged = (e: PositionChanged) => {
-        console.log("Position changed: ", e.source);
+
+        this.setState((oldNet: any) => ({
+            ...over(lensPath(e.path), () => ({...e.new}), oldNet)
+        }));
+        console.log(this.state);
         /* this.setState((prevState: any) => ({ */
         /* places: {...prevState.places, [place.data.id.value]: place} */
         /* })); */

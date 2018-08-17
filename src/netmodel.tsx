@@ -1,4 +1,4 @@
-import {BoundingBox, DataType, Dict, Position} from './types'
+import {DataType, Dict, Position, Size} from './types'
 
 export interface PlaceData {
     id: string;
@@ -7,6 +7,12 @@ export interface PlaceData {
     initExpr: string;
 }
 
+
 export interface Net {
-    places: Dict<{data: PlaceData, bboxes: {major: BoundingBox, minors?: Dict<Position>}}>
+    places: Dict<{
+        data: PlaceData,
+        position: Position,
+        size: Size,
+        relatedPositions?: Dict<Position>,
+    }>
 }

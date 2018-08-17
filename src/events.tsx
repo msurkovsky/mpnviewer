@@ -1,7 +1,7 @@
 import {Position} from './types'
 
 export interface PositionChanged {
-    "source": any;
+    "path": string[];
     "old": Position;
     "new": Position;
 }

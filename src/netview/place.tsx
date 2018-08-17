@@ -1,43 +1,54 @@
 import * as React from 'react';
 
-import {PositionChanged} from '../events';
 import {PlaceData} from '../netmodel';
-import {Position, Size} from '../types';
-import {createMovable, MouseTriggers} from './movable';
+import {Dict, Position, Size} from '../types';
+import {createMovable, MouseTriggers, PositionTriggers} from './movable';
 import {TextElement} from './textelement';
 
 
-type Props = PlaceData & Position & Size & MouseTriggers;
+type PlacePositions = Dict<Position> & {
+    type: Position,
+    initExpr: Position,
+}
+
+type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
+    path: string[],
+    relatedPositions: PlacePositions;
+};
 
 class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {type, initExpr, x, y, width, height} = this.props;
-        const {triggerMouseDown, triggerMouseUp} = this.props;
+        const {path, type, initExpr, x, y, width, height, relatedPositions,
+               triggerMouseDown, triggerMouseUp,
+               triggerPositionChanged} = this.props;
 
         const radius = height / 2;
 
+        const basePath = [...path].splice(0, path.length-1);
         return (
             <g>
                 <rect x={x} y={y} width={width} height={height} rx={radius} ry={radius}
                       onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp} />
-                {/* TODO: get the current position from the props => don't compute it! */}
-                <TextElement data={{text: type}} x={x+width} y={y+width}
-                    triggerPositionChanged={this.dummyTrigger}/>
-                <TextElement data={{text: initExpr}} x={x+width} y={0}
-                    triggerPositionChanged={this.dummyTrigger}/>
+                <TextElement
+                    path={basePath.concat(["relatedPositions", "type"])}
+                    data={{text: type}}
+                    parentPosition={{x, y}}
+                    x={relatedPositions.type.x}
+                    y={relatedPositions.type.y}
+                    triggerPositionChanged={triggerPositionChanged}/>
+                <TextElement
+                    path={basePath.concat(["relatedPositions", "initExpr"])}
+                    data={{text: initExpr}}
+                    parentPosition={{x, y}}
+                    x={relatedPositions.initExpr.x}
+                    y={relatedPositions.initExpr.y}
+                    triggerPositionChanged={triggerPositionChanged}/>
                 {/* TODO: name of the place will always be aligned to the center */}
             </g>
         );
     }
-
-    // TODO: Propagate trigger position correctly -> pass it from props
-    private dummyTrigger = (e: PositionChanged) => ({
-        source: "abc",
-        x: 0,
-        y: 0,
-    });
 }
 
 export const Place = createMovable<Props, PlaceData>(CorePlace);

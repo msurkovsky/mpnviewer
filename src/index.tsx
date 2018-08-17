@@ -4,11 +4,11 @@ import './index.css';
 
 import {Net as TNet} from './netmodel';
 import {Net} from './netview';
-import {computeDefaultMinors, getId} from './utils';
+import {fillDefaultRelatedPositions, getId} from './utils';
 
 import registerServiceWorker from './registerServiceWorker';
 
-const net: TNet = {
+const net: TNet = fillDefaultRelatedPositions({
     places: {
         "a": {
             data: {
@@ -17,14 +17,8 @@ const net: TNet = {
                 type: "Bool",
                 initExpr: "",
             },
-            bboxes: {
-                major: {
-                    x: 50,
-                    y: 50,
-                    width: 40,
-                    height: 40,
-                },
-            }
+            position: { x: 50, y: 50 },
+            size: { width: 40, height: 40 },
         },
         "b": {
             data: {
@@ -33,20 +27,14 @@ const net: TNet = {
                 type: "Integer",
                 initExpr: "3",
             },
-            bboxes: {
-                major: {
-                    x: 120,
-                    y: 120,
-                    width: 40,
-                    height: 40,
-                },
-            }
+            position: { x: 120, y: 120 },
+            size: { width: 80, height: 50 },
         }
     }
-}
+});
 
 ReactDOM.render(
-    <Net net={computeDefaultMinors(net)} x={0} y={0} width={1000} height={500} />,
+    <Net net={net} x={0} y={0} width={1000} height={500} />,
     document.getElementById('root') as HTMLElement
 );
 

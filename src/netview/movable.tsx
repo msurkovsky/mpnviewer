@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 import {PositionChanged} from '../events'
-import {Position, Size} from '../types'
+import {Dict, Position, Size} from '../types'
 
 
 export interface MouseTriggers {
@@ -10,11 +10,21 @@ export interface MouseTriggers {
 }
 
 
-type BaseComponentProps = Position & Partial<Size> & MouseTriggers;
+export interface PositionTriggers {
+    triggerPositionChanged?: (e: PositionChanged) => void;
+}
 
-type Props<T extends {}> = Position & Partial<Size> & {
+
+type BaseComponentProps = Position & Partial<Size> & MouseTriggers & PositionTriggers & {
+    path?: string[];
+    relatedPositions?: Dict<Position>;
+};
+
+type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
+    path: string[];
     data: T;
-    triggerPositionChanged: (e: PositionChanged) => void;
+    parentPosition: Position;
+    relatedPositions?: Dict<Position>;
 };
 
 export function createMovable<ComponentProps extends BaseComponentProps, DataType extends {}>(
@@ -22,7 +32,8 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
 
     return class extends React.Component<Props<DataType>, Position> {
 
-        private startPosition: {x: number, y: number} | null = null;
+        private mouseStartPosition: Position | null = null;
+        private originPosition: Position | null = null;
 
         constructor(props: Props<DataType>) {
             super(props);
@@ -33,43 +44,50 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
 
         public render() {
             const {x, y} = this.state;
-            const {width, height, data} = this.props;
+            const {path, data, parentPosition: {x: px, y: py}, width, height,
+                   relatedPositions, triggerPositionChanged} = this.props;
 
             return (
                 <Component
                     {...data}
-                    x={x}
-                    y={y}
+                    path={path}
+                    x={px+x}
+                    y={py+y}
                     width={width}
                     height={height}
+                    relatedPositions={relatedPositions}
                     triggerMouseDown={this.handleMouseDown}
                     triggerMouseUp={this.handleMouseUp}
+                    triggerPositionChanged={triggerPositionChanged}
                 />
             );
         }
 
         private handleMouseDown = (e: React.MouseEvent) => {
-            this.startPosition = {
+            this.mouseStartPosition = {
                 x: e.pageX,
                 y: e.pageY,
             };
+            const {x, y} = this.state;
+            this.originPosition = {x, y};
 
             document.addEventListener('mousemove', this.handleMoving);
         }
 
         private handleMouseUp = (e: React.MouseEvent) => {
-            this.startPosition = null;
-            // TODO: propagate state change further to parents;; similarly as in Net
-            const {data, triggerPositionChanged} = this.props;
+            const {path, triggerPositionChanged} = this.props;
+            const {x, y} = this.state;
 
             if (triggerPositionChanged) { // trigger position changed if registered
                 triggerPositionChanged({
-                    source: data,
-                    old: {x: -1, y: -1}, // TODO: What is the old position?
-                                         //       The last one or the one at start moving?
-                    new: {x: -1, y: -1}, // TODO: compute according to the old one
+                    path,
+                    new: {x, y},
+                    old: {...this.originPosition!},
                 });
             }
+
+            this.originPosition = null;
+            this.mouseStartPosition = this.originPosition =null;
             document.removeEventListener('mousemove', this.handleMoving);
         }
 
@@ -77,17 +95,17 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
             // This handler is registered as an event on DOM =>
             // that's why is not specified as MouseEvent
 
-            if (this.startPosition === null) {
+            if (this.mouseStartPosition === null) {
                 return;
             }
 
-            const dx = e.pageX - this.startPosition.x;
-            const dy = e.pageY - this.startPosition.y;
+            const dx = e.pageX - this.mouseStartPosition.x;
+            const dy = e.pageY - this.mouseStartPosition.y;
 
             this.setState(({x, y}) => ({x: x+dx, y: y+dy}));
 
-            this.startPosition.x = e.pageX;
-            this.startPosition.y = e.pageY;
+            this.mouseStartPosition.x = e.pageX;
+            this.mouseStartPosition.y = e.pageY;
         }
     }
 }
