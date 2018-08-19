@@ -76,11 +76,13 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
 
         private handleMouseUp = (e: React.MouseEvent) => {
             const {path, triggerPositionChanged} = this.props;
-            const {x, y} = this.state;
 
             if (triggerPositionChanged) { // trigger position changed if registered
+                const {x, y} = this.state;
+
+                const posPath = path.concat(["position"]);
                 triggerPositionChanged({
-                    path,
+                    path: posPath,
                     new: {x, y},
                     old: {...this.originPosition!},
                 });

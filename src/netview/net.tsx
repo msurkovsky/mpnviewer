@@ -33,7 +33,7 @@ export class Net extends React.Component<any, any> {
             results.push(
                 <Place
                     key={data.id}
-                    path={["places", key, "position"]}
+                    path={["places", key]}
                     data={data}
                     parentPosition={{x: 0, y: 0}}
                     {...position}
@@ -53,8 +53,5 @@ export class Net extends React.Component<any, any> {
             ...over(lensPath(e.path), () => ({...e.new}), oldNet)
         }));
         console.log(this.state);
-        /* this.setState((prevState: any) => ({ */
-        /* places: {...prevState.places, [place.data.id.value]: place} */
-        /* })); */
     }
 }

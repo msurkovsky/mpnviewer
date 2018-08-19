@@ -10,9 +10,9 @@ export interface PlaceData {
 
 export interface Net {
     places: Dict<{
-        data: PlaceData,
-        position: Position,
-        size: Size,
-        relatedPositions?: Dict<Position>,
+        data: PlaceData;
+        position: Position;
+        size: Size;
+        relatedPositions?: Dict<{[key: string]: {position: Position}}>;
     }>
 }

@@ -7,8 +7,8 @@ import {TextElement} from './textelement';
 
 
 type PlacePositions = Dict<Position> & {
-    type: Position,
-    initExpr: Position,
+    type: { position:  Position },
+    initExpr: { position: Position },
 }
 
 type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
@@ -26,24 +26,23 @@ class CorePlace extends React.PureComponent<Props> {
 
         const radius = height / 2;
 
-        const basePath = [...path].splice(0, path.length-1);
         return (
             <g>
                 <rect x={x} y={y} width={width} height={height} rx={radius} ry={radius}
                       onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp} />
                 <TextElement
-                    path={basePath.concat(["relatedPositions", "type"])}
+                    path={path.concat(["relatedPositions", "type"])}
                     data={{text: type}}
                     parentPosition={{x, y}}
-                    x={relatedPositions.type.x}
-                    y={relatedPositions.type.y}
+                    x={relatedPositions.type.position.x}
+                    y={relatedPositions.type.position.y}
                     triggerPositionChanged={triggerPositionChanged}/>
                 <TextElement
-                    path={basePath.concat(["relatedPositions", "initExpr"])}
+                    path={path.concat(["relatedPositions", "initExpr"])}
                     data={{text: initExpr}}
                     parentPosition={{x, y}}
-                    x={relatedPositions.initExpr.x}
-                    y={relatedPositions.initExpr.y}
+                    x={relatedPositions.initExpr.position.x}
+                    y={relatedPositions.initExpr.position.y}
                     triggerPositionChanged={triggerPositionChanged}/>
                 {/* TODO: name of the place will always be aligned to the center */}
             </g>

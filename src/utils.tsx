@@ -22,10 +22,12 @@ export function fillDefaultRelatedPositions(net: TNet) {
             const relatedPositions = {...defined};
             for (const elem of Object.keys(defaultPositions)) {
                 if (!relatedPositions[elem]) { // TODO: use better name then `elem`
-                    relatedPositions[elem] = defaultPositions[elem]
+                    relatedPositions[elem] = {
+                        position: defaultPositions[elem]
+                    }
                 }
             }
-            return {data, position, size, relatedPositions}; // return a partial object {realtedPositions: value}
+            return {data, position, size, relatedPositions};
         }, newNet);
     }
 

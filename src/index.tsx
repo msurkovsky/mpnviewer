@@ -29,7 +29,7 @@ const net: TNet = fillDefaultRelatedPositions({
             },
             position: { x: 120, y: 120 },
             size: { width: 80, height: 50 },
-        }
+        },
     }
 });
 
