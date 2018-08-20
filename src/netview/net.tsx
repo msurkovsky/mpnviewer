@@ -18,7 +18,7 @@ export class Net extends React.Component<any, any> {
         return (
             <svg width={width} height={height}>
 
-                <rect x={x} y={y} width={width} height={height} fill="#ccc" />
+                <rect className="net" x={x} y={y} width={width} height={height} />
                 {this.renderPlaces(net.places)}
             </svg>
         );
