@@ -1,5 +1,10 @@
 import {DataType, Dict, Position, Size} from './types'
 
+export enum PlaceDataLayout {
+    Queue = "queue",
+    Multiset = "multiset",
+}
+
 export interface PlaceData {
     id: string;
     name: string;
