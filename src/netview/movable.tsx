@@ -81,6 +81,8 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
         }
 
         private handleMouseUp = (e: React.MouseEvent) => {
+            e.preventDefault();
+
             const {paths, triggerPositionChanged} = this.props;
 
             if (triggerPositionChanged) { // trigger position changed if registered
@@ -105,6 +107,7 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
             if (this.mouseStartPosition === null) {
                 return;
             }
+            e.preventDefault();
 
             const dx = e.pageX - this.mouseStartPosition.x;
             const dy = e.pageY - this.mouseStartPosition.y;
