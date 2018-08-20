@@ -16,12 +16,18 @@ export interface PositionTriggers {
 
 
 type BaseComponentProps = Position & Partial<Size> & MouseTriggers & PositionTriggers & {
-    path?: string[];
+    paths?: {
+        base: string[];
+        position: string[];
+    };
     relatedPositions?: Dict<Position>;
 };
 
 type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
-    path: string[];
+    paths: {
+        base: string[];
+        position: string[];
+    };
     data: T;
     parentPosition: Position;
     relatedPositions?: Dict<Position>;
@@ -44,13 +50,13 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
 
         public render() {
             const {x, y} = this.state;
-            const {path, data, parentPosition: {x: px, y: py}, width, height,
+            const {paths, data, parentPosition: {x: px, y: py}, width, height,
                    relatedPositions, triggerPositionChanged} = this.props;
 
             return (
                 <Component
                     {...data}
-                    path={path}
+                    paths={paths}
                     x={px+x}
                     y={py+y}
                     width={width}
@@ -75,14 +81,13 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
         }
 
         private handleMouseUp = (e: React.MouseEvent) => {
-            const {path, triggerPositionChanged} = this.props;
+            const {paths, triggerPositionChanged} = this.props;
 
             if (triggerPositionChanged) { // trigger position changed if registered
                 const {x, y} = this.state;
 
-                const posPath = path.concat(["position"]);
                 triggerPositionChanged({
-                    path: posPath,
+                    path: paths.base.concat(paths.position),
                     new: {x, y},
                     old: {...this.originPosition!},
                 });

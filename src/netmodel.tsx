@@ -13,6 +13,6 @@ export interface Net {
         data: PlaceData;
         position: Position;
         size: Size;
-        relatedPositions?: Dict<{[key: string]: {position: Position}}>;
+        relatedPositions?: Dict<Position>;
     }>
 }
