@@ -33,7 +33,10 @@ export class Net extends React.Component<any, any> {
             results.push(
                 <Place
                     key={data.id}
-                    path={["places", key]}
+                    paths={{
+                        base: ["places", key],
+                        position: ["position"],
+                    }}
                     data={data}
                     parentPosition={{x: 0, y: 0}}
                     {...position}
