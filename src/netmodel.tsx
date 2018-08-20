@@ -13,6 +13,12 @@ export interface PlaceData {
     dataLayout: PlaceDataLayout;
 }
 
+export interface TransitionData {
+    id: string;
+    name: string;
+    code?: string[];
+    guard?: string[];
+}
 
 export interface Net {
     places: Dict<{
@@ -20,5 +26,11 @@ export interface Net {
         position: Position;
         size: Size;
         relatedPositions?: Dict<Position>;
-    }>
+    }>;
+    transitions: Dict<{
+        data: TransitionData,
+        position: Position;
+        size: Size;
+        relatedPositions?: Dict<Position>;
+    }>;
 }

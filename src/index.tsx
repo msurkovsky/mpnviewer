@@ -32,6 +32,17 @@ const net: TNet = fillDefaultRelatedPositions({
             position: { x: 120, y: 120 },
             size: { width: 80, height: 50 },
         },
+    },
+    transitions: {
+        "t1": {
+            data: {
+                id: getId(),
+                name: "t1",
+                guard: ["x !== null"],
+            },
+            position: { x: 200, y: 200 },
+            size: { width: 70, height: 40 },
+        }
     }
 });
 

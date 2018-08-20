@@ -7,6 +7,13 @@ body {
 .net {
     fill: #ffe;
 }
+
+.transition {
+    stroke: #000;
+    stroke-width: 2px;
+    fill: #fff;
+}
+
 .place {
     stroke: #000;
     stroke-width: 2px;
