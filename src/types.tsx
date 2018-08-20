@@ -13,10 +13,17 @@ export interface Size {
     height: number;
 }
 
-export interface BoundingBox {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+export type BBox = Position & Size;
+
+export type Vector2d = Position;
+
+export interface Line {
+    a: Position; // direction/gradient
+    u: Vector2d; // magnitude
+}
+
+export interface Circle {
+    c: Position; // center
+    r: number;   // radius
 }
 

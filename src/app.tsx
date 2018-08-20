@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 // TODO: remove these import in the future;
-import {PlaceDataLayout} from './netmodel';
+import {ArcType, PlaceDataLayout} from './netmodel';
 import {Net} from './netview';
 
 // NOTE: stay with just fillDefaultRelatedPositions
@@ -43,10 +43,20 @@ const state = { // TODO: REMOVE
                 position: { x: 200, y: 200 },
                 size: { width: 70, height: 40 },
             }
-        }
+        },
+        arcs: [{
+            data: {
+                /* source: */
+                /* destination: */
+                expression: "",
+                type: ArcType.SINGLE_HEADED_RO
+            },
+            startElementPath: ["transitions", "t1"],
+            endElementPath: ["places", "b"],
+            innerPoints: []
+        }]
     })
 };
-
 
 export class App extends React.Component<any, any> { // TODO: change `any` to specific types
 
