@@ -55,7 +55,9 @@ class CorePlace extends React.PureComponent<Props> {
                     x={relatedPositions.initExpr.x}
                     y={relatedPositions.initExpr.y}
                     triggerPositionChanged={triggerPositionChanged}/>
-                {/* TODO: name of the place will always be aligned to the center */}
+                <text x={x+width/2} y={y+height/2} textAnchor="middle" alignmentBaseline="central">
+                    {name}
+                </text>
             </g>
         );
     }
