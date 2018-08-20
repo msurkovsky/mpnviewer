@@ -10,6 +10,7 @@ export interface PlaceData {
     name: string;
     type: DataType;
     initExpr: string;
+    dataLayout: PlaceDataLayout;
 }
 
 

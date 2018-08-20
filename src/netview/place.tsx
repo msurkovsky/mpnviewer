@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import {PlaceData} from '../netmodel';
+import {PlaceData, PlaceDataLayout} from '../netmodel';
 import {Dict, Position, Size} from '../types';
 import {createMovable, MouseTriggers, PositionTriggers} from './movable';
 import {TextElement} from './textelement';
@@ -23,16 +23,18 @@ class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, type, initExpr, x, y, width, height, relatedPositions,
+        const {paths, name, type, initExpr, dataLayout, x, y, width, height, relatedPositions,
                triggerMouseDown, triggerMouseUp,
                triggerPositionChanged} = this.props;
 
         const radius = height / 2;
+        const cssDataLayout = dataLayout === PlaceDataLayout.Multiset? "bPlace" : "qPlace";
 
         return (
             <g>
-                <rect x={x} y={y} width={width} height={height} rx={radius} ry={radius}
-                      onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp} />
+            <rect className={`place ${cssDataLayout}`}
+                  x={x} y={y} width={width} height={height} rx={radius} ry={radius}
+                  onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp} />
                 <TextElement
                     paths={{
                         base: [...paths.base],
