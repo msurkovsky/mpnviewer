@@ -1,6 +1,6 @@
 import {lensPath, over} from 'ramda'
 import {Net as TNet} from './netmodel'
-import {Size} from './types'
+import {BBox, Line, Position, Size} from './types'
 
 const defaultPositions = {
     places: (placeSize: Size) => ({
@@ -47,5 +47,35 @@ export function fillDefaultRelatedPositions(net: TNet) {
     newNet = fill(newNet, "places");
     newNet = fill(newNet, "transitions");
     return newNet;
-};
+}
 
+export function computeLine(p1: Position, p2: Position): Line {
+    const vx = p2.x - p1.x;
+    const vy = p2.y - p1.y;
+
+    // normed vector
+    const nx = -vy;
+    const ny = vx;
+
+    return {
+        a: nx,
+        b: ny,
+        c: - (nx * p1.x + ny * p1.y)
+    };
+}
+
+export function computeIntersection (bbox: BBox,
+                                     p: Position,
+                                     rx: number=0,
+                                     ry: number=0) {
+
+    const c = {
+        x: bbox.x + bbox.width/2,
+        y: bbox.y + bbox.height/2,
+    };
+
+    // first line center to the given point
+    const l1 = computeLine(c, p);
+
+    // TODO: continue here; pick the right edge and compute intersection
+}

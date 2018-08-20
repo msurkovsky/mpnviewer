@@ -13,10 +13,11 @@ export interface Size {
     height: number;
 }
 
-export interface BoundingBox {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+export type BBox = Position & Size;
+
+export interface Line {
+    a: number;
+    b: number;
+    c: number;
 }
 

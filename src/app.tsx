@@ -43,10 +43,10 @@ const state = { // TODO: REMOVE
                 position: { x: 200, y: 200 },
                 size: { width: 70, height: 40 },
             }
-        }
+        },
+        arcs: []
     })
 };
-
 
 export class App extends React.Component<any, any> { // TODO: change `any` to specific types
 
