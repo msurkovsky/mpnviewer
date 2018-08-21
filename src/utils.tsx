@@ -1,6 +1,6 @@
 import {lensPath, over} from 'ramda'
 import {Net as TNet} from './netmodel'
-import {BBox, Position, Size} from './types'
+import {BBox, Line, Position, Size} from './types'
 
 const defaultPositions = {
     places: (placeSize: Size) => ({
@@ -55,32 +55,29 @@ export function floatCheckBound (
     return (v > (a - e) && v < (b + e));
 }
 
-export function lineIntersectGetT(
-    p1: Position, p2: Position, p3: Position, p4: Position
-): number | null {
+function lineIntersectGetT(l1: Line, l2: Line): number | null {
 
-    const u1 = {x: p2.x - p1.x, y: p2.y - p1.y};
-    const u2 = {x: p4.x - p3.x, y: p4.y - p3.y};
-
-    const d = u2.x * u1.y - u2.y * u1.x;
+    const d = l2.u.x * l1.u.y - l2.u.y * l1.u.x;
     if (Math.abs(d) < 0.000001) {
         return null;
     }
-    const z = p3.y * u1.x - p1.y * u1.x - p3.x * u1.y + p1.x * u1.y;
+
+    const z = l2.a.y * l1.u.x - l1.a.y * l1.u.x +
+              l1.a.x * l1.u.y - l2.a.x * l1.u.y;
     const s = z / d;
 
-    if (s < -0.000001 || s > 1.000001) {
+    if (!floatCheckBound(s, 0, 1)) {
         return null;
     }
 
     let t;
-    if (Math.abs(u1.y) > Math.abs(u1.x)) {
-        t = (p3.y - p1.y + u2.y * s) / u1.y;
+    if (Math.abs(l1.u.y) > Math.abs(l1.u.x)) {
+        t = (l2.a.y - l1.a.y + l2.u.y * s) / l1.u.y;
     } else {
-        t = (p3.x - p1.x + u2.x * s) / u1.x;
+        t = (l2.a.x - l1.a.x + l2.u.x * s) / l1.u.x;
     }
 
-    if (t < -0.000001 || t > 1.000001) {
+    if (!floatCheckBound(t, 0, 1)) {
         return null;
     }
 

@@ -15,8 +15,10 @@ export interface Size {
 
 export type BBox = Position & Size;
 
+export type Vector2d = [number, number];
+
 export interface Line {
     a: Position;
-    u: Position;
+    u: Vector2d;
 }
 
