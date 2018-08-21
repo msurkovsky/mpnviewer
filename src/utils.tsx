@@ -55,7 +55,7 @@ export function floatCheckBound (
     return (v > (a - e) && v < (b + e));
 }
 
-function lineIntersectGetT(l1: Line, l2: Line): number | null {
+export const linesIntersectGetT = (l1: Line) => (l2: Line): number | null => {
 
     const d = l2.u.x * l1.u.y - l2.u.y * l1.u.x;
     if (Math.abs(d) < 0.000001) {
@@ -84,25 +84,28 @@ function lineIntersectGetT(l1: Line, l2: Line): number | null {
     return t;
 }
 
-export function circleCollision(
-    p1: Position,
-    p2: Position,
+export function lineCircleIntersectGetT(
+    l: Line,
     center: Position,
     radius: number
 ): number | null {
-    const u = {x: p2.x - p1.x, y: p2.y - p1.y};
-    const a = u.x * u.x + u.y * u.y;
-    const b = 2 * (p1.x * u.x + p1.y * u.y - center.x * u.x - center.y * u.y);
-    const c = center.x*center.x + center.y*center.y
-            - radius*radius - 2*p1.x*center.x - 2*p1.y*center.y + p1.x*p1.x + p1.y*p1.y;
+    const a = l.u.x * l.u.x + l.u.y * l.u.y;
+    const b = 2 * (l.a.x * l.u.x + l.a.y * l.u.y -
+                   center.x * l.u.x -
+                   center.y * l.u.y);
+    const c = center.x * center.x + center.y * center.y -
+              radius*radius -
+              2 * l.a.x * center.x -
+              2 * l.a.y * center.y +
+              l.a.x * l.a.x + l.a.y * l.a.y;
     const d = b*b - 4*a*c;
 
     if (d < 0.000001) {
         return null;
     }
 
-    const t1 = (-b+Math.sqrt(d))/(2*a);
-    const t2 = (-b-Math.sqrt(d))/(2*a);
+    const t1 = (-b + Math.sqrt(d))/(2 * a);
+    const t2 = (-b - Math.sqrt(d))/(2 * a);
 
 
     let t = null;
@@ -138,37 +141,39 @@ export function rrectCollision ( // rounded rectangle collision
 
     const t = [];
 
-    const ta = lineIntersectGetT(
-        c, p,
-        {x: bbox.x + r, y: bbox.y},
-        {x: bbox.x + bbox.width - r, y: bbox.y});
-    if (ta) {
-        t.push(ta);
-    }
+    const l1 = {
+        a: c,
+        u: {x: p.x - c.x, y: p.y - c.y}
+    };
 
-    const tb = lineIntersectGetT(
-        c, p,
-        {x: bbox.x + bbox.width, y: bbox.y + r},
-        {x: bbox.x + bbox.width, y: bbox.y + bbox.height - r});
-    if (tb) {
-        t.push(tb);
-    }
+    const rectLines = [
 
-    const tc = lineIntersectGetT(
-        c, p,
-        {x: bbox.x + r, y: bbox.y + bbox.height},
-        {x: bbox.x + bbox.width - r, y: bbox.y + bbox.height});
-    if (tc) {
-        t.push(tc);
-    }
+        // TODO: add rect lines
+    ];
 
-    const td = lineIntersectGetT(
-        c, p,
-        {x: bbox.x, y: bbox.y + r},
-        {x: bbox.x, y: bbox.y + bbox.height - r});
-    if (td) {
-        t.push(td);
-    }
+    const l2a = {
+        a: {x: bbox.x + r, y: bbox.y},
+        u: {x: bbox.width - r, y: 0}
+    };
+    t.push(linesIntersectGetT(l1)(l2a));
+
+    const l2b = {
+        a: {x: bbox.x + bbox.width, y: bbox.y + r},
+        u: {x: 0, y: bbox.height - r}
+    };
+    t.push(linesIntersectGetT(l1)(l2b));
+
+    const l2c = {
+        a: {x: bbox.x + r, y: bbox.y + bbox.height},
+        u: {x: bbox.width - r, y: 0}
+    };
+    t.push(linesIntersectGetT(l1)(l2c));
+
+    const l2d = {
+        a: {x: bbox.x, y: bbox.y + r},
+        u: {x: 0, y: bbox.height - r}
+    };
+    t.push(linesIntersectGetT(l1)(l2d));
 
     if (r > 0) { // compute rounded corners
         if (bbox.width === bbox.height && r === (bbox.width / 2)) { // circle
