@@ -44,7 +44,16 @@ const state = { // TODO: REMOVE
                 size: { width: 70, height: 40 },
             }
         },
-        arcs: []
+        arcs: [{
+            data: {
+                /* source: */
+                /* destination: */
+                expression: "",
+            },
+            startElementPath: ["transitions", "t1"],
+            endElementPath: ["places", "b"],
+            innerPoints: []
+        }]
     })
 };
 

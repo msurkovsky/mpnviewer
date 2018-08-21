@@ -21,8 +21,8 @@ export interface TransitionData {
 }
 
 export interface ArcData {
-    source: PlaceData | TransitionData;
-    destination: PlaceData | TransitionData;
+    /* source: PlaceData | TransitionData; */
+    /* destination: PlaceData | TransitionData; */
     expression: string;
 }
 

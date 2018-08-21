@@ -16,8 +16,7 @@ export interface Size {
 export type BBox = Position & Size;
 
 export interface Line {
-    a: number;
-    b: number;
-    c: number;
+    a: Position;
+    u: Position;
 }
 
