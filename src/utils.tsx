@@ -1,6 +1,6 @@
 import {lensPath, over} from 'ramda'
 import {Net as TNet} from './netmodel'
-import {BBox, Line, Position, Size} from './types'
+import {BBox, Circle, Line, Position, Size} from './types'
 
 const defaultPositions = {
     places: (placeSize: Size) => ({
@@ -49,16 +49,41 @@ export function fillDefaultRelatedPositions(net: TNet) {
     return newNet;
 }
 
+
+export function floatLt (v: number, a: number, e: number = 0.000001): boolean {
+    return v < (a + e);
+}
+
+export function floatGt (v: number, a: number, e: number = 0.000001): boolean {
+    return v > (a - e);
+}
+
 export function floatCheckBound (
     v: number, a: number, b: number, e: number = 0.000001
 ): boolean {
-    return (v > (a - e) && v < (b + e));
+    return floatGt(v, a, e) && floatLt(v, b, e);
+}
+
+export function v2dSub (a: Position, b: Position): Position {
+    return { x: a.x - b.x, y: a.y - b.y };
+}
+
+export function v2dAdd (a: Position, b: Position): Position {
+    return { x: a.x + b.x, y: a.y + b.y };
+}
+
+export function v2dSquare (a: Position): Position {
+    return { x: a.x * a.x, y: a.y * a.y };
+}
+
+export function v2dAddComponents (a: Position): number {
+    return a.x + a.y;
 }
 
 export const linesIntersectGetT = (l1: Line) => (l2: Line): number | null => {
 
     const d = l2.u.x * l1.u.y - l2.u.y * l1.u.x;
-    if (Math.abs(d) < 0.000001) {
+    if (floatLt(Math.abs(d), 0)) {
         return null;
     }
 
@@ -84,23 +109,20 @@ export const linesIntersectGetT = (l1: Line) => (l2: Line): number | null => {
     return t;
 }
 
-export function lineCircleIntersectGetT(
-    l: Line,
-    center: Position,
-    radius: number
-): number | null {
-    const a = l.u.x * l.u.x + l.u.y * l.u.y;
+export const lineCircleIntersectGetT = (l: Line) => (circle: Circle): number | null => {
+    const {c: center, r: radius} = circle;
+    const a = v2dAddComponents(v2dSquare(l.u));
     const b = 2 * (l.a.x * l.u.x + l.a.y * l.u.y -
                    center.x * l.u.x -
                    center.y * l.u.y);
-    const c = center.x * center.x + center.y * center.y -
+    const c = v2dAddComponents(v2dSquare(center)) -
               radius*radius -
               2 * l.a.x * center.x -
               2 * l.a.y * center.y +
-              l.a.x * l.a.x + l.a.y * l.a.y;
+              v2dAddComponents(v2dSquare(l.a));
     const d = b*b - 4*a*c;
 
-    if (d < 0.000001) {
+    if (floatLt(d, 0)) {
         return null;
     }
 
@@ -128,92 +150,53 @@ export function rrectCollision ( // rounded rectangle collision
     r: number=0  // radius of bounding box corners
 ): Position {
 
-    console.log(bbox, p, r);
     const c = {
         x: bbox.x + bbox.width/2,
         y: bbox.y + bbox.height/2,
     };
 
-    const u = {
-        x: p.x - c.x,
-        y: p.y - c.y
-    };
+    const l1 = { a: c, u: v2dSub(p, c) };
 
-    const t = [];
-
-    const l1 = {
-        a: c,
-        u: {x: p.x - c.x, y: p.y - c.y}
-    };
-
-    const rectLines = [
-
-        // TODO: add rect lines
-    ];
-
-    const l2a = {
+    const rectLines = [{
         a: {x: bbox.x + r, y: bbox.y},
         u: {x: bbox.width - r, y: 0}
-    };
-    t.push(linesIntersectGetT(l1)(l2a));
-
-    const l2b = {
+    },{
         a: {x: bbox.x + bbox.width, y: bbox.y + r},
         u: {x: 0, y: bbox.height - r}
-    };
-    t.push(linesIntersectGetT(l1)(l2b));
-
-    const l2c = {
+    },{
         a: {x: bbox.x + r, y: bbox.y + bbox.height},
         u: {x: bbox.width - r, y: 0}
-    };
-    t.push(linesIntersectGetT(l1)(l2c));
-
-    const l2d = {
+    },{
         a: {x: bbox.x, y: bbox.y + r},
         u: {x: 0, y: bbox.height - r}
-    };
-    t.push(linesIntersectGetT(l1)(l2d));
+    }];
 
+    const fLLI = linesIntersectGetT(l1); // line-line intersect
+    const lineIntersectT = rectLines.map(fLLI);
+
+    let circleIntersectT: Array<number | null> = [];
     if (r > 0) { // compute rounded corners
         if (bbox.width === bbox.height && r === (bbox.width / 2)) { // circle
-            t.push(1 / Math.sqrt(u.x * u.x + u.y * u.y));
+            circleIntersectT = [1 / Math.sqrt(l1.u.x * l1.u.x + l1.u.y * l1.u.y)];
         } else { // rounded rectangle
-            // top-right circle
-            const tra = circleCollision(
-                c, p,
-                {x: bbox.x + bbox.width - r, y: bbox.y + r},
-                r);
-            if (tra) {
-                t.push(tra);
-            }
+            const circles: Circle[] = [
+                // top-right
+                {c: {x: bbox.x + bbox.width - r, y: bbox.y + r}, r},
+                // bottom-right
+                {c: {x: bbox.x + bbox.width - r, y: bbox.y + bbox.height - r}, r},
+                // bottom-left
+                {c: {x: bbox.x + r, y: bbox.y + bbox.height - r}, r},
+                // top-left
+                {c: {x: bbox.x + r, y: bbox.y + r}, r}
+            ];
 
-            // bottom-right circle
-            const trb = circleCollision(
-                c, p,
-                {x: bbox.x + bbox.width - r, y: bbox.y + bbox.height - r},
-                r);
-            if (trb) {
-                t.push(trb);
-            }
-
-            // bottom-left circle
-            const trc = circleCollision(
-                c, p,
-                {x: bbox.x + r, y: bbox.y + bbox.height - r},
-                r);
-            if (trc) {
-                t.push(trc);
-            }
-
-            // top-left circle
-            const trd = circleCollision(c, p, {x: bbox.x + r, y: bbox.y + r}, r);
-            if (trd) {
-                t.push(trd);
-            }
+            const fLCI = lineCircleIntersectGetT(l1); // line-circle intersect
+            circleIntersectT = circles.map(fLCI);
         }
     }
 
+    const t = [...lineIntersectT,
+               ...circleIntersectT].filter((v) => v !== null) as number[];
     let resultingT;
     if (t.length > 0) {
         resultingT = Math.max(...t);
@@ -222,5 +205,5 @@ export function rrectCollision ( // rounded rectangle collision
         resultingT = 0;
     }
 
-    return {x: c.x + u.x * resultingT, y: c.y + u.y * resultingT};
+    return {x: l1.a.x + l1.u.x * resultingT, y: l1.a.y + l1.u.y * resultingT};
 }

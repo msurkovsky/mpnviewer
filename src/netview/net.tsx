@@ -23,9 +23,9 @@ export class Net extends React.Component<any, any> {
             <svg width={width} height={height}>
 
                 <rect className="net" x={x} y={y} width={width} height={height} />
-                {this.renderArcs(net.arcs)}
                 {this.renderPlaces(net.places)}
                 {this.renderTransitions(net.transitions)}
+                {this.renderArcs(net.arcs)}
             </svg>
         );
     }

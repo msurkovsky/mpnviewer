@@ -18,7 +18,12 @@ export type BBox = Position & Size;
 export type Vector2d = Position;
 
 export interface Line {
-    a: Position;
-    u: Vector2d;
+    a: Position; // direction/gradient
+    u: Vector2d; // magnitude
+}
+
+export interface Circle {
+    c: Position; // center
+    r: number;   // radius
 }
 
