@@ -153,23 +153,24 @@ export const lineCircleIntersectGetT = (l: Line) => (circle: Circle): number | n
 export function rrectCollision ( // rounded rectangle collision
     bbox: BBox,  // bounding box
     p: Position, // position outer of bbox
-    r: number=0  // radius of bounding box corners
+    r: number=0,  // radius of bounding box corners
+    tolerance: number=5
 ): Position {
 
     const c = computeCenter(bbox);
     const l1 = { a: c, u: v2dSub(p, c) };
 
     const rectLines = [{
-        a: {x: bbox.x + r, y: bbox.y},
+        a: {x: bbox.x + r, y: bbox.y - tolerance},
         u: {x: bbox.width - r, y: 0}
     },{
-        a: {x: bbox.x + bbox.width, y: bbox.y + r},
+        a: {x: bbox.x + bbox.width + tolerance, y: bbox.y + r},
         u: {x: 0, y: bbox.height - r}
     },{
-        a: {x: bbox.x + r, y: bbox.y + bbox.height},
+        a: {x: bbox.x + r, y: bbox.y + bbox.height + tolerance},
         u: {x: bbox.width - r, y: 0}
     },{
-        a: {x: bbox.x, y: bbox.y + r},
+        a: {x: bbox.x - tolerance, y: bbox.y + r},
         u: {x: 0, y: bbox.height - r}
     }];
 
@@ -183,13 +184,17 @@ export function rrectCollision ( // rounded rectangle collision
         } else { // rounded rectangle
             const circles = [
                 // top-right
-                {c: {x: bbox.x + bbox.width - r, y: bbox.y + r}, r},
+                {c: {x: bbox.x + bbox.width - r, y: bbox.y + r},
+                 r: r + tolerance},
                 // bottom-right
-                {c: {x: bbox.x + bbox.width - r, y: bbox.y + bbox.height - r}, r},
+                {c: {x: bbox.x + bbox.width - r, y: bbox.y + bbox.height - r},
+                 r: r + tolerance},
                 // bottom-left
-                {c: {x: bbox.x + r, y: bbox.y + bbox.height - r}, r},
+                {c: {x: bbox.x + r, y: bbox.y + bbox.height - r},
+                 r: r + tolerance},
                 // top-left
-                {c: {x: bbox.x + r, y: bbox.y + r}, r}
+                {c: {x: bbox.x + r, y: bbox.y + r},
+                 r: r + tolerance}
             ];
 
             const fLCI = lineCircleIntersectGetT(l1); // line-circle intersect
