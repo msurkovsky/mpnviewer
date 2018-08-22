@@ -16,6 +16,16 @@ export class Net extends React.Component<any, any> {
     public state = {
         zoom: 1.0
     };
+
+    private netRef: React.RefObject<SVGGElement> = React.createRef();
+
+    // TODO: for export get bounding the real bounding box for free
+    /* public componentDidUpdate() { */
+    /* if (this.netRef.current) { */
+    /* console.log(this.netRef.current.getBBox()); */
+    /* } */
+    /* } */
+
     public render() {
         const {net, width, height} = this.props;
 
@@ -51,10 +61,11 @@ export class Net extends React.Component<any, any> {
                     </marker>
                 </defs>
 
-                <rect className="net" width={width} height={height} />
-                {this.renderArcs(net.arcs)}
-                {this.renderPlaces(net.places)}
-                {this.renderTransitions(net.transitions)}
+                <g id="net" ref={this.netRef}>
+                    {this.renderArcs(net.arcs)}
+                    {this.renderPlaces(net.places)}
+                    {this.renderTransitions(net.transitions)}
+                </g>
             </svg>
             </ReactSVGPanZoom>
             </CanvasContext.Provider>
