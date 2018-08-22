@@ -1,5 +1,6 @@
 import {path} from 'ramda'
 import * as React from 'react';
+import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
 import {ArcType} from '../netmodel';
 import * as Utils from '../utils';
 
@@ -8,46 +9,64 @@ import {Arc} from './arc'
 import {Place} from './place';
 import {Transition} from './transition';
 
+const defaultZoom = 1.0;
+
+export const CanvasContext = React.createContext({zoom: defaultZoom});
+
 export class Net extends React.Component<any, any> {
 
+    public state = { zoom: defaultZoom };
+
     public render() {
-        const {net, x, y, width, height} = this.props;
+        const {net, width, height} = this.props;
 
         return (
-            <svg transform={`translate(${x}, ${y})`} width={width} height={height}>
-                <defs>
-                    <marker id={ArcType.SINGLE_HEADED} viewBox="0 0 10 10" refX="8" refY="5"
-                            markerWidth="10" markerHeight="8"
-                            orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 Z" />
-                    </marker>
+            <CanvasContext.Provider value={{zoom: this.state.zoom}}>
+            <ReactSVGPanZoom
+                width={width} height={height}
+                background="#ffe"
+                SVGBackground="#ffe"
+                miniaturePosition={POSITION_NONE}
+                detectAutoPan={false}
+                onZoom={this.onZoom}>
 
-                    <marker id={ArcType.DOUBLE_HEADED} viewBox="0 0 20 10" refX="18" refY="5"
-                            markerWidth="18" markerHeight="8"
-                            orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 Z" />
-                        <path d="M 10 0 L 20 5 L 10 10 Z" />
-                    </marker>
+                <svg width={width} height={height}>
+                    <defs>
+                        <marker id={ArcType.SINGLE_HEADED} viewBox="0 0 10 10" refX="8" refY="5"
+                                markerWidth="10" markerHeight="8"
+                                orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 Z" />
+                        </marker>
 
-                    <marker id={ArcType.SINGLE_HEADED_RO} viewBox="0 0 10 10" refX="8" refY="5"
-                            markerWidth="10" markerHeight="8"
-                            orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
-                    </marker>
+                        <marker id={ArcType.DOUBLE_HEADED} viewBox="0 0 20 10" refX="18" refY="5"
+                                markerWidth="18" markerHeight="8"
+                                orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 Z" />
+                            <path d="M 10 0 L 20 5 L 10 10 Z" />
+                        </marker>
 
-                    <marker id={ArcType.DOUBLE_HEADED_RO} viewBox="0 0 20 10" refX="18" refY="5"
-                            markerWidth="18" markerHeight="8"
-                            orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
-                        <path d="M 10 0 L 20 5 L 10 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5" />
-                    </marker>
-                </defs>
+                        <marker id={ArcType.SINGLE_HEADED_RO} viewBox="0 0 10 10" refX="8" refY="5"
+                                markerWidth="10" markerHeight="8"
+                                orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
+                        </marker>
 
-                <rect className="net" width={width} height={height} />
-                {this.renderArcs(net.arcs)}
-                {this.renderPlaces(net.places)}
-                {this.renderTransitions(net.transitions)}
-            </svg>
+                        <marker id={ArcType.DOUBLE_HEADED_RO} viewBox="0 0 20 10" refX="18" refY="5"
+                                markerWidth="18" markerHeight="8"
+                                orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
+                            <path d="M 10 0 L 20 5 L 10 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5" />
+                        </marker>
+                    </defs>
+
+                    <g id="mpnet">
+                      {this.renderArcs(net.arcs)}
+                      {this.renderPlaces(net.places)}
+                      {this.renderTransitions(net.transitions)}
+                    </g>
+                </svg>
+            </ReactSVGPanZoom>
+            </CanvasContext.Provider>
         );
     }
 
@@ -142,5 +161,10 @@ export class Net extends React.Component<any, any> {
             );
         }
         return results;
+    }
+
+    protected onZoom = (e: any) => {
+        // `a` keeps the current zoom value
+        this.setState({zoom: e.a});
     }
 }
