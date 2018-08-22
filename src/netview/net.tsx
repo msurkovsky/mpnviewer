@@ -19,7 +19,9 @@ export class Net extends React.Component<any, any> {
     }
 
     public render() {
-        const {net, x, y, width, height} = this.props;
+        const {x, y, width, height} = this.props;
+        const net = this.state;
+
         return (
             <svg width={width} height={height}>
                 <defs>
