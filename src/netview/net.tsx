@@ -31,7 +31,7 @@ export class Net extends React.Component<any, any> {
                         <path d="M 0 0 L 10 5 L 0 10 Z" />
                     </marker>
 
-                    <marker id={ArcType.DOUBLE_HEADED} viewBox="0 0 20 10" refX="16" refY="5"
+                    <marker id={ArcType.DOUBLE_HEADED} viewBox="0 0 20 10" refX="18" refY="5"
                             markerWidth="18" markerHeight="8"
                             orient="auto-start-reverse">
                         <path d="M 0 0 L 10 5 L 0 10 Z" />
@@ -44,7 +44,7 @@ export class Net extends React.Component<any, any> {
                         <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
                     </marker>
 
-                    <marker id={ArcType.DOUBLE_HEADED_RO} viewBox="0 0 20 10" refX="16" refY="5"
+                    <marker id={ArcType.DOUBLE_HEADED_RO} viewBox="0 0 20 10" refX="18" refY="5"
                             markerWidth="18" markerHeight="8"
                             orient="auto-start-reverse">
                         <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
