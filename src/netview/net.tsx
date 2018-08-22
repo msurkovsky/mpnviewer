@@ -3,18 +3,31 @@ import * as React from 'react';
 import {ArcType} from '../netmodel';
 import * as Utils from '../utils';
 
-import {Position, Size} from '../types'
-import {Arc} from './arc'
+import {NetData} from '../netmodel';
+import {Position, Size} from '../types';
+import {Arc} from './arc';
+import {createMovable, MouseTriggers, PositionTriggers} from './movable';
 import {Place} from './place';
 import {Transition} from './transition';
 
-export class Net extends React.Component<any, any> {
+type Props = NetData & Position & Size & MouseTriggers & PositionTriggers & {
+    paths: {
+        base: string[];
+        position: string[];
+    };
+};
+
+class CoreNet extends React.PureComponent<Props> {
 
     public render() {
-        const {net, x, y, width, height} = this.props;
+        const {places, transitions, arcs, width, height,
+               triggerMouseDown, triggerMouseUp} = this.props;
 
         return (
-            <svg transform={`translate(${x}, ${y})`} width={width} height={height}>
+            /* <svg transform={`translate(${x}, ${y})`} */
+            /* viewBox={`${x} ${y} ${width} ${height}`} */
+            /* width={width} height={height}> */
+            <svg width={width} height={height}>
                 <defs>
                     <marker id={ArcType.SINGLE_HEADED} viewBox="0 0 10 10" refX="8" refY="5"
                             markerWidth="10" markerHeight="8"
@@ -43,17 +56,23 @@ export class Net extends React.Component<any, any> {
                     </marker>
                 </defs>
 
-                <rect className="net" width={width} height={height} />
-                {this.renderArcs(net.arcs)}
-                {this.renderPlaces(net.places)}
-                {this.renderTransitions(net.transitions)}
+                <rect className="net"
+                      width={width} height={height}
+                      onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp} />
+
+            <g transform="translate(200, 200)">
+                {this.renderArcs(arcs)}
+                {this.renderPlaces(places)}
+                {this.renderTransitions(transitions)}
+            </g>
             </svg>
         );
     }
 
     protected renderArcs(arcs: any) { // TODO: refactore
 
-        const net = this.props.net;
+        const {places, transitions, x, y} = this.props;
+        const net = {places, transitions}
 
         const arcComponents = [];
         for (const key of Object.keys(arcs)) {
@@ -62,7 +81,9 @@ export class Net extends React.Component<any, any> {
             const s = path(startElementPath, net) as {position: Position, size: Size, data: any};
             const e = path(endElementPath, net) as {position: Position, size: Size, data: any};
 
-            const startPosition = Utils.computeCenter({...s.position, ...s.size});
+            const startPosition = Utils.computeCenter({
+                ...Utils.v2dAdd(s.position, {x, y}), // TODO: adding position here is not the best
+                ...s.size});
 
             let prelastPos = startPosition;
             if (innerPoints.length > 0) {
@@ -73,7 +94,9 @@ export class Net extends React.Component<any, any> {
             if (endElementPath[0] === "places") { // TODO: better check
                 r = e.size.height / 2;
             }
-            const endPosition = Utils.rrectCollision({...e.position, ...e.size}, prelastPos, r);
+            const endPosition = Utils.rrectCollision({
+                ...Utils.v2dAdd(e.position, {x,y}), // TODO: the same don't add the view position
+                ...e.size}, prelastPos, r);
             const points = [startPosition, ...innerPoints, endPosition];
 
             arcComponents.push(
@@ -91,7 +114,7 @@ export class Net extends React.Component<any, any> {
 
     protected renderPlaces (places: any) {
 
-        const triggerPositionChanged = this.props.triggerPositionChanged;
+        const {triggerPositionChanged, x, y} = this.props;
 
         const results = [];
         for (const key of Object.keys(places)) {
@@ -100,12 +123,13 @@ export class Net extends React.Component<any, any> {
             results.push(
                 <Place
                     key={data.id}
-                    paths={{
-                        base: ["places", key],
+                    paths={{ // TODO: the fixed `net` string is not the best solution
+                             //       however, the parent net has position on different place
+                        base: (["net", "places", key]),
                         position: ["position"],
                     }}
                     data={data}
-                    parentPosition={{x: 0, y: 0}}
+                    parentPosition={{x, y}}
                     {...position}
                     {...size}
                     relatedPositions={relatedPositions}
@@ -119,7 +143,7 @@ export class Net extends React.Component<any, any> {
 
     protected renderTransitions (transitions: any) {
 
-        const triggerPositionChanged = this.props.triggerPositionChanged;
+        const {triggerPositionChanged, x, y} = this.props;
 
         const results = [];
         for (const key of Object.keys(transitions)) {
@@ -129,11 +153,11 @@ export class Net extends React.Component<any, any> {
                 <Transition
                     key={data.id}
                     paths={{
-                        base: ["transitions", key],
+                        base: ["net", "transitions", key],
                         position: ["position"],
                     }}
                     data={data}
-                    parentPosition={{x: 0, y: 0}}
+                    parentPosition={{x, y}}
                     {...position}
                     {...size}
                     relatedPositions={relatedPositions}
@@ -144,3 +168,5 @@ export class Net extends React.Component<any, any> {
         return results;
     }
 }
+
+export const Net = createMovable<Props, NetData>(CoreNet);

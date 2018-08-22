@@ -39,7 +39,7 @@ export enum NetElement {
     Transition
 }
 
-export interface Net {
+export interface NetData {
     places: Dict<{
         data: PlaceData;
         position: Position;

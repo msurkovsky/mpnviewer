@@ -1,5 +1,5 @@
 import {lensPath, over} from 'ramda'
-import {Net as TNet} from './netmodel'
+import {NetData} from './netmodel'
 import {BBox, Circle, Line, Position, Size} from './types'
 
 const defaultPositions = {
@@ -19,9 +19,9 @@ export const getId = ((id: number) => (): string => {
 })(0);
 
 
-export function fillDefaultRelatedPositions(net: TNet) {
+export function fillDefaultRelatedPositions(net: NetData) {
 
-    const fill = (n: TNet, elem: string) => {
+    const fill = (n: NetData, elem: string) => {
         for (const key of Object.keys(net[elem])) {
             const path = lensPath([elem, key]);
 
@@ -42,7 +42,7 @@ export function fillDefaultRelatedPositions(net: TNet) {
         return n;
     };
 
-    let newNet: TNet = net;
+    let newNet: NetData = net;
 
     newNet = fill(newNet, "places");
     newNet = fill(newNet, "transitions");

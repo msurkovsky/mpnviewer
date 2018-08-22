@@ -10,6 +10,10 @@ import {PositionChanged} from './events';
 import {fillDefaultRelatedPositions, getId} from './utils';
 
 const state = {
+    view: {
+        x: 0,
+        y: 0
+    },
     net: fillDefaultRelatedPositions({ // TODO: REMOVE -> start with empty net
         places: {
             "a": {
@@ -73,15 +77,20 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
 
         return (
             <Net x={50} y={50} width={1000} height={500}
-                 net={net}
+                 data={net}
+                 parentPosition={{x: 50, y: 50}}
+                 paths={{
+                     base: [],
+                     position: ["view"]
+                 }}
                  triggerPositionChanged={this.cbPositionChanged} />
         );
     }
 
     private cbPositionChanged = (e: PositionChanged) => {
 
-        this.setState(({net}: any) => ({
-            net: {...over(lensPath(e.path), () => ({...e.new}), net)}
+        this.setState((old: any) => ({
+            ...over(lensPath(e.path), () => ({...e.new}), old)
         }));
     }
 }
