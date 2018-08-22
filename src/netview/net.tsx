@@ -1,9 +1,8 @@
-import {lensPath, over, path} from 'ramda'
+import {path} from 'ramda'
 import * as React from 'react';
 import {ArcType} from '../netmodel';
 import * as Utils from '../utils';
 
-import {PositionChanged} from '../events';
 import {Position, Size} from '../types'
 import {Arc} from './arc'
 import {Place} from './place';
@@ -11,19 +10,11 @@ import {Transition} from './transition';
 
 export class Net extends React.Component<any, any> {
 
-    constructor (props: any) {
-        super(props);
-
-        const net = this.props.net;
-        this.state = net;
-    }
-
     public render() {
-        const {x, y, width, height} = this.props;
-        const net = this.state;
+        const {net, x, y, width, height} = this.props;
 
         return (
-            <svg width={width} height={height}>
+            <svg transform={`translate(${x}, ${y})`} width={width} height={height}>
                 <defs>
                     <marker id={ArcType.SINGLE_HEADED} viewBox="0 0 10 10" refX="8" refY="5"
                             markerWidth="10" markerHeight="8"
@@ -52,7 +43,7 @@ export class Net extends React.Component<any, any> {
                     </marker>
                 </defs>
 
-                <rect className="net" x={x} y={y} width={width} height={height} />
+                <rect className="net" width={width} height={height} />
                 {this.renderArcs(net.arcs)}
                 {this.renderPlaces(net.places)}
                 {this.renderTransitions(net.transitions)}
@@ -60,13 +51,13 @@ export class Net extends React.Component<any, any> {
         );
     }
 
-    protected renderArcs(arcs: any) {
+    protected renderArcs(arcs: any) { // TODO: refactore
+
+        const net = this.props.net;
 
         const arcComponents = [];
         for (const key of Object.keys(arcs)) {
             const {data, startElementPath, endElementPath, innerPoints} = arcs[key];
-
-            const net = this.state;
 
             const s = path(startElementPath, net) as {position: Position, size: Size, data: any};
             const e = path(endElementPath, net) as {position: Position, size: Size, data: any};
@@ -100,6 +91,8 @@ export class Net extends React.Component<any, any> {
 
     protected renderPlaces (places: any) {
 
+        const triggerPositionChanged = this.props.triggerPositionChanged;
+
         const results = [];
         for (const key of Object.keys(places)) {
             const {data, position, size, relatedPositions} = places[key];
@@ -116,7 +109,7 @@ export class Net extends React.Component<any, any> {
                     {...position}
                     {...size}
                     relatedPositions={relatedPositions}
-                    triggerPositionChanged={this.cbPositionChanged}
+                    triggerPositionChanged={triggerPositionChanged}
                 />
             );
         }
@@ -125,6 +118,8 @@ export class Net extends React.Component<any, any> {
     }
 
     protected renderTransitions (transitions: any) {
+
+        const triggerPositionChanged = this.props.triggerPositionChanged;
 
         const results = [];
         for (const key of Object.keys(transitions)) {
@@ -142,17 +137,10 @@ export class Net extends React.Component<any, any> {
                     {...position}
                     {...size}
                     relatedPositions={relatedPositions}
-                    triggerPositionChanged={this.cbPositionChanged}
+                    triggerPositionChanged={triggerPositionChanged}
                 />
             );
         }
         return results;
-    }
-
-    private cbPositionChanged = (e: PositionChanged) => {
-
-        this.setState((oldNet: any) => ({
-            ...over(lensPath(e.path), () => ({...e.new}), oldNet)
-        }));
     }
 }

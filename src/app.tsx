@@ -1,14 +1,16 @@
+import {lensPath, over} from 'ramda';
 import * as React from 'react';
 
 // TODO: remove these import in the future;
 import {ArcType, PlaceDataLayout} from './netmodel';
 import {Net} from './netview';
 
+import {PositionChanged} from './events';
 // NOTE: stay with just fillDefaultRelatedPositions
 import {fillDefaultRelatedPositions, getId} from './utils';
 
-const state = { // TODO: REMOVE
-    net: fillDefaultRelatedPositions({
+const state = {
+    net: fillDefaultRelatedPositions({ // TODO: REMOVE -> start with empty net
         places: {
             "a": {
                 data: {
@@ -70,7 +72,16 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         const {net} = this.state;
 
         return (
-            <Net net={net} x={0} y={0} width={1000} height={500} />
+            <Net x={50} y={50} width={1000} height={500}
+                 net={net}
+                 triggerPositionChanged={this.cbPositionChanged} />
         );
+    }
+
+    private cbPositionChanged = (e: PositionChanged) => {
+
+        this.setState(({net}: any) => ({
+            net: {...over(lensPath(e.path), () => ({...e.new}), net)}
+        }));
     }
 }
