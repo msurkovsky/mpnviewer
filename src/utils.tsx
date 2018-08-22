@@ -154,24 +154,29 @@ export function rrectCollision ( // rounded rectangle collision
     bbox: BBox,  // bounding box
     p: Position, // position outer of bbox
     r: number=0,  // radius of bounding box corners
-    tolerance: number=5
+    tolerance: number=3
 ): Position {
 
     const c = computeCenter(bbox);
     const l1 = { a: c, u: v2dSub(p, c) };
 
     const rectLines = [{
+        // top line
         a: {x: bbox.x + r, y: bbox.y - tolerance},
-        u: {x: bbox.width - r, y: 0}
+        u: {x: bbox.width - 2*r, y: 0} // -2r because the lengh was shortened
+                                       // once at the beggining
     },{
+        // right line
         a: {x: bbox.x + bbox.width + tolerance, y: bbox.y + r},
-        u: {x: 0, y: bbox.height - r}
+        u: {x: 0, y: bbox.height - 2*r}
     },{
+        // bottom line
         a: {x: bbox.x + r, y: bbox.y + bbox.height + tolerance},
-        u: {x: bbox.width - r, y: 0}
+        u: {x: bbox.width - 2*r, y: 0}
     },{
+        // left line
         a: {x: bbox.x - tolerance, y: bbox.y + r},
-        u: {x: 0, y: bbox.height - r}
+        u: {x: 0, y: bbox.height - 2*r}
     }];
 
     const fLLI = linesIntersectGetT(l1); // line-line intersect
