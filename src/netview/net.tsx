@@ -1,5 +1,6 @@
 import {path} from 'ramda'
 import * as React from 'react';
+import {ReactSVGPanZoom} from 'react-svg-pan-zoom';
 import {ArcType} from '../netmodel';
 import * as Utils from '../utils';
 
@@ -8,13 +9,20 @@ import {Arc} from './arc'
 import {Place} from './place';
 import {Transition} from './transition';
 
+export const CanvasContext = React.createContext({zoom: 1.0});
+
 export class Net extends React.Component<any, any> {
 
+    public state = {
+        zoom: 1.0
+    };
     public render() {
-        const {net, x, y, width, height} = this.props;
+        const {net, width, height} = this.props;
 
         return (
-            <svg transform={`translate(${x}, ${y})`} width={width} height={height}>
+            <CanvasContext.Provider value={{zoom: this.state.zoom}}>
+            <ReactSVGPanZoom width={width} height={height} onZoom={this.onZoom} background="#f00">
+            <svg width={width} height={height}>
                 <defs>
                     <marker id={ArcType.SINGLE_HEADED} viewBox="0 0 10 10" refX="8" refY="5"
                             markerWidth="10" markerHeight="8"
@@ -48,6 +56,8 @@ export class Net extends React.Component<any, any> {
                 {this.renderPlaces(net.places)}
                 {this.renderTransitions(net.transitions)}
             </svg>
+            </ReactSVGPanZoom>
+            </CanvasContext.Provider>
         );
     }
 
@@ -142,5 +152,9 @@ export class Net extends React.Component<any, any> {
             );
         }
         return results;
+    }
+
+    protected onZoom = (e: any) => {
+        this.setState({zoom: e.a});
     }
 }

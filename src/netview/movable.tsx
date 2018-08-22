@@ -3,6 +3,7 @@ import * as React from 'react'
 import {PositionChanged} from '../events'
 import {Dict, Position, Size} from '../types'
 
+import {CanvasContext} from './net'
 
 export interface MouseTriggers {
     triggerMouseDown?: (e: React.MouseEvent) => void;
@@ -36,7 +37,8 @@ type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
 export function createMovable<ComponentProps extends BaseComponentProps, DataType extends {}>(
     Component: React.ComponentType<ComponentProps>) {
 
-    return class extends React.Component<Props<DataType>, Position> {
+
+    class Moveable extends React.Component<Props<DataType> & {zoom: number}, Position> {
 
         private mouseStartPosition: Position | null = null;
 
@@ -86,8 +88,8 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
             }
             e.preventDefault();
 
-            const dx = e.pageX - this.mouseStartPosition.x;
-            const dy = e.pageY - this.mouseStartPosition.y;
+            const dx = (e.pageX - this.mouseStartPosition.x) / this.props.zoom;
+            const dy = (e.pageY - this.mouseStartPosition.y) / this.props.zoom;
 
             const {x, y, paths, triggerPositionChanged} = this.props;
 
@@ -102,6 +104,16 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
 
             this.mouseStartPosition.x = e.pageX;
             this.mouseStartPosition.y = e.pageY;
+        }
+    }
+
+    return class extends React.Component<Props<DataType>, any> {
+        public render() {
+            return (
+                <CanvasContext.Consumer>
+                    {({zoom}) => <Moveable {...this.props} zoom={zoom}/>}
+                </CanvasContext.Consumer>
+            );
         }
     }
 }
