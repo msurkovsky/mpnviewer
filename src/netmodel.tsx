@@ -23,7 +23,7 @@ export interface TransitionData {
 export enum ArcType {
     SINGLE_HEADED = "singleheaded",
     DOUBLE_HEADED = "doubleheaded",
-    SINGLE_HEADED_RO = "doubleheadedro",
+    SINGLE_HEADED_RO = "singleheadedro",
     DOUBLE_HEADED_RO = "doubleheadedro",
 }
 
