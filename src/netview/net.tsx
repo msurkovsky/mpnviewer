@@ -4,30 +4,44 @@ import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
 import {ArcType} from '../netmodel';
 import * as Utils from '../utils';
 
-import {Position, Size} from '../types'
+import {Position, Size, Vector2d} from '../types'
 import {Arc} from './arc'
 import {Place} from './place';
 import {Transition} from './transition';
 
-const defaultZoom = 1.0;
+const defaultState = {
+    canvasContext: {
+        zoom: 1.0,
+        pan: {x: 0.0, y: 0.0},
+    }
+};
 
-export const CanvasContext = React.createContext({zoom: defaultZoom});
+export interface CanvasCtxData {
+    zoom: number;
+    pan: Vector2d;
+}
+
+interface State {
+    canvasContext: CanvasCtxData
+}
+
+export const CanvasContext = React.createContext({...defaultState.canvasContext});
 
 export class Net extends React.Component<any, any> {
 
-    public state = { zoom: defaultZoom };
+    public state = {...defaultState};
 
     public render() {
         const {net, width, height} = this.props;
 
         return (
-            <CanvasContext.Provider value={{zoom: this.state.zoom}}>
+            <CanvasContext.Provider value={this.state.canvasContext}>
             <ReactSVGPanZoom
                 width={width} height={height}
                 background="#ffe"
                 SVGBackground="#ffe"
                 miniaturePosition={POSITION_NONE}
-                detectAutoPan={false}
+                onPan={this.onPan}
                 onZoom={this.onZoom}>
 
                 <svg width={width} height={height}>
@@ -163,8 +177,20 @@ export class Net extends React.Component<any, any> {
         return results;
     }
 
-    protected onZoom = (e: any) => {
+    protected onZoom = (evt: any) => {
         // `a` keeps the current zoom value
-        this.setState({zoom: e.a});
+        this.setState(({canvasContext: oldCC}: State) => ({canvasContext: {
+            pan: {x: evt.e, y: evt.f}, // zoom changes the pan too
+                                       // (zoom to the mouse pointer)
+            zoom: evt.a,
+        }}));
+    }
+
+    protected onPan = (evt: any) => {
+        // e->x and f->y are the pan coordinates
+        this.setState(({canvasContext: oldCC}: State) => ({canvasContext: {
+            ...oldCC,
+            pan: {x: evt.e, y: evt.f}
+        }}));
     }
 }

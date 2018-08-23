@@ -1,9 +1,10 @@
 import * as React from 'react'
+import * as Utils from '../utils'
 
 import {PositionChanged} from '../events'
-import {Dict, Position, Size} from '../types'
+import {Dict, Position, Size, Vector2d} from '../types'
 
-import {CanvasContext} from './net'
+import {CanvasContext, CanvasCtxData} from './net'
 
 export interface MouseTriggers {
     triggerMouseDown?: (e: React.MouseEvent) => void;
@@ -38,9 +39,9 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
     Component: React.ComponentType<ComponentProps>) {
 
 
-    class Moveable extends React.Component<Props<DataType> & {zoom: number}, Position> {
+    class Moveable extends React.Component<Props<DataType> & CanvasCtxData, Position> {
 
-        private mouseStartPosition: Position | null = null;
+        private pointerElementDiff: Vector2d | null = null;
 
         public render() {
             const {paths, data,
@@ -64,10 +65,11 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
         }
 
         private handleMouseDown = (e: React.MouseEvent) => {
-            this.mouseStartPosition = {
-                x: e.pageX,
-                y: e.pageY,
-            };
+            const {x, y, zoom, pan} = this.props;
+            this.pointerElementDiff = Utils.v2dSub({
+                x: (e.clientX - pan.x) / zoom,
+                y: (e.clientY - pan.y) / zoom
+            }, { x, y });
 
             document.addEventListener('mousemove', this.handleMoving);
         }
@@ -75,7 +77,7 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
         private handleMouseUp = (e: React.MouseEvent) => {
             e.preventDefault();
 
-            this.mouseStartPosition = null;
+            this.pointerElementDiff = null;
             document.removeEventListener('mousemove', this.handleMoving);
         }
 
@@ -83,27 +85,25 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
             // This handler is registered as an event on DOM =>
             // that's why is not specified as React.MouseEvent
 
-            if (this.mouseStartPosition === null) {
+            if (this.pointerElementDiff === null) {
                 return;
             }
             e.preventDefault();
 
-            const dx = (e.pageX - this.mouseStartPosition.x) / this.props.zoom;
-            const dy = (e.pageY - this.mouseStartPosition.y) / this.props.zoom;
+            const {x, y, pan, zoom, paths, triggerPositionChanged} = this.props;
 
-            const {x, y, paths, triggerPositionChanged} = this.props;
+            const newPos = Utils.v2dSub({
+                x: (e.clientX - pan.x) / zoom,
+                y: (e.clientY - pan.y) / zoom}, this.pointerElementDiff);
 
             if (triggerPositionChanged) { // trigger position changed if registered
 
                 triggerPositionChanged({
                     path: paths.base.concat(paths.position),
-                    new: {x: x+dx, y: y+dy},
+                    new: newPos,
                     old: {x, y},
                 });
             }
-
-            this.mouseStartPosition.x = e.pageX;
-            this.mouseStartPosition.y = e.pageY;
         }
     }
 
@@ -111,7 +111,7 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
         public render() {
             return (
                 <CanvasContext.Consumer>
-                    {({zoom}) => <Moveable {...this.props} zoom={zoom}/>}
+                    {({zoom, pan}) => <Moveable {...this.props} zoom={zoom} pan={pan} />}
                 </CanvasContext.Consumer>
             );
         }
