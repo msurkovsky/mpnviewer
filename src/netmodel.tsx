@@ -1,8 +1,16 @@
-import {DataType, Dict, Position, Size} from './types'
+import {Dict, Position, Size} from './types'
+
+export enum AMT {
+    UNIT = "unit",
+    BOOL = "bool",
+    INTEGER = "integer",
+}
+
+export type DataType = AMT | string;
 
 export enum PlaceDataLayout {
-    Queue = "queue",
-    Multiset = "multiset",
+    QUEUE = "queue",
+    MULTISET = "multiset",
 }
 
 export interface PlaceData {
@@ -34,31 +42,33 @@ export interface ArcData {
     type: ArcType;
 }
 
-export enum NetElement {
-    Place,
-    Transition
+interface CommonAttributes {
+    position: Position;
+    size: Size;
+    relatedPositions?: Dict<Position>;
+}
+export interface PlaceElement extends CommonAttributes {
+    data: PlaceData;
+}
+
+export interface TransitionElement extends CommonAttributes {
+    data: TransitionData,
+}
+
+export type NetElement = PlaceElement | TransitionElement;
+
+export interface ArcElement {
+    data: ArcData
+    // Source and destination should be used to compute the start and
+    // end position of an arrow.
+    startElementPath: string[];
+    endElementPath: string[];
+    innerPoints: Position[]; // these are fixed and given (also relative to the parent)
+    relatedPositions?: Dict<Position>; // position of arc's expression(s)
 }
 
 export interface Net {
-    places: Dict<{
-        data: PlaceData;
-        position: Position;
-        size: Size;
-        relatedPositions?: Dict<Position>;
-    }>;
-    transitions: Dict<{
-        data: TransitionData,
-        position: Position;
-        size: Size;
-        relatedPositions?: Dict<Position>;
-    }>;
-    arcs: Array<{
-        data: ArcData
-        // Source and destination should be used to compute the start and
-        // end position of an arrow.
-        startElementPath: string[];
-        endElementPath: string[];
-        innerPoints: Position[]; // these are fixed and given (also relative to the parent)
-        relatedPositions?: Dict<Position>; // position of arc's expression(s)
-    }>;
+    places: Dict<PlaceElement>;
+    transitions: Dict<TransitionElement>;
+    arcs: ArcElement[];
 }

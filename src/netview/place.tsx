@@ -28,7 +28,7 @@ class CorePlace extends React.PureComponent<Props> {
                triggerPositionChanged} = this.props;
 
         const radius = height / 2;
-        const cssDataLayout = dataLayout === PlaceDataLayout.Multiset? "bPlace" : "qPlace";
+        const cssDataLayout = dataLayout === PlaceDataLayout.MULTISET? "bPlace" : "qPlace";
 
         return (
             <g>
