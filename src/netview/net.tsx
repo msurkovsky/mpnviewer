@@ -30,6 +30,7 @@ export const CanvasContext = React.createContext({...defaultState.canvasContext}
 export class Net extends React.Component<any, any> {
 
     public state = {...defaultState};
+    public viewerInst: any = null;
 
     public render() {
         const {net, width, height, toolbarState, triggerChangeValue, triggerChangeTool} = this.props;
@@ -37,10 +38,12 @@ export class Net extends React.Component<any, any> {
         return (
             <CanvasContext.Provider value={this.state.canvasContext}>
             <ReactSVGPanZoom
+                ref={(viewerInst: any) => {this.viewerInst = viewerInst}}
                 width={width} height={height}
                 background="#ffe"
                 SVGBackground="#ffe"
                 miniaturePosition={POSITION_NONE}
+                toolbarPosition={POSITION_NONE}
                 value={toolbarState.value} onChangeValue={triggerChangeValue}
                 tool={toolbarState.tool} onChangeTool={triggerChangeTool}
                 onPan={this.onPan}

@@ -1,4 +1,4 @@
-import {Dict, Position, Size} from './types'
+import {Dict, Omit, Position, Size} from './types'
 
 export enum AMT {
     UNIT = "unit",
@@ -47,6 +47,7 @@ interface CommonAttributes {
     size: Size;
     relatedPositions?: Dict<Position>;
 }
+
 export interface PlaceElement extends CommonAttributes {
     data: PlaceData;
 }
@@ -56,6 +57,8 @@ export interface TransitionElement extends CommonAttributes {
 }
 
 export type NetElement = PlaceElement | TransitionElement;
+
+export type UnpositionedNetElement = Omit<NetElement, "position">
 
 export interface ArcElement {
     data: ArcData

@@ -1,7 +1,5 @@
-export type AMT = "Unit" | "Bool" | "Integer";
-export type DataType = AMT | string;
-
 export interface Dict<T> { [key: string]: T };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export interface Position {
     x: number;

@@ -1,5 +1,5 @@
 import {lensPath, over} from 'ramda'
-import {Net as TNet} from './netmodel'
+import {Net as TNet, NetElement} from './netmodel'
 import {BBox, Circle, Line, Position, Size} from './types'
 
 const defaultPositions = {
@@ -18,6 +18,11 @@ export const getId = ((id: number) => (): string => {
     return (id++).toString();
 })(0);
 
+
+export function fillElementDefaultRelatedPosition(element: NetElement, category: string) {
+    const relatedPositions = defaultPositions[category](element.size);
+    return {...element, relatedPositions};
+}
 
 export function fillDefaultRelatedPositions(net: TNet) {
 

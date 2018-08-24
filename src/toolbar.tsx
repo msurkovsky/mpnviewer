@@ -1,70 +1,84 @@
 import * as React from 'react';
-import {TOOL_AUTO, TOOL_NONE, TOOL_PAN, TOOL_ZOOM_IN, TOOL_ZOOM_OUT} from 'react-svg-pan-zoom'
+import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
 import {Button, ButtonGroup, ButtonToolbar} from 'reactstrap';
 
-import {emptyPlace, startAddNetElement} from './features/addnetelements'
+import {emptyPlace, emptyTransition, startAddingNetElement} from './features/addnetelements'
+import {UnpositionedNetElement} from './netmodel'
 
+export enum NetTool {
+    NONE = "none",
+    ADD_PLACE = "adding-place",
+    ADD_TRANSITION = "adding-transitin",
+    ADD_ARC = "adding-arc",
+}
 
 interface Props {
     activeTool: any;
+    activeNetTool: NetTool,
     triggerFitNet: (evt: any) => void;
-    triggerToolChange: (tool: any) => (evt: any) => void;
+    triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
     triggerAddPlace: (evt: any) => void;
+    triggerAddTransition: (evt: any) => void;
 }
 
 export class Toolbar extends React.Component<Props, any> {
 
+    private viewerInst: {ViewerDOM: any, state: any};
+
+    public setViewer (viewer: {ViewerDOM: any, state: any}) {
+        this.viewerInst = viewer;
+    }
+
     public render () {
-        const {activeTool, triggerToolChange} = this.props;
+        const {activeTool, activeNetTool,
+               triggerChangeToolbarTools,
+               triggerAddPlace, triggerAddTransition} = this.props;
 
-        const addPlace = (evt: React.MouseEvent) => {
-            triggerToolChange(TOOL_NONE)(evt);
+        const addNetElement =
+            (netTool: NetTool,
+            getElement: () => UnpositionedNetElement,
+             triggerAddElement: (evt: any) => void) =>
+                (evt: React.MouseEvent) => {
 
-            const p = emptyPlace();
-            const position = {
-                x: evt.clientX + p.size.width / 2,
-                y: evt.clientY + p.size.height / 2
-            };
-            startAddNetElement({...p, position})(evt);
+            const elem = getElement();
+
+            startAddingNetElement(
+                elem,
+                this.viewerInst,
+                triggerAddElement,
+                triggerChangeToolbarTools,
+            )(evt);
         };
+
+        const toggleAddArc = (evt: React.MouseEvent) => {
+            triggerChangeToolbarTools(TOOL_NONE, NetTool.ADD_ARC);
+        };
+
+        const autoTool = () => {triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE)};
 
         return (
           <ButtonToolbar>
-            <ButtonGroup>
-                <Button
-                    onClick={triggerToolChange(TOOL_AUTO)}
-                    active={activeTool === TOOL_AUTO}
-                >
-                    Select
-                </Button>
-                <Button
-                    onClick={triggerToolChange(TOOL_PAN)}
-                    active={activeTool === TOOL_PAN}
-                >
-                    Move
-                </Button>
-                <Button
-                    onClick={triggerToolChange(TOOL_ZOOM_IN)}
-                    active={activeTool === TOOL_ZOOM_IN}
-                >
-                    Zoom-in
-                </Button>
-                <Button
-                    onClick={triggerToolChange(TOOL_ZOOM_OUT)}
-                    active={activeTool === TOOL_ZOOM_OUT}
-                >
-                    Zoom-out
-                </Button>
-            </ButtonGroup>
+            <Button
+                onClick={autoTool}
+                active={activeTool === TOOL_AUTO}>
+                Select
+            </Button>
 
             <ButtonGroup>
-                <Button onClick={addPlace}>
+                <Button onClick={addNetElement(NetTool.ADD_PLACE,
+                                               emptyPlace,
+                                               triggerAddPlace)}
+                        active={activeNetTool === NetTool.ADD_PLACE}>
                     Place
                 </Button>
-                <Button>
+                <Button onClick={addNetElement(NetTool.ADD_TRANSITION,
+                                               emptyTransition,
+                                               triggerAddTransition)}
+                        active={activeNetTool === NetTool.ADD_TRANSITION}>
                     Transition
                 </Button>
-                <Button>
+                <Button onClick={toggleAddArc}
+                        active={activeNetTool === NetTool.ADD_ARC}>
                     Arc
                 </Button>
             </ButtonGroup>
