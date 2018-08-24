@@ -6,6 +6,79 @@ import {Dict, Position, Size, Vector2d} from '../types'
 
 import {CanvasContext, CanvasCtxData} from './net'
 
+// Movable binders ==============================================================
+
+let activeId: string | null = null;
+let pointerElementDiff: Vector2d | null = null;
+const moveInfo: {[key: string]: {
+    x: number;
+    y: number;
+    zoom: number;
+    pan: Position;
+    paths: {[key: string]: string[]};
+    triggerPositionChanged: (evt: PositionChanged) => void;
+} | null} = {};
+
+const handleMoving = (e: MouseEvent) => {
+    if (activeId === null) {
+        return;
+    }
+
+    const info = moveInfo[activeId];
+    if (pointerElementDiff === null || info === null) {
+        return;
+    }
+    e.preventDefault();
+
+    const {x, y, zoom, pan, paths, triggerPositionChanged} = info;
+
+    const newPos = Utils.v2dSub({
+        x: (e.clientX - pan.x) / zoom,
+        y: (e.clientY - pan.y) / zoom}, pointerElementDiff);
+
+    triggerPositionChanged({
+        path: paths.base.concat(paths.position),
+        new: newPos,
+        old: {x, y},
+    });
+}
+
+export const onMovableMouseDown = (id: string) => (e: React.MouseEvent) => {
+
+    e.preventDefault();
+    e.stopPropagation(); // When click on moveable stop propagation -> avoid paning canvas
+
+    const info = moveInfo[id];
+    if (info === null) {
+        return;
+    }
+    activeId = id;
+
+    const {x, y, zoom, pan} = info;
+
+    pointerElementDiff = Utils.v2dSub({
+        x: (e.clientX - pan.x) / zoom,
+        y: (e.clientY - pan.y) / zoom
+    }, { x, y });
+
+    document.addEventListener('mousemove', handleMoving);
+}
+
+export const onMovableMouseUp = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (handleMoving !== null) {
+        document.removeEventListener('mousemove', handleMoving);
+    }
+    activeId = null;
+    // NOTE: do not remove moveInfo[activeId]; need to keep the last info
+    // otherwise it would have to be passed by `onMovableMouseDown`
+    pointerElementDiff = null;
+}
+
+
+// Moveable HOC ================================================================
+
 export interface MouseTriggers {
     triggerMouseDown?: (e: React.MouseEvent) => void;
     triggerMouseUp?: (e: React.MouseEvent) => void;
@@ -35,18 +108,21 @@ type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
     relatedPositions?: Dict<Position>;
 };
 
-export function createMovable<ComponentProps extends BaseComponentProps, DataType extends {}>(
+export function createMovable<ComponentProps extends BaseComponentProps,
+                              DataType extends {id: string}>(
     Component: React.ComponentType<ComponentProps>) {
 
 
     class Moveable extends React.Component<Props<DataType> & CanvasCtxData, Position> {
 
-        private pointerElementDiff: Vector2d | null = null;
-
         public render() {
             const {paths, data,
                    parentPosition: {x: px, y: py}, x, y, width, height,
-                   relatedPositions, triggerPositionChanged} = this.props;
+                   relatedPositions, zoom, pan,
+                   triggerPositionChanged=(() => {/* empty function */})} = this.props;
+
+            moveInfo[data.id] = {x, y, zoom, pan, paths, triggerPositionChanged};
+            const handleMouseDown = onMovableMouseDown(data.id);
 
             return (
                 <Component
@@ -57,53 +133,11 @@ export function createMovable<ComponentProps extends BaseComponentProps, DataTyp
                     width={width}
                     height={height}
                     relatedPositions={relatedPositions}
-                    triggerMouseDown={this.handleMouseDown}
-                    triggerMouseUp={this.handleMouseUp}
+                    triggerMouseDown={handleMouseDown}
+                    triggerMouseUp={onMovableMouseUp}
                     triggerPositionChanged={triggerPositionChanged}
                 />
             );
-        }
-
-        private handleMouseDown = (e: React.MouseEvent) => {
-            const {x, y, zoom, pan} = this.props;
-            this.pointerElementDiff = Utils.v2dSub({
-                x: (e.clientX - pan.x) / zoom,
-                y: (e.clientY - pan.y) / zoom
-            }, { x, y });
-
-            document.addEventListener('mousemove', this.handleMoving);
-        }
-
-        private handleMouseUp = (e: React.MouseEvent) => {
-            e.preventDefault();
-
-            this.pointerElementDiff = null;
-            document.removeEventListener('mousemove', this.handleMoving);
-        }
-
-        private handleMoving = (e: MouseEvent) => {
-            // This handler is registered as an event on DOM =>
-            // that's why is not specified as React.MouseEvent
-
-            if (this.pointerElementDiff === null) {
-                return;
-            }
-            e.preventDefault();
-
-            const {x, y, pan, zoom, paths, triggerPositionChanged} = this.props;
-
-            const newPos = Utils.v2dSub({
-                x: (e.clientX - pan.x) / zoom,
-                y: (e.clientY - pan.y) / zoom}, this.pointerElementDiff);
-
-            if (triggerPositionChanged) { // trigger position changed if registered
-
-                triggerPositionChanged({
-                    path: paths.base.concat(paths.position),
-                    new: newPos,
-                    old: {x, y},
-                });
-            }
         }
     }
 
