@@ -32,7 +32,7 @@ export class Net extends React.Component<any, any> {
     public state = {...defaultState};
 
     public render() {
-        const {net, width, height} = this.props;
+        const {net, width, height, toolbarState, triggerChangeValue, triggerChangeTool} = this.props;
 
         return (
             <CanvasContext.Provider value={this.state.canvasContext}>
@@ -41,6 +41,8 @@ export class Net extends React.Component<any, any> {
                 background="#ffe"
                 SVGBackground="#ffe"
                 miniaturePosition={POSITION_NONE}
+                value={toolbarState.value} onChangeValue={triggerChangeValue}
+                tool={toolbarState.tool} onChangeTool={triggerChangeTool}
                 onPan={this.onPan}
                 onZoom={this.onZoom}>
 
