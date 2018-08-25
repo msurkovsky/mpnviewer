@@ -3,7 +3,7 @@ import * as React from 'react';
 import {Position} from '../types';
 import {createMovable, MouseTriggers} from './movable';
 
-interface Data {text: string}
+interface Data {id: string, text: string}
 type Props = Data & Position & MouseTriggers;
 
 class CoreTextElement extends React.PureComponent<Props> {

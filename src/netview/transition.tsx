@@ -21,7 +21,7 @@ class CoreTransition extends React.PureComponent<Props> {
 
     public render() {
 
-        const {paths, name, guard, x, y, width, height, relatedPositions,
+        const {paths, id, name, guard, x, y, width, height, relatedPositions,
                triggerMouseDown, triggerMouseUp,
                triggerPositionChanged} = this.props;
 
@@ -32,7 +32,7 @@ class CoreTransition extends React.PureComponent<Props> {
                     base: [...paths.base],
                     position: ["relatedPositions", "guard"]
                 }}
-                data={{ text: `[${guard.join(', ')}]` }}
+                data={{id: `${id}-guard`, text: `[${guard.join(', ')}]` }}
                 parentPosition={{x, y}}
                 x={relatedPositions.guard.x}
                 y={relatedPositions.guard.y}

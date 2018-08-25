@@ -23,7 +23,7 @@ class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, type, initExpr, dataLayout, x, y, width, height, relatedPositions,
+        const {paths, name, id, type, initExpr, dataLayout, x, y, width, height, relatedPositions,
                triggerMouseDown, triggerMouseUp,
                triggerPositionChanged} = this.props;
 
@@ -40,7 +40,7 @@ class CorePlace extends React.PureComponent<Props> {
                         base: [...paths.base],
                         position: ["relatedPositions", "type"],
                     }}
-                    data={{text: type}}
+                    data={{id: `${id}-type`, text: type}}
                     parentPosition={{x, y}}
                     x={relatedPositions.type.x}
                     y={relatedPositions.type.y}
@@ -50,7 +50,7 @@ class CorePlace extends React.PureComponent<Props> {
                         base: [...paths.base],
                         position: ["relatedPositions", "initExpr"],
                     }}
-                    data={{text: initExpr}}
+                    data={{id: `${id}-initExpr`, text: initExpr}}
                     parentPosition={{x, y}}
                     x={relatedPositions.initExpr.x}
                     y={relatedPositions.initExpr.y}
