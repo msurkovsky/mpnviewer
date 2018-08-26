@@ -12,6 +12,8 @@ export class Arc extends React.PureComponent<Props> {
         return (
             <polyline
                 className="arc"
+                fill="none"
+                strokeLinejoin="round"
                 points={points.map(({x,y}) => ([x, y])).join(" ")}
                 markerEnd={`url(#${type})`} />
         );
