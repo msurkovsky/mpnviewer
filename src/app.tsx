@@ -2,14 +2,12 @@ import {lensPath, over} from 'ramda';
 import * as React from 'react';
 import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom'
 
-// TODO: remove these import in the future;
-import {ArcElement, ArcType, NetElement, PlaceDataLayout} from './netmodel';
+import {ArcElement, NetElement} from './netmodel';
 import {Net} from './netview';
 
 import {PositionChanged} from './events';
 import {NetTool, Toolbar} from './toolbar';
-// NOTE: stay with just fillDefaultRelatedPositions
-import {fillDefaultRelatedPositions, fillElementDefaultRelatedPosition, getId} from './utils';
+import {fillDefaultRelatedPositions, fillElementDefaultRelatedPosition} from './utils';
 
 const state = {
     canvasToolbar: {
@@ -20,57 +18,11 @@ const state = {
         value: null,
         tool: NetTool.NONE,
     },
-    net: fillDefaultRelatedPositions({ // TODO: REMOVE -> start with empty net
-        places: {
-            "a": {
-                data: {
-                    id: getId(),
-                    name: "a",
-                    type: "Bool",
-                    initExpr: "",
-                    dataLayout: PlaceDataLayout.QUEUE,
-                },
-                position: { x: 50, y: 50 },
-                size: { width: 40, height: 40 },
-            },
-            "b": {
-                data: {
-                    id: getId(),
-                    name: "b",
-                    type: "Integer",
-                    initExpr: "3",
-                    dataLayout: PlaceDataLayout.MULTISET,
-                },
-                position: { x: 120, y: 120 },
-                size: { width: 80, height: 50 },
-            },
-        },
-        transitions: {
-            "t1": {
-                data: {
-                    id: getId(),
-                    name: "t1",
-                    guard: ["x !== null"],
-                },
-                position: { x: 200, y: 200 },
-                size: { width: 70, height: 40 },
-            }
-        },
-        arcs: {
-            "a1": {
-                data: {
-                    /* source: */
-                    /* destination: */
-                    id: "a1",
-                    expression: "",
-                    type: ArcType.SINGLE_HEADED_RO
-                },
-                startElementPath: ["transitions", "t1"],
-                endElementPath: ["places", "b"],
-                innerPoints: []
-            }
-        },
-    })
+    net: {
+        places: {},
+        transitions: {},
+        arcs: {},
+    },
 };
 
 export class App extends React.Component<any, any> { // TODO: change `any` to specific types
@@ -115,6 +67,8 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerChangeToolbarTools={this.onChangeToolbarTools}
                 triggerAddPlace={this.onAddNetElement("places")}
                 triggerAddTransition={this.onAddNetElement("transitions")}
+                triggerSaveNet={this.onSaveNet}
+                triggerLoadNet={this.onLoadNet}
             />
             </div>
         );
@@ -190,5 +144,36 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
             value: fitSelection(canvasToolbar.value, 40, 40, 200, 200),
             tool: canvasToolbar.tool,
         }}));
+    }
+
+    private onSaveNet = (evt: any) => {
+
+        const data = JSON.stringify(this.state.net);
+        const blob = new Blob( [ data ], {
+            type: 'application/octet-stream'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'mpnet.json');
+
+        const event = document.createEvent('MouseEvents');
+        event.initMouseEvent(
+            'click', true, true, window, 1, 0, 0, 0, 0,
+            false, false, false, false, 0, null);
+        link.dispatchEvent(event);
+    }
+
+    private onLoadNet = (evt: any) => {
+        const fr = new FileReader();
+        fr.onload = () => {
+            const data = fr.result as string;
+            const net = JSON.parse(data);
+            this.setState(() => {
+                return {net: fillDefaultRelatedPositions(net)};
+            });
+        };
+        fr.readAsText(evt.target.files[0]);
     }
 }

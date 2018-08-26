@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
-import {Button, ButtonGroup, ButtonToolbar} from 'reactstrap';
+import {Button, ButtonGroup, ButtonToolbar, Input} from 'reactstrap';
 
 import {emptyPlace, emptyTransition, startAddingNetElement} from './features/addnetelements'
 import {UnpositionedNetElement} from './netmodel'
@@ -24,6 +24,8 @@ interface Props {
     triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
     triggerAddPlace: (evt: any) => void;
     triggerAddTransition: (evt: any) => void;
+    triggerSaveNet: (evt: any) => void;
+    triggerLoadNet: (evt: any) => void;
 }
 
 export class Toolbar extends React.Component<Props, any> {
@@ -35,9 +37,13 @@ export class Toolbar extends React.Component<Props, any> {
     }
 
     public render () {
-        const {activeTool, activeNetTool,
-               triggerChangeToolbarTools,
-               triggerAddPlace, triggerAddTransition} = this.props;
+        const {
+            activeTool, activeNetTool,
+            triggerChangeToolbarTools,
+            triggerAddPlace, triggerAddTransition,
+            triggerSaveNet,
+            triggerLoadNet,
+        } = this.props;
 
         const addNetElement =
             (netTool: NetTool,
@@ -86,6 +92,14 @@ export class Toolbar extends React.Component<Props, any> {
                         active={activeNetTool === NetTool.ADD_ARC}>
                     Arc
                 </Button>
+            </ButtonGroup>
+
+            <ButtonGroup>
+                <Button onClick={triggerSaveNet}>
+                    Save MP net
+                </Button>
+
+                <Input id="loadMPNet" type="file" onChange={triggerLoadNet}/>
             </ButtonGroup>
           </ButtonToolbar>
         );
