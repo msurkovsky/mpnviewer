@@ -1,4 +1,5 @@
 import {lensPath, over} from 'ramda'
+import * as React from 'react'
 import {Net as TNet, NetElement} from './netmodel'
 import {BBox, Circle, Line, Position, Size} from './types'
 
@@ -52,6 +53,10 @@ export function fillDefaultRelatedPositions(net: TNet) {
     newNet = fill(newNet, "places");
     newNet = fill(newNet, "transitions");
     return newNet;
+}
+
+export function getPosition(evt: React.MouseEvent | MouseEvent): Position {
+    return {x: evt.clientX, y: evt.clientY};
 }
 
 export function computeCenter(bbox: BBox): Position {
