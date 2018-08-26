@@ -17,7 +17,7 @@ const defaultPositions = {
 
 export const getId = ((id: number) => (): string => {
     return (id++).toString();
-})(0);
+})(new Date().getTime());
 
 
 export function fillElementDefaultRelatedPosition(element: NetElement, category: string) {
