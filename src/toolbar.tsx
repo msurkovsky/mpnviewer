@@ -12,6 +12,11 @@ export enum NetTool {
     ADD_ARC = "adding-arc",
 }
 
+export interface NetToolbarState {
+    tool: NetTool,
+    value: any
+}
+
 interface Props {
     activeTool: any;
     activeNetTool: NetTool,

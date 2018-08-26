@@ -38,6 +38,7 @@ export enum ArcType {
 export interface ArcData {
     /* source: PlaceData | TransitionData; */
     /* destination: PlaceData | TransitionData; */
+    id: string;
     expression: string;
     type: ArcType;
 }
@@ -70,8 +71,14 @@ export interface ArcElement {
     relatedPositions?: Dict<Position>; // position of arc's expression(s)
 }
 
+export type PartialArcElement = Omit<ArcElement, "endElementPath"> & {
+    endPosition: Position;
+};
+
+export type NetCategory = "places" | "transitions" | "arcs";
+
 export interface Net {
     places: Dict<PlaceElement>;
     transitions: Dict<TransitionElement>;
-    arcs: ArcElement[];
+    arcs: Dict<ArcElement | PartialArcElement>;
 }

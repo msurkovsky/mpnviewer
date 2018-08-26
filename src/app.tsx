@@ -3,7 +3,7 @@ import * as React from 'react';
 import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom'
 
 // TODO: remove these import in the future;
-import {ArcType, NetElement, PlaceDataLayout} from './netmodel';
+import {ArcElement, ArcType, NetElement, PlaceDataLayout} from './netmodel';
 import {Net} from './netview';
 
 import {PositionChanged} from './events';
@@ -17,7 +17,8 @@ const state = {
         tool: TOOL_AUTO,
     },
     netToolbar: {
-        tool: NetTool.NONE
+        value: null,
+        tool: NetTool.NONE,
     },
     net: fillDefaultRelatedPositions({ // TODO: REMOVE -> start with empty net
         places: {
@@ -55,17 +56,20 @@ const state = {
                 size: { width: 70, height: 40 },
             }
         },
-        arcs: [{
-            data: {
-                /* source: */
-                /* destination: */
-                expression: "",
-                type: ArcType.SINGLE_HEADED_RO
-            },
-            startElementPath: ["transitions", "t1"],
-            endElementPath: ["places", "b"],
-            innerPoints: []
-        }]
+        arcs: {
+            "a1": {
+                data: {
+                    /* source: */
+                    /* destination: */
+                    id: "a1",
+                    expression: "",
+                    type: ArcType.SINGLE_HEADED_RO
+                },
+                startElementPath: ["transitions", "t1"],
+                endElementPath: ["places", "b"],
+                innerPoints: []
+            }
+        },
     })
 };
 
@@ -89,10 +93,21 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
     }
 
     public render () {
-        const {net, canvasToolbar: ctState} = this.state;
+        const {net, canvasToolbar, netToolbar} = this.state;
 
         return (
             <div id="app">
+            <Net ref={(netInst) => {this.netInst = netInst}}
+                x={50} y={50} width={1000} height={500}
+                net={net}
+                canvasToolbar={canvasToolbar}
+                netToolbar={netToolbar}
+                triggerAddArc={this.onAddArc}
+                triggerRemoveElement={this.onRemoveElement}
+                triggerChangeValue={this.onChangeCanvasToolbarValue}
+                triggerChangeNetToolbarValue={this.onChangeNetToolbarValue}
+                triggerChangeToolbarTools={this.onChangeToolbarTools}
+                triggerPositionChanged={this.onPositionChanged} />
             <Toolbar ref={(toolbarInst) => {this.toolbarInst = toolbarInst}}
                 activeTool={this.state.canvasToolbar.tool}
                 activeNetTool={this.state.netToolbar.tool}
@@ -101,13 +116,6 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerAddPlace={this.onAddNetElement("places")}
                 triggerAddTransition={this.onAddNetElement("transitions")}
             />
-            <Net ref={(netInst) => {this.netInst = netInst}}
-                x={50} y={50} width={1000} height={500}
-                net={net}
-                toolbarState={ctState}
-                triggerChangeValue={this.onChangeToolbarValue}
-                triggerChangeToolbarTools={this.onChangeToolbarTools}
-                triggerPositionChanged={this.onPositionChanged} />
             </div>
         );
     }
@@ -122,16 +130,43 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         });
     }
 
+    private onAddArc = (arc: ArcElement) => {
+        this.setState(({net}: any) => {
+            const arcs = net.arcs;
+            arcs[arc.data.id] = arc;
+            return {
+                net: {...over(lensPath(["arcs"]), () => ({...arcs}), net)}
+            };
+        });
+    }
+
+    private onRemoveElement = (category: "places" | "transitions" | "arcs") => (id: string) => {
+        this.setState(({net}: any) => {
+            const elements = net[category];
+            delete elements[id];
+            return {
+                net: {...over(lensPath([category]), () => ({...elements}), net)}
+            };
+        });
+    }
+
     private onPositionChanged = (e: PositionChanged) => {
         this.setState(({net}: any) => ({
             net: {...over(lensPath(e.path), () => ({...e.new}), net)}
         }));
     }
 
-    private onChangeToolbarValue = (value: any) => {
+    private onChangeCanvasToolbarValue = (value: any) => {
         this.setState(({canvasToolbar}: any) => ({canvasToolbar: {
             value,
             tool: canvasToolbar.tool,
+        }}));
+    }
+
+    private onChangeNetToolbarValue = (value: any) => {
+        this.setState(({netToolbar}: any) => ({netToolbar: {
+            value,
+            tool: netToolbar.tool,
         }}));
     }
 
@@ -142,10 +177,10 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 tool: canvasTool,
             },
             netToolbar: {
+                value: netToolbar.value,
                 tool: netTool !== null ? netTool : netToolbar.tool
             }
         }));
-        console.log(this.state);
     }
 
     private onFitNet = (evt: any) => {

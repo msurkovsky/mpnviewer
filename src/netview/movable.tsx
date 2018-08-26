@@ -2,9 +2,11 @@ import * as React from 'react'
 import * as Utils from '../utils'
 
 import {PositionChanged} from '../events'
+import {ArcElement, NetCategory} from '../netmodel'
+import {NetToolbarState} from '../toolbar'
 import {Dict, Position, Size, Vector2d} from '../types'
 
-import {CanvasContext, CanvasCtxData} from './net'
+import {CanvasContext, CanvasCtxData, Viewer} from './net'
 
 // Movable binders ==============================================================
 
@@ -96,6 +98,11 @@ type BaseComponentProps = Position & Partial<Size> & MouseTriggers & PositionTri
         position: string[];
     };
     relatedPositions?: Dict<Position>;
+    viewerInst?: Viewer;
+    netToolbar?: NetToolbarState;
+    triggerChangeNetToolbarValue?: (value: any) => void;
+    triggerAddArc?: (arc: ArcElement) => void;
+    triggerRemoveElement?: (category: NetCategory) => (id: string) => void;
 };
 
 type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
@@ -106,6 +113,11 @@ type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
     data: T;
     parentPosition: Position;
     relatedPositions?: Dict<Position>;
+    viewerInst?: Viewer;
+    netToolbar?: NetToolbarState;
+    triggerChangeNetToolbarValue?: (value: any) => void;
+    triggerAddArc?: (arc: ArcElement) => void;
+    triggerRemoveElement?: (category: NetCategory) => (id: string) => void;
 };
 
 export function createMovable<ComponentProps extends BaseComponentProps,
@@ -119,6 +131,9 @@ export function createMovable<ComponentProps extends BaseComponentProps,
             const {paths, data,
                    parentPosition: {x: px, y: py}, x, y, width, height,
                    relatedPositions, zoom, pan,
+                   viewerInst,
+                   triggerAddArc, triggerRemoveElement,
+                   netToolbar, triggerChangeNetToolbarValue,
                    triggerPositionChanged=(() => {/* empty function */})} = this.props;
 
             moveInfo[data.id] = {x, y, zoom, pan, paths, triggerPositionChanged};
@@ -132,7 +147,12 @@ export function createMovable<ComponentProps extends BaseComponentProps,
                     y={py+y}
                     width={width}
                     height={height}
+                    viewerInst={viewerInst}
+                    netToolbar={netToolbar}
                     relatedPositions={relatedPositions}
+                    triggerAddArc={triggerAddArc}
+                    triggerRemoveElement={triggerRemoveElement}
+                    triggerChangeNetToolbarValue={triggerChangeNetToolbarValue}
                     triggerMouseDown={handleMouseDown}
                     triggerMouseUp={onMovableMouseUp}
                     triggerPositionChanged={triggerPositionChanged}
