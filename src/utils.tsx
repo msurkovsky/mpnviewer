@@ -194,27 +194,23 @@ export function rrectCollision ( // rounded rectangle collision
 
     let circleIntersectT: Array<number | null> = [];
     if (r > 0) { // compute rounded corners
-        if (bbox.width === bbox.height && r === (bbox.width / 2)) { // circle
-            circleIntersectT = [1 / Math.sqrt(v2dAddComponents(v2dSquare(l1.u)))];
-        } else { // rounded rectangle
-            const circles = [
-                // top-right
-                {c: {x: bbox.x + bbox.width - r, y: bbox.y + r},
-                 r: r + tolerance},
-                // bottom-right
-                {c: {x: bbox.x + bbox.width - r, y: bbox.y + bbox.height - r},
-                 r: r + tolerance},
-                // bottom-left
-                {c: {x: bbox.x + r, y: bbox.y + bbox.height - r},
-                 r: r + tolerance},
-                // top-left
-                {c: {x: bbox.x + r, y: bbox.y + r},
-                 r: r + tolerance}
-            ];
+        const circles = [
+            // top-right
+            {c: {x: bbox.x + bbox.width - r, y: bbox.y + r},
+                r: r + tolerance},
+            // bottom-right
+            {c: {x: bbox.x + bbox.width - r, y: bbox.y + bbox.height - r},
+                r: r + tolerance},
+            // bottom-left
+            {c: {x: bbox.x + r, y: bbox.y + bbox.height - r},
+                r: r + tolerance},
+            // top-left
+            {c: {x: bbox.x + r, y: bbox.y + r},
+                r: r + tolerance}
+        ];
 
-            const fLCI = lineCircleIntersectGetT(l1); // line-circle intersect
-            circleIntersectT = circles.map(fLCI);
-        }
+        const fLCI = lineCircleIntersectGetT(l1); // line-circle intersect
+        circleIntersectT = circles.map(fLCI);
     }
 
     const t = [...lineIntersectT,
