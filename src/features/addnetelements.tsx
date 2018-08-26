@@ -52,12 +52,9 @@ const addNetElement = (evt: React.MouseEvent) => {
     const {e: panX, f: panY, a: zoom} = viewerInst.state.value;
     const {width, height} = addingElem.size;
 
-    const position = { // TODO: the work with zoom is experimental;
-                            // why it works is unclear to me.
-                            // Moreover, it works only when etered to the
-                            // canvas from top side.
+    const position = {
         x: (evt.clientX - panX)/zoom - width/2,
-        y: evt.clientY - panY/zoom - 1.5*height,
+        y: (evt.clientY - panY)/zoom - height/2,
     };
 
     // somehow add the element into the net
