@@ -4,7 +4,7 @@ import {Button, Form, Input, Label} from 'reactstrap'
 import {TransitionData} from './netmodel'
 
 type Props = TransitionData & {
-    triggerChangesSubmit: (placeData: TransitionData) => void;
+    triggerChangesSubmit: (transData: TransitionData) => void;
 };
 
 export class TransitionSetting extends React.Component<Props, any> {

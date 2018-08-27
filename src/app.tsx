@@ -10,11 +10,15 @@ import {ArcData, ArcElement,
 import {Net} from './netview';
 
 import {PositionChanged} from './events';
-import {PlaceSetting} from './placesetting'
-import {TransitionSetting} from './transitionsetting'
+
+import {ArcSetting} from './arcsetting';
+import {PlaceSetting} from './placesetting';
+import {TransitionSetting} from './transitionsetting';
 
 import {NetTool, Toolbar} from './toolbar';
-import {fillDefaultRelatedPositions, fillElementDefaultRelatedPosition} from './utils';
+import {fillArcsDefaultRelatedPosition,
+        fillDefaultRelatedPositions,
+        fillElementDefaultRelatedPosition} from './utils';
 
 const state = {
     selected: {
@@ -59,19 +63,25 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
 
         let settingForm = null;
         if (selected.path !== null) {
-            console.log(selected.path);
             if (selected.path[0] === "places") {
                 const place = {...ramdaPath(selected.path, this.state.net)} as PlaceElement;
                 settingForm = <PlaceSetting
                     {...place.data}
-                    key={`setting-${place.data.id}`}
+                    key={`setting-place-${place.data.id}`}
                     triggerChangesSubmit={this.onChangeElement(selected.path)} />;
             } else if (selected.path[0] === "transitions") {
                 const transition = {...ramdaPath(
                     selected.path, this.state.net)} as TransitionElement;
                 settingForm = <TransitionSetting
                     {...transition.data}
-                    key={`setting-${transition.data.id}`}
+                    key={`setting-trans-${transition.data.id}`}
+                    triggerChangesSubmit={this.onChangeElement(selected.path)} />;
+            } else if (selected.path[0] === "arcs") {
+                const arc = {...ramdaPath(
+                    selected.path, this.state.net)} as ArcElement;
+                settingForm = <ArcSetting
+                    {...arc.data}
+                    key={`setting-arc${arc.data.id}`}
                     triggerChangesSubmit={this.onChangeElement(selected.path)} />;
             }
         }
@@ -120,7 +130,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
             const arcs = net.arcs;
             arcs[arc.data.id] = arc;
             return {
-                net: {...over(lensPath(["arcs"]), () => ({...arcs}), net)}
+                net: fillArcsDefaultRelatedPosition({...over(lensPath(["arcs"]), () => ({...arcs}), net)})
             };
         });
     }

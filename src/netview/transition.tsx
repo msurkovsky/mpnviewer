@@ -70,7 +70,6 @@ class CoreTransition extends React.PureComponent<Props> {
         }
 
         let guardElement = null;
-        console.log(guard);
         if (guard) {
             guardElement = <TextElement
                 paths={{

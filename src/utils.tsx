@@ -1,6 +1,6 @@
-import {lensPath, over} from 'ramda'
+import {lensPath, over, path as ramdaPath} from 'ramda'
 import * as React from 'react'
-import {Net as TNet, NetElement} from './netmodel'
+import {ArcElement, Net as TNet, NetElement} from './netmodel'
 import {BBox, Circle, Line, Position, Size} from './types'
 
 const defaultPositions = {
@@ -13,6 +13,9 @@ const defaultPositions = {
                              //       but have to find out how to propagate (anonymously)
                              //       other parameters to SVG elements from HOC
     }),
+    arcs: (startElemSize: Size) => ({
+        expression: {x: startElemSize.width + 5, y: startElemSize.height / 2 - 5}
+    })
 };
 
 export const getId = ((id: number) => (): string => {
@@ -23,6 +26,30 @@ export const getId = ((id: number) => (): string => {
 export function fillElementDefaultRelatedPosition(element: NetElement, category: string) {
     const relatedPositions = defaultPositions[category](element.size);
     return {...element, relatedPositions};
+}
+
+export function fillArcsDefaultRelatedPosition(net: TNet) {
+
+    for (const key of Object.keys(net.arcs)) {
+        const path = lensPath(["arcs", key]);
+        const arc = ramdaPath(["arcs", key], net) as ArcElement;
+
+        const startElem = ramdaPath(arc.startElementPath, net) as NetElement;
+        const arcDefaultPos = defaultPositions.arcs(startElem.size);
+        net = over(path, ({relatedPositions: defined, ...rest}) => {
+            const relatedPositions = {...defined};
+
+            for (const p of Object.keys(arcDefaultPos)) {
+                if (!relatedPositions[p]) {
+                    relatedPositions[p] =  arcDefaultPos[p];
+                }
+            }
+
+            return {...rest, relatedPositions};
+        }, net);
+    }
+    return net;
+   // TODO: contineue here
 }
 
 export function fillDefaultRelatedPositions(net: TNet) {
@@ -52,6 +79,7 @@ export function fillDefaultRelatedPositions(net: TNet) {
 
     newNet = fill(newNet, "places");
     newNet = fill(newNet, "transitions");
+    newNet = fillArcsDefaultRelatedPosition(newNet);
     return newNet;
 }
 

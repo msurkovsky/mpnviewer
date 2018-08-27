@@ -167,11 +167,15 @@ export class Net extends React.Component<any, any> {
             const endPosition = Utils.rrectCollision({...e.position, ...e.size}, prelastPos, r);
             const points = [startPosition, ...innerPoints, endPosition];
 
+            const basePath = ["arcs", key];
             arcComponents.push(
                 <Arc
-                   key={`${s.data.id}-${e.data.id}`}
-                   points={points}
-                   {...data}
+                    key={`${s.data.id}-${e.data.id}`}
+                    paths={{base: basePath}}
+                    points={points}
+                    triggerSelect={triggerSelect(basePath)}
+                    relatedPositions={{...arc.relatedPositions}}
+                    {...data}
                 />
             );
         }
