@@ -30,7 +30,7 @@ const handleMoving = (e: MouseEvent) => {
     if (pointerElementDiff === null || info === null) {
         return;
     }
-    e.preventDefault();
+    e.stopPropagation();
 
     const {x, y, zoom, pan, paths, triggerPositionChanged} = info;
 
@@ -46,9 +46,7 @@ const handleMoving = (e: MouseEvent) => {
 }
 
 export const onMovableMouseDown = (id: string) => (e: React.MouseEvent) => {
-
-    e.preventDefault();
-    e.stopPropagation(); // When click on moveable stop propagation -> avoid paning canvas
+    e.stopPropagation();
 
     const info = moveInfo[id];
     if (info === null) {
@@ -67,7 +65,7 @@ export const onMovableMouseDown = (id: string) => (e: React.MouseEvent) => {
 }
 
 export const onMovableMouseUp = (e: React.MouseEvent) => {
-    e.preventDefault();
+    e.stopPropagation();
 
     if (handleMoving !== null) {
         document.removeEventListener('mousemove', handleMoving);
