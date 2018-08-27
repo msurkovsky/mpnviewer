@@ -33,7 +33,7 @@ function arcEndPointMoving(evt: MouseEvent) {
     ctx.triggerAddArc(ctx.partialArc);
 }
 
-function arcAddNewEndPoint(evt: MouseEvent) {
+function arcAddNewEndPoint(evt: React.MouseEvent) {
     if (ctx === null) {
         return;
     }
@@ -68,6 +68,7 @@ export function startAddingArc(
     ctx = {viewerInst, partialArc, triggerAddArc, triggerRemoveArc, triggerChangeNetToolbarValue};
     viewerInst.ViewerDOM.addEventListener("mousemove", arcEndPointMoving);
     viewerInst.ViewerDOM.addEventListener("click", arcAddNewEndPoint);
+    viewerInst.ViewerDOM.addEventListener("contextmenu", cancelAddingArc);
     triggerChangeNetToolbarValue({value: {partialArcId: partialArc.data.id}});
 }
 
@@ -78,18 +79,35 @@ export function endAddingArc(path: string[]) {
 
     const {data, startElementPath, innerPoints} = ctx.partialArc;
     const fullArc = {
-        data: {...data},
+        data: {
+            ...data,
+            id: `${data.id}-full` // change id to safely remove
+                                  // partial arc after adding the full one
+        },
         startElementPath: [...startElementPath],
         // cut off the last element
         innerPoints: innerPoints.splice(0, innerPoints.length-1),
         endElementPath: [...path],
     };
-    ctx.triggerRemoveArc(ctx.partialArc.data.id);
     ctx.triggerAddArc(fullArc);
+    cancelAddingArc();
+}
+
+export function cancelAddingArc(evt?: React.MouseEvent) {
+    if (ctx === null) {
+        return;
+    }
+
+    if (evt) { // prevent default context menu
+        evt.preventDefault();
+    }
+
+    ctx.triggerRemoveArc(ctx.partialArc.data.id);
 
     ctx.triggerChangeNetToolbarValue(null);
     ctx.viewerInst.ViewerDOM.removeEventListener("mousemove", arcEndPointMoving);
     ctx.viewerInst.ViewerDOM.removeEventListener("click", arcAddNewEndPoint);
+    ctx.viewerInst.ViewerDOM.removeEventListener("contextmenu", cancelAddingArc);
     // remove context
     ctx = null;
 }
