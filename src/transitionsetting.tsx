@@ -13,7 +13,7 @@ export class TransitionSetting extends React.Component<Props, any> {
         super(props);
 
         const {name, guard, code} = this.props;
-        this.state = {name, guard, code};
+        this.state = {name, guard: guard || "" , code: code || ""};
     }
 
     public render() {
@@ -27,15 +27,16 @@ export class TransitionSetting extends React.Component<Props, any> {
         const onChange = (key: string) => (evt: any) => {
             const val = evt.target.value;
             this.setState(() => ({[key]: val}));
-            evt.preventDefault();
         };
 
         const onChangeGuard = (evt: any) => {
             const val = evt.target.value;
-            const guardList = val.split(',');
-            this.setState(() => ({
-                guard: guardList
-            }));
+            let guardList: string[] = [];
+            if (val !== "") { // split on empty string returns empty string,
+                              // hence the list is not empty
+                guardList = val.split(',');
+            }
+            this.setState(() => ({ guard: guardList }));
         }
 
         return (
