@@ -48,6 +48,7 @@ export class Net extends React.Component<any, any> {
     public render() {
         const {net, width, height,
                canvasToolbar, netToolbar,
+               triggerSelect,
                triggerAddArc, triggerRemoveElement,
                triggerChangeNetToolbarValue,
                triggerChangeValue, triggerChangeToolbarTools} = this.props;
@@ -64,7 +65,9 @@ export class Net extends React.Component<any, any> {
                 value={canvasToolbar.value} onChangeValue={triggerChangeValue}
                 tool={canvasToolbar.tool} onChangeTool={triggerChangeToolbarTools}
                 onPan={this.onPan}
-                onZoom={this.onZoom}>
+                onZoom={this.onZoom}
+                onClick={triggerSelect(null)}
+            >
 
                 <svg width={width} height={height}>
                     <defs>
@@ -96,10 +99,11 @@ export class Net extends React.Component<any, any> {
                     </defs>
 
                     <g id="mpnet">
-                      {this.renderArcs(net.arcs)}
+                      {this.renderArcs(net.arcs, triggerSelect)}
                         {this.renderPlaces(
                              net.places,
                              netToolbar,
+                             triggerSelect,
                              triggerAddArc,
                              triggerRemoveElement,
                              triggerChangeNetToolbarValue
@@ -107,6 +111,7 @@ export class Net extends React.Component<any, any> {
                         {this.renderTransitions(
                              net.transitions,
                              netToolbar,
+                             triggerSelect,
                              triggerAddArc,
                              triggerRemoveElement,
                              triggerChangeNetToolbarValue
@@ -118,7 +123,10 @@ export class Net extends React.Component<any, any> {
         );
     }
 
-    protected renderArcs(arcs: any) { // TODO: refactore
+    protected renderArcs(
+        arcs: any,
+        triggerSelect: (path: string[]) => () => void
+    ) { // TODO: refactore
 
         const net = this.props.net;
 
@@ -174,6 +182,7 @@ export class Net extends React.Component<any, any> {
     protected renderPlaces (
         places: any,
         netToolbar: NetToolbarState,
+        triggerSelect: (path: string[]) => () => void,
         triggerAddArc: (arc: ArcElement) => void,
         triggerRemoveElement: (category: NetCategory) => (id: string) => void,
         triggerChangeNetToolbarValue: (value: any) => void
@@ -183,12 +192,13 @@ export class Net extends React.Component<any, any> {
         const results = [];
         for (const key of Object.keys(places)) {
             const {data, position, size, relatedPositions} = places[key];
+            const basePath = ["places", key];
 
             results.push(
                 <Place
                     key={data.id}
                     paths={{
-                        base: ["places", key],
+                        base: basePath,
                         position: ["position"],
                     }}
                     data={data}
@@ -196,6 +206,7 @@ export class Net extends React.Component<any, any> {
                     {...position}
                     {...size}
                     viewerInst={this.state.viewerInst}
+                    triggerSelect={triggerSelect(basePath)}
                     triggerAddArc={triggerAddArc}
                     triggerRemoveElement={triggerRemoveElement}
                     netToolbar={netToolbar}
@@ -212,6 +223,7 @@ export class Net extends React.Component<any, any> {
     protected renderTransitions (
         transitions: any,
         netToolbar: NetToolbarState,
+        triggerSelect: (path: string[]) => () => void,
         triggerAddArc: (arc: ArcElement) => void,
         triggerRemoveElement: (category: NetCategory) => (id: string) => void,
         triggerChangeNetToolbarValue: (value: any) => void
@@ -222,12 +234,13 @@ export class Net extends React.Component<any, any> {
         const results = [];
         for (const key of Object.keys(transitions)) {
             const {data, position, size, relatedPositions} = transitions[key];
+            const basePath = ["transitions", key];
 
             results.push(
                 <Transition
                     key={data.id}
                     paths={{
-                        base: ["transitions", key],
+                        base: basePath,
                         position: ["position"],
                     }}
                     data={data}
@@ -235,6 +248,7 @@ export class Net extends React.Component<any, any> {
                     {...position}
                     {...size}
                     viewerInst={this.state.viewerInst}
+                    triggerSelect={triggerSelect(basePath)}
                     triggerAddArc={triggerAddArc}
                     triggerRemoveElement={triggerRemoveElement}
                     netToolbar={netToolbar}
@@ -249,7 +263,7 @@ export class Net extends React.Component<any, any> {
 
     protected onZoom = (evt: any) => {
         // `a` keeps the current zoom value
-        this.setState(({canvasContext: oldCC}: State) => ({canvasContext: {
+         this.setState(({canvasContext: oldCC}: State) => ({canvasContext: {
             pan: {x: evt.e, y: evt.f}, // zoom changes the pan too
                                        // (zoom to the mouse pointer)
             zoom: evt.a,

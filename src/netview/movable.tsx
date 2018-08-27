@@ -97,6 +97,7 @@ type BaseComponentProps = Position & Partial<Size> & MouseTriggers & PositionTri
         base: string[];
         position: string[];
     };
+    triggerSelect?: () => void;
     relatedPositions?: Dict<Position>;
     viewerInst?: Viewer;
     netToolbar?: NetToolbarState;
@@ -112,6 +113,7 @@ type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
     };
     data: T;
     parentPosition: Position;
+    triggerSelect?: () => void;
     relatedPositions?: Dict<Position>;
     viewerInst?: Viewer;
     netToolbar?: NetToolbarState;
@@ -131,7 +133,7 @@ export function createMovable<ComponentProps extends BaseComponentProps,
             const {paths, data,
                    parentPosition: {x: px, y: py}, x, y, width, height,
                    relatedPositions, zoom, pan,
-                   viewerInst,
+                   viewerInst, triggerSelect,
                    triggerAddArc, triggerRemoveElement,
                    netToolbar, triggerChangeNetToolbarValue,
                    triggerPositionChanged=(() => {/* empty function */})} = this.props;
@@ -150,6 +152,7 @@ export function createMovable<ComponentProps extends BaseComponentProps,
                     viewerInst={viewerInst}
                     netToolbar={netToolbar}
                     relatedPositions={relatedPositions}
+                    triggerSelect={triggerSelect}
                     triggerAddArc={triggerAddArc}
                     triggerRemoveElement={triggerRemoveElement}
                     triggerChangeNetToolbarValue={triggerChangeNetToolbarValue}

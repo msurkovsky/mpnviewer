@@ -1,15 +1,25 @@
-import {lensPath, over} from 'ramda';
+import {lensPath, over, path as ramdaPath} from 'ramda';
 import * as React from 'react';
 import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom'
 
-import {ArcElement, NetElement} from './netmodel';
+import {ArcData, ArcElement,
+        NetElement,
+        PlaceData, PlaceElement,
+        TransitionData, TransitionElement,
+} from './netmodel';
 import {Net} from './netview';
 
 import {PositionChanged} from './events';
+import {PlaceSetting} from './placesetting'
+import {TransitionSetting} from './transitionsetting'
+
 import {NetTool, Toolbar} from './toolbar';
 import {fillDefaultRelatedPositions, fillElementDefaultRelatedPosition} from './utils';
 
 const state = {
+    selected: {
+        path: null,
+    },
     canvasToolbar: {
         value: null,
         tool: TOOL_AUTO,
@@ -45,7 +55,26 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
     }
 
     public render () {
-        const {net, canvasToolbar, netToolbar} = this.state;
+        const {selected, net, canvasToolbar, netToolbar} = this.state;
+
+        let settingForm = null;
+        if (selected.path !== null) {
+            console.log(selected.path);
+            if (selected.path[0] === "places") {
+                const place = {...ramdaPath(selected.path, this.state.net)} as PlaceElement;
+                settingForm = <PlaceSetting
+                    {...place.data}
+                    key={`setting-${place.data.id}`}
+                    triggerChangesSubmit={this.onChangeElement(selected.path)} />;
+            } else if (selected.path[0] === "transitions") {
+                const transition = {...ramdaPath(
+                    selected.path, this.state.net)} as TransitionElement;
+                settingForm = <TransitionSetting
+                    {...transition.data}
+                    key={`setting-${transition.data.id}`}
+                    triggerChangesSubmit={this.onChangeElement(selected.path)} />;
+            }
+        }
 
         return (
             <div id="app">
@@ -54,6 +83,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 net={net}
                 canvasToolbar={canvasToolbar}
                 netToolbar={netToolbar}
+                triggerSelect={this.onSelect}
                 triggerAddArc={this.onAddArc}
                 triggerRemoveElement={this.onRemoveElement}
                 triggerChangeValue={this.onChangeCanvasToolbarValue}
@@ -70,6 +100,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerSaveNet={this.onSaveNet}
                 triggerLoadNet={this.onLoadNet}
             />
+            {settingForm}
             </div>
         );
     }
@@ -104,10 +135,24 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         });
     }
 
+    private onSelect = (path: string[] | null) => () => {
+        this.setState(() => ({selected: {path}}));
+    }
+
     private onPositionChanged = (e: PositionChanged) => {
         this.setState(({net}: any) => ({
             net: {...over(lensPath(e.path), () => ({...e.new}), net)}
         }));
+    }
+
+    private onChangeElement = (path: string[]) =>
+        (newData: PlaceData | TransitionData | ArcData) => {
+
+        this.setState(({net}: any) => ({net: {
+            ...over(lensPath(path),
+                    ({data, ...rest}) => ({...rest, data: {...newData}}),
+                    net)
+        }}));
     }
 
     private onChangeCanvasToolbarValue = (value: any) => {
@@ -170,9 +215,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         fr.onload = () => {
             const data = fr.result as string;
             const net = JSON.parse(data);
-            this.setState(() => {
-                return {net: fillDefaultRelatedPositions(net)};
-            });
+            this.setState(() => ({net: fillDefaultRelatedPositions(net)}));
         };
         fr.readAsText(evt.target.files[0]);
     }

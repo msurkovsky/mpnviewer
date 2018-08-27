@@ -2,7 +2,10 @@ import * as React from 'react'
 
 import {ArcData} from '../netmodel'
 
-type Props = ArcData & {points: Array<{x: number, y: number}>};
+type Props = ArcData & {
+    points: Array<{x: number, y: number}>;
+    triggerSelect: () => void;
+};
 
 export class Arc extends React.PureComponent<Props> {
 

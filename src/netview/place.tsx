@@ -23,6 +23,7 @@ type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
     viewerInst: Viewer;
     netToolbar: NetToolbarState;
     triggerChangeNetToolbarValue: (value: any) => void;
+    triggerSelect: () => void;
     triggerAddArc: (arc: ArcElement) => void;
     triggerRemoveElement: (category: NetCategory) => (id: string) => void;
 };
@@ -34,7 +35,7 @@ class CorePlace extends React.PureComponent<Props> {
         const {paths, name, id, type, initExpr, dataLayout, x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
-               triggerMouseDown, triggerMouseUp,
+               triggerMouseDown, triggerMouseUp, triggerSelect,
                triggerPositionChanged} = this.props;
 
         const radius = height / 2;
@@ -64,13 +65,22 @@ class CorePlace extends React.PureComponent<Props> {
             }
         };
 
+        const triggerClick = (evt: React.MouseEvent) => {
+            triggerSelect();
+            addRemoveArc(evt);
+
+            // stop propagation to prevent canvas unselect
+            evt.preventDefault();
+            evt.stopPropagation();
+        }
+
         return (
             <g>
                 <rect className={`place ${cssDataLayout}`}
                     x={x} y={y} width={width} height={height} rx={radius} ry={radius}
                     onMouseDown={triggerMouseDown}
                     onMouseUp={triggerMouseUp}
-                    onClick={addRemoveArc}
+                    onClick={triggerClick}
                 />
                 <TextElement
                     paths={{

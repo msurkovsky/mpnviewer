@@ -21,6 +21,7 @@ type Props = TransitionData & Position & Size & MouseTriggers & PositionTriggers
     viewerInst: Viewer;
     netToolbar: NetToolbarState;
     triggerChangeNetToolbarValue: (value: any) => void;
+    triggerSelect: () => void;
     triggerAddArc: (arc: ArcElement) => void;
     triggerRemoveElement: (category: NetCategory) => (id: string) => void;
 }
@@ -32,7 +33,7 @@ class CoreTransition extends React.PureComponent<Props> {
         const {paths, id, name, guard, x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
-               triggerMouseDown, triggerMouseUp,
+               triggerMouseDown, triggerMouseUp, triggerSelect,
                triggerPositionChanged} = this.props;
 
         const addRemoveArc = (evt: React.MouseEvent) => {
@@ -59,7 +60,17 @@ class CoreTransition extends React.PureComponent<Props> {
             }
         };
 
+        const triggerClick = (evt: React.MouseEvent) => {
+            triggerSelect();
+            addRemoveArc(evt);
+
+            // stop propagation to prevent canvas unselect
+            evt.preventDefault();
+            evt.stopPropagation();
+        }
+
         let guardElement = null;
+        console.log(guard);
         if (guard) {
             guardElement = <TextElement
                 paths={{
@@ -78,7 +89,7 @@ class CoreTransition extends React.PureComponent<Props> {
                     x={x} y={y} width={width} height={height}
                     onMouseDown={triggerMouseDown}
                     onMouseUp={triggerMouseUp}
-                    onClick={addRemoveArc}
+                    onClick={triggerClick}
                 />
                 <text
                     x={x+width/2}
