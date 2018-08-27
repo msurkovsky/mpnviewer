@@ -19,10 +19,16 @@ type Props = ArcData & MouseTriggers & PositionTriggers & {
 export class Arc extends React.PureComponent<Props> {
 
     public render() {
-        const {id, expression, type,
+        const {id, expression, type, triggerSelect,
                points, paths, relatedPositions,
-               triggerSelect, triggerPositionChanged
+                triggerPositionChanged
         } = this.props;
+
+        const onArcClick = (evt: React.MouseEvent) => {
+            triggerSelect();
+
+            evt.stopPropagation();
+        };
 
         // NOTE: onMouseDown has to be used when click does not work
         return (
@@ -30,10 +36,11 @@ export class Arc extends React.PureComponent<Props> {
             <polyline
                 className="arc"
                 fill="transparent"
+                strokeWidth={10}
                 strokeLinejoin="round"
                 points={points.map(({x,y}) => ([x, y])).join(" ")}
                 markerEnd={`url(#${type})`}
-                onMouseDown={triggerSelect}
+                onClick={onArcClick}
             />
             <TextElement
                 paths={{
