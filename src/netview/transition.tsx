@@ -65,12 +65,11 @@ class CoreTransition extends React.PureComponent<Props> {
             addRemoveArc(evt);
 
             // stop propagation to prevent canvas unselect
-            evt.preventDefault();
             evt.stopPropagation();
         }
 
         let guardElement = null;
-        if (guard) {
+        if (guard && guard.length > 0) {
             guardElement = <TextElement
                 paths={{
                     base: [...paths.base],
