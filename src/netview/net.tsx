@@ -130,6 +130,8 @@ export class Net extends React.Component<any, any> {
 
         const net = this.props.net;
 
+        const triggerPositionChanged = this.props.triggerPositionChanged;
+
         const arcComponents = [];
         for (const key of Object.keys(arcs)) {
             const arc = arcs[key];
@@ -174,6 +176,7 @@ export class Net extends React.Component<any, any> {
                     paths={{base: basePath}}
                     points={points}
                     triggerSelect={triggerSelect(basePath)}
+                    triggerPositionChanged={triggerPositionChanged}
                     relatedPositions={{...arc.relatedPositions}}
                     {...data}
                 />
