@@ -146,6 +146,10 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
     }
 
     private onSelect = (path: string[] | null) => () => {
+        if (this.state.canvasToolbar.tool !== TOOL_AUTO) {
+            return;
+        }
+
         this.setState(() => ({selected: {path}}));
     }
 
