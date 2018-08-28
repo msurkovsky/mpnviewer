@@ -89,7 +89,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         return (
             <div id="app">
             <Net ref={(netInst) => {this.netInst = netInst}}
-                x={50} y={50} width={1000} height={500}
+                x={50} y={50} width={1600} height={700}
                 net={net}
                 canvasToolbar={canvasToolbar}
                 netToolbar={netToolbar}
