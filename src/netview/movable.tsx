@@ -102,6 +102,7 @@ type BaseComponentProps = Position & Partial<Size> & MouseTriggers & PositionTri
     triggerChangeNetToolbarValue?: (value: any) => void;
     triggerAddArc?: (arc: ArcElement) => void;
     triggerRemoveElement?: (category: NetCategory) => (id: string) => void;
+    className?: string;
 };
 
 type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
@@ -118,6 +119,7 @@ type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
     triggerChangeNetToolbarValue?: (value: any) => void;
     triggerAddArc?: (arc: ArcElement) => void;
     triggerRemoveElement?: (category: NetCategory) => (id: string) => void;
+    className?: string;
 };
 
 export function createMovable<ComponentProps extends BaseComponentProps,
@@ -128,7 +130,7 @@ export function createMovable<ComponentProps extends BaseComponentProps,
     class Moveable extends React.Component<Props<DataType> & CanvasCtxData, Position> {
 
         public render() {
-            const {paths, data,
+            const {className, paths, data,
                    parentPosition: {x: px, y: py}, x, y, width, height,
                    relatedPositions, zoom, pan,
                    viewerInst, triggerSelect,
@@ -142,6 +144,7 @@ export function createMovable<ComponentProps extends BaseComponentProps,
             return (
                 <Component
                     {...data}
+                    className={className}
                     paths={paths}
                     x={px+x}
                     y={py+y}

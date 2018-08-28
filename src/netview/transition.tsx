@@ -90,6 +90,7 @@ class CoreTransition extends React.PureComponent<Props> {
                     onClick={triggerClick}
                 />
                 <text
+                    className="small"
                     x={x+width/2}
                     y={y+height/2}
                     textAnchor="middle"

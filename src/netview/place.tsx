@@ -104,7 +104,9 @@ class CorePlace extends React.PureComponent<Props> {
                     x={relatedPositions.initExpr.x}
                     y={relatedPositions.initExpr.y}
                     triggerPositionChanged={triggerPositionChanged}/>
-                <text x={x+width/2} y={y+height/2} textAnchor="middle" alignmentBaseline="central">
+                <text className="small"
+                      x={x+width/2} y={y+height/2}
+                      textAnchor="middle" alignmentBaseline="central">
                     {name}
                 </text>
             </g>

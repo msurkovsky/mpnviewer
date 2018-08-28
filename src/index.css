@@ -31,3 +31,7 @@ body {
     stroke: #000;
     stroke-width: 1.5px;
 }
+
+.small {
+    font: normal 8pt sans-serif;
+}

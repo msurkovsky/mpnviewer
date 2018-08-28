@@ -4,18 +4,22 @@ import {Position} from '../types';
 import {createMovable, MouseTriggers} from './movable';
 
 interface Data {id: string, text: string}
-type Props = Data & Position & MouseTriggers;
+type Props = Data & Position & MouseTriggers & {
+    className?: string;
+};
 
 class CoreTextElement extends React.PureComponent<Props> {
 
     public render() {
-        const {text, x, y} = this.props;
+        const {text, x, y, className} = this.props;
         const {triggerMouseDown, triggerMouseUp} = this.props;
 
         return (
-          <text x={x} y={y} onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp}>
-            {text}
-          </text>
+            <text className={className}
+                  x={x} y={y}
+                  onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp}>
+                {text}
+            </text>
         );
     }
 }

@@ -43,6 +43,7 @@ export class Arc extends React.PureComponent<Props> {
                 onClick={onArcClick}
             />
             <TextElement
+                className="small"
                 paths={{
                     base: [...paths.base],
                     position: ["relatedPositions", "expression"],
