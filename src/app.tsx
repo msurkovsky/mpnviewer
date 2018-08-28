@@ -207,7 +207,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
 
     private onSaveNet = (evt: any) => {
 
-        const data = JSON.stringify(this.state.net);
+        const data = JSON.stringify(this.state.net, null, 2);
         const blob = new Blob( [ data ], {
             type: 'application/octet-stream'
         });
