@@ -30,6 +30,7 @@ body {
 .arc {
     stroke: #000;
     stroke-width: 1.5px;
+    pointer-events: stroke;
 }
 
 .small {
