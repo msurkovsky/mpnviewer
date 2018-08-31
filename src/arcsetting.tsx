@@ -1,11 +1,14 @@
 import * as React from 'react'
-import {Button, Form, Input, Label} from 'reactstrap'
+import {Button, ButtonGroup, ButtonToolbar, Form, Input, Label} from 'reactstrap'
 
-import {ArcData} from './netmodel'
+import {ArcData, ArcType} from './netmodel'
 
 type Props = ArcData & {
     triggerChangesSubmit: (arcData: ArcData) => void;
 };
+
+const {SINGLE_HEADED, DOUBLE_HEADED,
+       SINGLE_HEADED_RO, DOUBLE_HEADED_RO} = ArcType;
 
 export class ArcSetting extends React.Component<Props, any> {
 
@@ -24,10 +27,13 @@ export class ArcSetting extends React.Component<Props, any> {
             triggerChangesSubmit({id, expression, type});
         };
 
-        const onChange = (key: string) => (evt: any) => {
+        const onChangeExpr = (evt: any) => {
             const val = evt.target.value;
-            this.setState(() => ({[key]: val}));
-            evt.preventDefault();
+            this.setState(() => ({expression: val}));
+        };
+
+        const onClick = (arcType: ArcType) => (evt: React.MouseEvent) => {
+            this.setState(() => ({type: arcType}));
         };
 
         return (
@@ -37,9 +43,34 @@ export class ArcSetting extends React.Component<Props, any> {
                     id="arc-expr"
                     value={expression}
                     type="text"
-                    onChange={onChange("expression")} />
+                    onChange={onChangeExpr} />
 
-                <Button onClick={submit}>Submit</Button>
+                <ButtonToolbar>
+                <ButtonGroup>
+                    <Button
+                        onClick={onClick(SINGLE_HEADED)}
+                        active={type === SINGLE_HEADED}>
+                        Take
+                    </Button>
+                    <Button
+                        onClick={onClick(DOUBLE_HEADED)}
+                        active={type === DOUBLE_HEADED }>
+                        Force-take
+                    </Button>
+                    <Button
+                        onClick={onClick(SINGLE_HEADED_RO)}
+                        active={type === SINGLE_HEADED_RO}>
+                        Read-only
+                    </Button>
+                    <Button
+                        onClick={onClick(DOUBLE_HEADED_RO)}
+                        active={type === DOUBLE_HEADED_RO}>
+                        Force-read-only
+                    </Button>
+                </ButtonGroup>
+                </ButtonToolbar>
+
+                <Button color="primary" onClick={submit}>Submit</Button>
             </Form>
         );
     }
