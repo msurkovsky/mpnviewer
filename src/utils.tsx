@@ -2,6 +2,7 @@ import {lensPath, over, path as ramdaPath} from 'ramda'
 import * as React from 'react'
 import {ArcElement, Net as TNet, NetElement} from './netmodel'
 import {BBox, Circle, Line, Position, Size} from './types'
+import {FontSetting, FontSize, pt2px} from './visualsetting'
 
 const defaultPositions = {
     places: (placeSize: Size) => ({
@@ -21,7 +22,6 @@ const defaultPositions = {
 export const getId = ((id: number) => (): string => {
     return (id++).toString();
 })(new Date().getTime());
-
 
 export function fillElementDefaultRelatedPosition(element: NetElement, category: string) {
     const relatedPositions = defaultPositions[category](element.size);
@@ -49,7 +49,6 @@ export function fillArcsDefaultRelatedPosition(net: TNet) {
         }, net);
     }
     return net;
-   // TODO: contineue here
 }
 
 export function fillDefaultRelatedPositions(net: TNet) {
@@ -81,6 +80,60 @@ export function fillDefaultRelatedPositions(net: TNet) {
     newNet = fill(newNet, "transitions");
     newNet = fillArcsDefaultRelatedPosition(newNet);
     return newNet;
+}
+
+export function textToSVG(
+    keyPrefix: string,
+    text: string,
+    fontSetting: FontSetting,
+    fontSize: FontSize,
+    svgTextAttrs: React.SVGProps<SVGTextElement> = {}
+): JSX.Element {
+
+    const {x=0, y=0, textAnchor, alignmentBaseline} = svgTextAttrs;
+
+    const lines = text.split('\\n');
+    const tspans = [];
+
+    // font size
+    const fsize = fontSetting.size[fontSize];
+    // space size
+    const spsize = fontSetting.spaceFactor * fsize; // don not apply pt2px here
+
+    let idx = 0;
+    let dy = 0;
+    console.log("Dy", dy);
+    for (const line of lines) {
+        const spaces = line.search(/\S|$/);
+        const tspan =
+            <tspan
+              fontFamily={fontSetting.face}
+              fontWeight={fontSetting.weight}
+              fontSize={`${fsize}pt`}
+              key={`${keyPrefix}-${idx}`}
+              x={x}
+              dx={spaces * spsize}
+              dy={dy}
+              textAnchor={textAnchor}
+              alignmentBaseline={alignmentBaseline}>
+
+              {line.trim()}
+            </tspan>
+
+        dy = pt2px(fsize * 1.2); // dy is relative to the previous one; first dy has to be zero.
+        idx++;
+        tspans.push(tspan);
+    }
+
+    return (
+        <text
+            {...svgTextAttrs}
+            y={y as number - dy * (idx - 1) / 2
+               /*mines half of the line for every new one*/}>
+
+            {tspans}
+        </text>
+    );
 }
 
 export function getPosition(evt: React.MouseEvent | MouseEvent): Position {

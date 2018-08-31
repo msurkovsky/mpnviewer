@@ -2,6 +2,7 @@ import * as React from 'react'
 
 import {ArcData} from '../netmodel'
 import {Dict, Position} from '../types';
+import {font} from '../visualsetting';
 import {MouseTriggers, PositionTriggers} from './movable';
 import {TextElement} from './textelement';
 
@@ -52,6 +53,8 @@ export class Arc extends React.PureComponent<Props> {
                 parentPosition={{...points[0]}}
                 x={relatedPositions.expression.x}
                 y={relatedPositions.expression.y}
+                font={font.code}
+                fontSize="small"
                 triggerPositionChanged={triggerPositionChanged}/>
             </g>
         );

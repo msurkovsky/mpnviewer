@@ -1,9 +1,11 @@
 import * as React from 'react';
+import * as Utils from '../utils'
 
 import {endAddingArc, startAddingArc} from '../features/addarc'
 import {ArcElement, NetCategory, TransitionData} from '../netmodel'
 import {NetTool, NetToolbarState} from '../toolbar'
 import {Dict, Position, Size} from '../types';
+import {font} from '../visualsetting';
 import {createMovable, MouseTriggers, PositionTriggers} from './movable';
 import {Viewer} from './net'
 import {TextElement} from './textelement';
@@ -79,8 +81,17 @@ class CoreTransition extends React.PureComponent<Props> {
                 parentPosition={{x, y}}
                 x={relatedPositions.guard.x}
                 y={relatedPositions.guard.y}
+                font={font.code}
+                fontSize="small"
                 triggerPositionChanged={triggerPositionChanged} />
         }
+
+        const nameText = Utils.textToSVG(id, name, font.description, "small", {
+            x: x + width/2,
+            y: y + height/2,
+            textAnchor: "middle",
+            alignmentBaseline: "central",
+        });
         return (
             <g>
                 <rect className="transition"
@@ -89,12 +100,7 @@ class CoreTransition extends React.PureComponent<Props> {
                     onMouseUp={triggerMouseUp}
                     onClick={triggerClick}
                 />
-                <text
-                    className="small"
-                    x={x+width/2}
-                    y={y+height/2}
-                    textAnchor="middle"
-                    alignmentBaseline="central">{name}</text>
+                {nameText}
                 {guardElement}
             </g>
         );

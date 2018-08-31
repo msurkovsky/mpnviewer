@@ -1,9 +1,11 @@
 import * as React from 'react';
+import * as Utils from '../utils'
 
 import {endAddingArc, startAddingArc} from '../features/addarc'
 import {ArcElement, NetCategory, PlaceData, PlaceDataLayout} from '../netmodel';
 import {NetTool, NetToolbarState} from '../toolbar'
 import {Dict, Position, Size} from '../types';
+import {font} from '../visualsetting';
 import {createMovable, MouseTriggers, PositionTriggers} from './movable';
 import {Viewer} from './net'
 import {TextElement} from './textelement';
@@ -32,7 +34,8 @@ class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, id, type, initExpr, dataLayout, x, y, width, height, relatedPositions,
+        const {paths, name, id, type, initExpr, dataLayout,
+               x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
                triggerMouseDown, triggerMouseUp, triggerSelect,
@@ -74,6 +77,13 @@ class CorePlace extends React.PureComponent<Props> {
             evt.stopPropagation();
         }
 
+        const nameText = Utils.textToSVG(id, name, font.description, "small", {
+            x: x + width/2,
+            y: y + height/2,
+            textAnchor: "middle",
+            alignmentBaseline: "central",
+        });
+
         return (
             <g>
                 <rect className={`place ${cssDataLayout}`}
@@ -82,6 +92,7 @@ class CorePlace extends React.PureComponent<Props> {
                     onMouseUp={triggerMouseUp}
                     onClick={triggerClick}
                 />
+                {nameText}
                 <TextElement
                     paths={{
                         base: [...paths.base],
@@ -92,6 +103,8 @@ class CorePlace extends React.PureComponent<Props> {
                     netToolbar={netToolbar}
                     x={relatedPositions.type.x}
                     y={relatedPositions.type.y}
+                    font={font.code}
+                    fontSize="normal"
                     triggerPositionChanged={triggerPositionChanged}/>
                 <TextElement
                     paths={{
@@ -103,12 +116,9 @@ class CorePlace extends React.PureComponent<Props> {
                     netToolbar={netToolbar}
                     x={relatedPositions.initExpr.x}
                     y={relatedPositions.initExpr.y}
+                    font={font.code}
+                    fontSize="small"
                     triggerPositionChanged={triggerPositionChanged}/>
-                <text className="small"
-                      x={x+width/2} y={y+height/2}
-                      textAnchor="middle" alignmentBaseline="central">
-                    {name}
-                </text>
             </g>
         );
     }

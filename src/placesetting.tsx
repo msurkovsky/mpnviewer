@@ -59,18 +59,16 @@ export class PlaceSetting extends React.Component<Props, any> {
                 <ButtonGroup>
                     <Button
                         onClick={changeDataLayout(PlaceDataLayout.QUEUE)}
-                        active={this.state.dataLayout === PlaceDataLayout.QUEUE}
-                    >
+                        active={this.state.dataLayout === PlaceDataLayout.QUEUE}>
                         Queue
                     </Button>
                     <Button
                         onClick={changeDataLayout(PlaceDataLayout.MULTISET)}
-                        active={this.state.dataLayout === PlaceDataLayout.MULTISET}
-                    >
+                        active={this.state.dataLayout === PlaceDataLayout.MULTISET}>
                         Multiset
                     </Button>
                 </ButtonGroup>
-                <Button onClick={submit}>Submit</Button>
+                <Button color="primary" onClick={submit}>Submit</Button>
             </Form>
         );
     }

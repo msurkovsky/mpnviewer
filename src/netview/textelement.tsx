@@ -1,26 +1,29 @@
 import * as React from 'react';
+import * as Utils from '../utils'
 
 import {Position} from '../types';
+import {FontSetting, FontSize} from '../visualsetting'
 import {createMovable, MouseTriggers} from './movable';
 
 interface Data {id: string, text: string}
 type Props = Data & Position & MouseTriggers & {
+    font: FontSetting;
+    fontSize: FontSize;
     className?: string;
 };
 
 class CoreTextElement extends React.PureComponent<Props> {
 
     public render() {
-        const {text, x, y, className} = this.props;
+        const {id, text, x, y, className, font, fontSize} = this.props;
         const {triggerMouseDown, triggerMouseUp} = this.props;
 
-        return (
-            <text className={className}
-                  x={x} y={y}
-                  onMouseDown={triggerMouseDown} onMouseUp={triggerMouseUp}>
-                {text}
-            </text>
-        );
+        const jsxText = Utils.textToSVG(id, text, font, fontSize, {
+            x, y, className,
+            onMouseDown: triggerMouseDown,
+            onMouseUp: triggerMouseUp,
+        });
+        return jsxText;
     }
 }
 

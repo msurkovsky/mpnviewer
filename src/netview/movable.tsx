@@ -5,6 +5,7 @@ import {PositionChanged} from '../events'
 import {ArcElement, NetCategory} from '../netmodel'
 import {NetToolbarState} from '../toolbar'
 import {Dict, Position, Size, Vector2d} from '../types'
+import {FontSetting, FontSize} from '../visualsetting'
 
 import {CanvasContext, CanvasCtxData, Viewer} from './net'
 
@@ -102,6 +103,8 @@ type BaseComponentProps = Position & Partial<Size> & MouseTriggers & PositionTri
     triggerChangeNetToolbarValue?: (value: any) => void;
     triggerAddArc?: (arc: ArcElement) => void;
     triggerRemoveElement?: (category: NetCategory) => (id: string) => void;
+    font?: FontSetting;
+    fontSize?: FontSize;
     className?: string;
 };
 
@@ -119,6 +122,8 @@ type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
     triggerChangeNetToolbarValue?: (value: any) => void;
     triggerAddArc?: (arc: ArcElement) => void;
     triggerRemoveElement?: (category: NetCategory) => (id: string) => void;
+    font?: FontSetting;
+    fontSize?: FontSize;
     className?: string;
 };
 
@@ -136,6 +141,7 @@ export function createMovable<ComponentProps extends BaseComponentProps,
                    viewerInst, triggerSelect,
                    triggerAddArc, triggerRemoveElement,
                    netToolbar, triggerChangeNetToolbarValue,
+                   font, fontSize,
                    triggerPositionChanged=(() => {/* empty function */})} = this.props;
 
             moveInfo[data.id] = {x, y, zoom, pan, paths, triggerPositionChanged};
@@ -153,6 +159,8 @@ export function createMovable<ComponentProps extends BaseComponentProps,
                     viewerInst={viewerInst}
                     netToolbar={netToolbar}
                     relatedPositions={relatedPositions}
+                    font={font}
+                    fontSize={fontSize}
                     triggerSelect={triggerSelect}
                     triggerAddArc={triggerAddArc}
                     triggerRemoveElement={triggerRemoveElement}
