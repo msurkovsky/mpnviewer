@@ -2,6 +2,7 @@ import * as React from 'react'
 import {Button, Form, Input, Label} from 'reactstrap'
 
 import {TransitionData} from './netmodel'
+import {codeRef2String, identity} from './utils'
 
 type Props = TransitionData & {
     triggerChangesSubmit: (transData: TransitionData) => void;
@@ -12,20 +13,21 @@ export class TransitionSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {name, guard, code} = this.props;
-        this.state = {name, guard: guard || "" , code: code || ""};
+        const {name, guard, codeRef} = this.props;
+        this.state = {name, guard: guard || "" , codeRef: codeRef || null};
     }
 
     public render() {
-        const {name, guard, code} = this.state;
+        const {name, guard, codeRef} = this.state;
         const {triggerChangesSubmit, id} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({id, name, guard, code});
+            triggerChangesSubmit({id, name, guard, codeRef});
         };
 
-        const onChange = (key: string) => (evt: any) => {
-            const val = evt.target.value;
+        const onChange = (key: string,
+                          transform: (v: string) => any = identity) => (evt: any) => {
+            const val = transform(evt.target.value);
             this.setState(() => ({[key]: val}));
         };
 
@@ -37,6 +39,17 @@ export class TransitionSetting extends React.Component<Props, any> {
                 guardList = val.split(',');
             }
             this.setState(() => ({ guard: guardList }));
+        }
+
+        const codeRefTransform = (v: string): number | [number, number] => {
+            const r = v.split('-');
+            if (r.length === 1) {
+                return +r[0];
+            } else if (r.length === 2) {
+                return [+r[0], +r[1]];
+            } else {
+                throw new Error("Invalid format of code reference");
+            }
         }
 
         return (
@@ -55,12 +68,12 @@ export class TransitionSetting extends React.Component<Props, any> {
                     type="text"
                     onChange={onChangeGuard} />
 
-                <Label for="trans-code">Code reference</Label>
+                <Label for="trans-codeRef">Code reference</Label>
                 <Input
-                    id="trans-code"
-                    value={code}
+                    id="trans-codeRef"
+                    value={codeRef2String(codeRef)}
                     type="text"
-                    onChange={onChange("code")} />
+                    onChange={onChange("codeRef", codeRefTransform)} />
 
                 <Button onClick={submit}>Submit</Button>
             </Form>

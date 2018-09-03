@@ -14,6 +14,12 @@ body {
     fill: #fff;
 }
 
+.codeRef {
+    stroke: #000;
+    stroke-width: 2px;
+    fill: #fff;
+}
+
 .place {
     stroke: #000;
     stroke-width: 2px;

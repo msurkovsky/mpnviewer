@@ -24,7 +24,7 @@ export interface PlaceData {
 export interface TransitionData {
     id: string;
     name: string;
-    code?: string[];
+    codeRef?: number | [number, number]; // specific reference or range
     guard?: string[];
 }
 

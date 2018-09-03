@@ -19,6 +19,9 @@ const defaultPositions = {
     })
 };
 
+export const emptyFn = () => {/*empty*/};
+export const identity = (v: any) => v;
+
 export const getId = ((id: number) => (): string => {
     return (id++).toString();
 })(new Date().getTime());
@@ -102,7 +105,6 @@ export function textToSVG(
 
     let idx = 0;
     let dy = 0;
-    console.log("Dy", dy);
     for (const line of lines) {
         const spaces = line.search(/\S|$/);
         const tspan =
@@ -134,6 +136,17 @@ export function textToSVG(
             {tspans}
         </text>
     );
+}
+
+export function codeRef2String(v: null | number | [number, number]): string {
+    if (v === null) {
+        return "";
+    }
+
+    if (typeof v === "number") {
+        return "" + v;
+    }
+    return `${v[0]}-${v[1]}`;
 }
 
 export function getPosition(evt: React.MouseEvent | MouseEvent): Position {

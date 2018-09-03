@@ -4,7 +4,7 @@ import * as Utils from '../utils'
 import {endAddingArc, startAddingArc} from '../features/addarc'
 import {ArcElement, NetCategory, TransitionData} from '../netmodel'
 import {NetTool, NetToolbarState} from '../toolbar'
-import {Dict, Position, Size} from '../types';
+import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
 import {createMovable, MouseTriggers, PositionTriggers} from './movable';
 import {Viewer} from './net'
@@ -32,7 +32,8 @@ class CoreTransition extends React.PureComponent<Props> {
 
     public render() {
 
-        const {paths, id, name, guard, x, y, width, height, relatedPositions,
+        const {paths, id, name, guard, codeRef,
+               x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
                triggerMouseDown, triggerMouseUp, triggerSelect,
@@ -86,9 +87,37 @@ class CoreTransition extends React.PureComponent<Props> {
                 triggerPositionChanged={triggerPositionChanged} />
         }
 
+        let codeRefElement = null;
+        let codeRefBBox: BBox | null = null;
+        if (codeRef) {
+            const crWidth = .7 * width;
+            const crHeight = font.code.size.small * 1.8;
+            const crX = x + (width - crWidth) / 2;
+            const crY = y;
+            codeRefBBox = { x: crX, y: crY, width: crWidth, height: crHeight };
+            codeRefElement = (<g>
+                <rect className="codeRef" {...codeRefBBox} />
+                {Utils.textToSVG(`${id}-code-`, Utils.codeRef2String(codeRef), font.code, "small", {
+                    x: crX + crWidth / 2,
+                    y: crY + crHeight / 2,
+                    textAnchor: "middle",
+                    alignmentBaseline: "central",
+                })}
+            </g>);
+
+        }
+
+        const ntX = x + width / 2;
+        let ntY;
+        if (codeRefBBox) {
+            ntY = y + codeRefBBox.height + (height - codeRefBBox.height) / 2;
+        } else {
+            ntY = y + height /2
+        }
+
         const nameText = Utils.textToSVG(id, name, font.description, "small", {
-            x: x + width/2,
-            y: y + height/2,
+            x: ntX,
+            y: ntY,
             textAnchor: "middle",
             alignmentBaseline: "central",
         });
@@ -100,6 +129,7 @@ class CoreTransition extends React.PureComponent<Props> {
                     onMouseUp={triggerMouseUp}
                     onClick={triggerClick}
                 />
+                {codeRefElement}
                 {nameText}
                 {guardElement}
             </g>
