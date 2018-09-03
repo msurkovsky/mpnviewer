@@ -20,6 +20,7 @@ export interface PlaceData {
     initExpr: string;
     dataLayout: PlaceDataLayout;
     cpLabel?: string; // compound place
+    porView?: string; // partial order view
 }
 
 export interface TransitionData {

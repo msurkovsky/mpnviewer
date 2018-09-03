@@ -34,7 +34,7 @@ class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, id, type, initExpr, dataLayout, cpLabel,
+        const {paths, name, id, type, initExpr, dataLayout, cpLabel, porView,
                x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
@@ -99,6 +99,28 @@ class CorePlace extends React.PureComponent<Props> {
                       alignmentBaseline: "central",
                 })}
             </g>);
+        }
+
+        let porViewElement = null;
+        let porViewBBox: BBox | null = null;
+        if (porView) {
+            const porWidth = .7 * width;
+            const porHeight = 2 * font.code.size.small;
+            const porX = x + (width - porWidth) / 2;
+            const porY = y - porHeight / 2;
+            porViewBBox = {x: porX, y: porY, width: porWidth, height: porHeight};
+            porViewElement = ( // NOTE: I don't think it will work ... maybe would be better to implement simpler version of place
+                <CorePlace
+                    paths={{...paths} /* the same as origin place */}
+                    {...porViewBBox}
+                    id={`porView-${id}`}
+                    name={porView}
+                    type={""/* do not show type; is the same as original place*/}
+                    initExpr=""
+                    dataLayout={PlaceDataLayout.MULTISET}
+                    triggerAddArc={triggerAddArc}
+                />
+            );
         }
 
         const ntX = x + width / 2;
