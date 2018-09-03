@@ -19,6 +19,7 @@ export interface PlaceData {
     type: DataType;
     initExpr: string;
     dataLayout: PlaceDataLayout;
+    cpLabel?: string; // compound place
 }
 
 export interface TransitionData {

@@ -6,7 +6,7 @@ import {Button, ButtonGroup,
 import {ElementValueChanged} from './events'
 import {PlaceData, PlaceDataLayout} from './netmodel'
 import {Size} from './types'
-import {identity} from './utils';
+import {identity, rejectNulls} from './utils';
 
 type Props = PlaceData & Size & {
     path: string[];
@@ -18,19 +18,24 @@ export class PlaceSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {name, type, initExpr, dataLayout, width, height} = this.props;
-        this.state = {name, type, initExpr, dataLayout, width, height};
+        const {name, type, initExpr, dataLayout, cpLabel,
+               width, height} = this.props;
+        this.state = {name, type, initExpr, dataLayout, cpLabel: cpLabel || null,
+                      width, height};
     }
 
     public render() {
-        const {name, type, initExpr, dataLayout, width, height} = this.state;
+        const {name, type, initExpr, dataLayout, cpLabel,
+               width, height} = this.state;
         const {triggerChangesSubmit, id, path} = this.props;
 
         const submit = () => {
             triggerChangesSubmit({
                 path,
                 value: {
-                    data: {id, name, type, initExpr, dataLayout},
+                    data: rejectNulls({
+                        id, name, type, initExpr, dataLayout, cpLabel
+                    }),
                     size: {width, height}
                 },
             });
@@ -94,6 +99,16 @@ export class PlaceSetting extends React.Component<Props, any> {
                                 Multiset
                             </Button>
                         </ButtonGroup>
+                    </Label>
+                </FormGroup>
+
+                <FormGroup>
+                    <Label>
+                        Compount place label:
+                        <Input
+                            value={cpLabel}
+                            type="text"
+                            onChange={onChange("cpLabel")} />
                     </Label>
                 </FormGroup>
 

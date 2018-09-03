@@ -4,7 +4,7 @@ import * as Utils from '../utils'
 import {endAddingArc, startAddingArc} from '../features/addarc'
 import {ArcElement, NetCategory, PlaceData, PlaceDataLayout} from '../netmodel';
 import {NetTool, NetToolbarState} from '../toolbar'
-import {Dict, Position, Size} from '../types';
+import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
 import {createMovable, MouseTriggers, PositionTriggers} from './movable';
 import {Viewer} from './net'
@@ -34,7 +34,7 @@ class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, id, type, initExpr, dataLayout,
+        const {paths, name, id, type, initExpr, dataLayout, cpLabel,
                x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
@@ -77,9 +77,41 @@ class CorePlace extends React.PureComponent<Props> {
             evt.stopPropagation();
         }
 
+        let cpLabelElement = null;
+        let cpLabelBBox: BBox | null = null;
+        if (cpLabel) {
+            const cplWidth = .6 * width;
+            const cplHeight = 1.8 * font.description.size.small;
+            const cplX = x + (width - cplWidth) / 2;
+            const cplY = y + height - cplHeight / 2;
+            const cplRadius = cplHeight / 2;
+            cpLabelBBox = {x: cplX, y: cplY, width: cplWidth, height: cplHeight};
+            cpLabelElement = (<g>
+                <rect className="cpLabel" {...cpLabelBBox} rx={cplRadius} ry={cplRadius} />
+                {Utils.textToSVG(
+                     `{id}-cpLabel-`,
+                     cpLabel.replace(/\\n/g, ""),
+                     font.description,
+                     "small", {
+                      x: cplX + cplWidth / 2,
+                      y: cplY + cplHeight / 2,
+                      textAnchor: "middle",
+                      alignmentBaseline: "central",
+                })}
+            </g>);
+        }
+
+        const ntX = x + width / 2;
+        let ntY;
+        if (cpLabelBBox) {
+            ntY = y + (height - cpLabelBBox.height / 2) / 2;
+        } else {
+            ntY = y + height / 2;
+        }
+
         const nameText = Utils.textToSVG(id, name, font.description, "small", {
-            x: x + width/2,
-            y: y + height/2,
+            x: ntX,
+            y: ntY,
             textAnchor: "middle",
             alignmentBaseline: "central",
         });
@@ -92,6 +124,7 @@ class CorePlace extends React.PureComponent<Props> {
                     onMouseUp={triggerMouseUp}
                     onClick={triggerClick}
                 />
+                {cpLabelElement}
                 {nameText}
                 <TextElement
                     paths={{
