@@ -1,11 +1,16 @@
 import * as React from 'react'
-import {Button, Form, Input, Label} from 'reactstrap'
+import {Button,
+        Form, FormGroup,
+        Input, Label} from 'reactstrap'
 
+import {ElementValueChanged} from './events'
 import {TransitionData} from './netmodel'
+import {Size} from './types'
 import {codeRef2String, identity} from './utils'
 
-type Props = TransitionData & {
-    triggerChangesSubmit: (transData: TransitionData) => void;
+type Props = TransitionData & Size & {
+    path: string[];
+    triggerChangesSubmit: (evt: ElementValueChanged) => void;
 };
 
 export class TransitionSetting extends React.Component<Props, any> {
@@ -13,16 +18,24 @@ export class TransitionSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {name, guard, codeRef} = this.props;
-        this.state = {name, guard: guard || "" , codeRef: codeRef || null};
+        const {name, guard, codeRef, width, height} = this.props;
+        this.state = {
+            name, width, height,
+            guard: guard || "" , codeRef: codeRef || null};
     }
 
     public render() {
-        const {name, guard, codeRef} = this.state;
-        const {triggerChangesSubmit, id} = this.props;
+        const {name, width, height, guard, codeRef} = this.state;
+        const {triggerChangesSubmit, id, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({id, name, guard, codeRef});
+            triggerChangesSubmit({
+                path,
+                value: {
+                    data: {id, name, guard, codeRef},
+                    size: {width, height}
+                },
+            });
         };
 
         const onChange = (key: string,
@@ -54,28 +67,55 @@ export class TransitionSetting extends React.Component<Props, any> {
 
         return (
             <Form>
-                <Label for="trans-name">Name</Label>
-                <Input
-                    id="trans-name"
-                    value={name}
-                    type="text"
-                    onChange={onChange("name")} />
+                <FormGroup>
+                    <Label>
+                        Name:
+                        <Input
+                            value={name}
+                            type="text"
+                            onChange={onChange("name")} />
+                    </Label>
+                </FormGroup>
 
-                <Label for="trans-guard">Guard</Label>
-                <Input
-                    id="trans-guard"
-                    value={guard}
-                    type="text"
-                    onChange={onChangeGuard} />
+                <FormGroup>
+                    <Label>
+                        Guard:
+                        <Input
+                            value={guard}
+                            type="text"
+                            onChange={onChangeGuard} />
+                    </Label>
+                </FormGroup>
 
-                <Label for="trans-codeRef">Code reference</Label>
-                <Input
-                    id="trans-codeRef"
-                    value={codeRef2String(codeRef)}
-                    type="text"
-                    onChange={onChange("codeRef", codeRefTransform)} />
+                <FormGroup>
+                    <Label>
+                        Code reference:
+                        <Input
+                            value={codeRef2String(codeRef)}
+                            type="text"
+                            onChange={onChange("codeRef", codeRefTransform)} />
+                    </Label>
+                </FormGroup>
 
-                <Button onClick={submit}>Submit</Button>
+                <FormGroup inline={true}>
+                    <Label>
+                        Width:
+                        <Input
+                            value={width}
+                            type="text"
+                            onChange={onChange("width", parseInt)} />
+                    </Label>
+
+                    <Label>
+                        Height:
+                        <Input
+                            value={height}
+                            type="text"
+                            onChange={onChange("height", parseInt)} />
+                    </Label>
+                </FormGroup>
+
+                <Button color="primary" onClick={submit}>Submit</Button>
             </Form>
         );
     }

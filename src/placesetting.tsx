@@ -1,10 +1,16 @@
 import * as React from 'react'
-import {Button, ButtonGroup, Form, Input, Label} from 'reactstrap'
+import {Button, ButtonGroup,
+        Form, FormGroup,
+        Input, Label} from 'reactstrap'
 
+import {ElementValueChanged} from './events'
 import {PlaceData, PlaceDataLayout} from './netmodel'
+import {Size} from './types'
+import {identity} from './utils';
 
-type Props = PlaceData & {
-    triggerChangesSubmit: (placeData: PlaceData) => void;
+type Props = PlaceData & Size & {
+    path: string[];
+    triggerChangesSubmit: (evt: ElementValueChanged) => void;
 };
 
 export class PlaceSetting extends React.Component<Props, any> {
@@ -12,20 +18,28 @@ export class PlaceSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {name, type, initExpr, dataLayout} = this.props;
-        this.state = {name, type, initExpr, dataLayout};
+        const {name, type, initExpr, dataLayout, width, height} = this.props;
+        this.state = {name, type, initExpr, dataLayout, width, height};
     }
 
     public render() {
-        const {name, type, initExpr, dataLayout} = this.state;
-        const {triggerChangesSubmit, id} = this.props;
+        const {name, type, initExpr, dataLayout, width, height} = this.state;
+        const {triggerChangesSubmit, id, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({id, name, type, initExpr, dataLayout});
+            triggerChangesSubmit({
+                path,
+                value: {
+                    data: {id, name, type, initExpr, dataLayout},
+                    size: {width, height}
+                },
+            });
         };
 
-        const onChange = (key: string) => (evt: any) => {
-            const val = evt.target.value;
+
+        const onChange = (key: string,
+                          transform: (v: string) => any = identity) => (evt: any) => {
+            const val = transform(evt.target.value);
             this.setState(() => ({[key]: val}));
         };
 
@@ -35,39 +49,72 @@ export class PlaceSetting extends React.Component<Props, any> {
 
         return (
             <Form>
-                <Label for="elem-name">Name</Label>
-                <Input
-                    id="elem-name"
-                    value={name}
-                    type="text"
-                    onChange={onChange("name")} />
+                <FormGroup>
+                    <Label>
+                       Name
+                        <Input
+                            value={name}
+                            type="text"
+                            onChange={onChange("name")} />
+                    </Label>
+                </FormGroup>
 
-                <Label for="elem-type">Type</Label>
-                <Input
-                    id="elem-type"
-                    value={type}
-                    type="text"
-                    onChange={onChange("type")} />
+                <FormGroup>
+                    <Label>
+                        Type:
+                        <Input
+                            value={type}
+                            type="text"
+                            onChange={onChange("type")} />
+                    </Label>
+                </FormGroup>
 
-                <Label for="elem-initexpr">Initial expression</Label>
-                <Input
-                    id="elem-initexpr"
-                    value={initExpr}
-                    type="text"
-                    onChange={onChange("initExpr")} />
+                <FormGroup>
+                    <Label>
+                        Initial Expression:
+                        <Input
+                            value={initExpr}
+                            type="text"
+                            onChange={onChange("initExpr")} />
+                    </Label>
+                </FormGroup>
 
-                <ButtonGroup>
-                    <Button
-                        onClick={changeDataLayout(PlaceDataLayout.QUEUE)}
-                        active={this.state.dataLayout === PlaceDataLayout.QUEUE}>
-                        Queue
-                    </Button>
-                    <Button
-                        onClick={changeDataLayout(PlaceDataLayout.MULTISET)}
-                        active={this.state.dataLayout === PlaceDataLayout.MULTISET}>
-                        Multiset
-                    </Button>
-                </ButtonGroup>
+                <FormGroup>
+                    <Label>
+                        Data layout:
+                        <ButtonGroup>
+                            <Button
+                                onClick={changeDataLayout(PlaceDataLayout.QUEUE)}
+                                active={this.state.dataLayout === PlaceDataLayout.QUEUE}>
+                                Queue
+                            </Button>
+                            <Button
+                                onClick={changeDataLayout(PlaceDataLayout.MULTISET)}
+                                active={this.state.dataLayout === PlaceDataLayout.MULTISET}>
+                                Multiset
+                            </Button>
+                        </ButtonGroup>
+                    </Label>
+                </FormGroup>
+
+                <FormGroup inline={true}>
+                    <Label>
+                        Width:
+                        <Input
+                            value={width}
+                            type="text"
+                            onChange={onChange("width", parseInt)} />
+                    </Label>
+
+                    <Label>
+                        Height:
+                        <Input
+                            value={height}
+                            type="text"
+                            onChange={onChange("height", parseInt)} />
+                    </Label>
+                </FormGroup>
+
                 <Button color="primary" onClick={submit}>Submit</Button>
             </Form>
         );

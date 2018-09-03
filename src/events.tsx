@@ -5,3 +5,8 @@ export interface PositionChanged {
     "old": Position;
     "new": Position;
 }
+
+export interface ElementValueChanged {
+    "path": string[];
+    "value": any;
+}

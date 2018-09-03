@@ -1,15 +1,14 @@
-import {lensPath, over, path as ramdaPath} from 'ramda';
+import {lensPath, lensProp, over, path as ramdaPath} from 'ramda';
 import * as React from 'react';
 import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom'
 
-import {ArcData, ArcElement,
+import {ArcElement,
         NetElement,
-        PlaceData, PlaceElement,
-        TransitionData, TransitionElement,
-} from './netmodel';
+        PlaceElement,
+        TransitionElement} from './netmodel';
 import {Net} from './netview';
 
-import {PositionChanged} from './events';
+import {ElementValueChanged, PositionChanged} from './events';
 
 import {ArcSetting} from './arcsetting';
 import {PlaceSetting} from './placesetting';
@@ -67,22 +66,27 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 const place = {...ramdaPath(selected.path, this.state.net)} as PlaceElement;
                 settingForm = <PlaceSetting
                     {...place.data}
+                    {...place.size}
+                    path={selected.path}
                     key={`setting-place-${place.data.id}`}
-                    triggerChangesSubmit={this.onChangeElement(selected.path)} />;
+                    triggerChangesSubmit={this.onChangeElementValue} />;
             } else if (selected.path[0] === "transitions") {
                 const transition = {...ramdaPath(
                     selected.path, this.state.net)} as TransitionElement;
                 settingForm = <TransitionSetting
                     {...transition.data}
+                    {...transition.size}
+                    path={selected.path}
                     key={`setting-trans-${transition.data.id}`}
-                    triggerChangesSubmit={this.onChangeElement(selected.path)} />;
+                    triggerChangesSubmit={this.onChangeElementValue} />;
             } else if (selected.path[0] === "arcs") {
                 const arc = {...ramdaPath(
                     selected.path, this.state.net)} as ArcElement;
                 settingForm = <ArcSetting
                     {...arc.data}
+                    path={selected.path}
                     key={`setting-arc${arc.data.id}`}
-                    triggerChangesSubmit={this.onChangeElement(selected.path)} />;
+                    triggerChangesSubmit={this.onChangeElementValue} />;
             }
         }
 
@@ -159,14 +163,19 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         }));
     }
 
-    private onChangeElement = (path: string[]) =>
-        (newData: PlaceData | TransitionData | ArcData) => {
+    private onChangeElementValue = (evt: ElementValueChanged) => {
 
-        this.setState(({net}: any) => ({net: {
-            ...over(lensPath(path),
-                    ({data, ...rest}) => ({...rest, data: {...newData}}),
-                    net)
-        }}));
+        this.setState(({net}: any) => {
+            const keys = Object.keys(evt.value);
+            let o = ramdaPath(evt.path, net);
+            for (const key of keys) {
+                o = over(lensProp(key), () => ({...evt.value[key]}), o);
+            }
+
+            return {
+                net: over(lensPath(evt.path), () => ({...o}), net),
+            };
+        });
     }
 
     private onChangeCanvasToolbarValue = (value: any) => {

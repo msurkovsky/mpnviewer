@@ -1,10 +1,14 @@
 import * as React from 'react'
-import {Button, ButtonGroup, ButtonToolbar, Form, Input, Label} from 'reactstrap'
+import {Button, ButtonGroup, ButtonToolbar,
+        Form, FormGroup,
+        Input, Label} from 'reactstrap'
 
+import {ElementValueChanged} from './events'
 import {ArcData, ArcType} from './netmodel'
 
 type Props = ArcData & {
-    triggerChangesSubmit: (arcData: ArcData) => void;
+    path: string[];
+    triggerChangesSubmit: (evt: ElementValueChanged) => void;
 };
 
 const {SINGLE_HEADED, DOUBLE_HEADED,
@@ -21,10 +25,15 @@ export class ArcSetting extends React.Component<Props, any> {
 
     public render() {
         const {expression, type} = this.state;
-        const {triggerChangesSubmit, id} = this.props;
+        const {triggerChangesSubmit, id, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({id, expression, type});
+            triggerChangesSubmit({
+                path,
+                value: {
+                    data: {id, name, type, expression},
+                },
+            });
         };
 
         const onChangeExpr = (evt: any) => {
@@ -38,37 +47,45 @@ export class ArcSetting extends React.Component<Props, any> {
 
         return (
             <Form>
-                <Label for="arc-expr">Name</Label>
-                <Input
-                    id="arc-expr"
-                    value={expression}
-                    type="text"
-                    onChange={onChangeExpr} />
+                <FormGroup>
+                    <Label>
+                        Expression:
+                        <Input
+                            value={expression}
+                            type="text"
+                            onChange={onChangeExpr} />
+                    </Label>
+                </FormGroup>
 
-                <ButtonToolbar>
-                <ButtonGroup>
-                    <Button
-                        onClick={onClick(SINGLE_HEADED)}
-                        active={type === SINGLE_HEADED}>
-                        Take
-                    </Button>
-                    <Button
-                        onClick={onClick(DOUBLE_HEADED)}
-                        active={type === DOUBLE_HEADED }>
-                        Force-take
-                    </Button>
-                    <Button
-                        onClick={onClick(SINGLE_HEADED_RO)}
-                        active={type === SINGLE_HEADED_RO}>
-                        Read-only
-                    </Button>
-                    <Button
-                        onClick={onClick(DOUBLE_HEADED_RO)}
-                        active={type === DOUBLE_HEADED_RO}>
-                        Force-read-only
-                    </Button>
-                </ButtonGroup>
-                </ButtonToolbar>
+                <FormGroup inline={true}>
+                    <Label>
+                        Type:
+                        <ButtonToolbar>
+                        <ButtonGroup>
+                            <Button
+                                onClick={onClick(SINGLE_HEADED)}
+                                active={type === SINGLE_HEADED}>
+                                Take
+                            </Button>
+                            <Button
+                                onClick={onClick(DOUBLE_HEADED)}
+                                active={type === DOUBLE_HEADED }>
+                                Force-take
+                            </Button>
+                            <Button
+                                onClick={onClick(SINGLE_HEADED_RO)}
+                                active={type === SINGLE_HEADED_RO}>
+                                Read-only
+                            </Button>
+                            <Button
+                                onClick={onClick(DOUBLE_HEADED_RO)}
+                                active={type === DOUBLE_HEADED_RO}>
+                                Force-read-only
+                            </Button>
+                        </ButtonGroup>
+                        </ButtonToolbar>
+                    </Label>
+                </FormGroup>
 
                 <Button color="primary" onClick={submit}>Submit</Button>
             </Form>
