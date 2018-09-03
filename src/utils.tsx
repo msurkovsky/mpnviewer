@@ -1,8 +1,8 @@
-import {lensPath, over, path as ramdaPath} from 'ramda'
-import * as React from 'react'
-import {ArcElement, Net as TNet, NetElement} from './netmodel'
-import {BBox, Circle, Line, Position, Size} from './types'
-import {FontSetting, FontSize, pt2px} from './visualsetting'
+import {lensPath, over, path as ramdaPath, reject} from 'ramda';
+import * as React from 'react';
+import {ArcElement, Net as TNet, NetElement} from './netmodel';
+import {BBox, Circle, Line, Position, Size} from './types';
+import {FontSetting, FontSize, pt2px} from './visualsetting';
 
 const defaultPositions = {
     places: (placeSize: Size) => ({
@@ -149,6 +149,10 @@ export function codeRef2String(v: null | number | [number, number]): string {
     return `${v[0]}-${v[1]}`;
 }
 
+export function rejectNulls (obj: any) {
+    const isNull = (v: any): boolean => (v === null);
+    return reject(isNull, obj);
+}
 export function getPosition(evt: React.MouseEvent | MouseEvent): Position {
     return {x: evt.clientX, y: evt.clientY};
 }
