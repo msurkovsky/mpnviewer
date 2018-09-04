@@ -44,7 +44,11 @@ export class PlaceSetting extends React.Component<Props, any> {
 
         const onChange = (key: string,
                           transform: (v: string) => any = identity) => (evt: any) => {
-            const val = transform(evt.target.value);
+            const fieldStr = evt.target.value;
+            let val: any = null;
+            if (fieldStr !== "") {
+                val = transform(fieldStr);
+            }
             this.setState(() => ({[key]: val}));
         };
 
@@ -106,7 +110,7 @@ export class PlaceSetting extends React.Component<Props, any> {
                     <Label>
                         Compount place label:
                         <Input
-                            value={cpLabel}
+                            value={cpLabel || ""}
                             type="text"
                             onChange={onChange("cpLabel")} />
                     </Label>
