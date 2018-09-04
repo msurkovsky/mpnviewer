@@ -54,6 +54,7 @@ export class Net extends React.Component<any, any> {
                triggerChangeValue, triggerChangeToolbarTools} = this.props;
 
         return (
+            <div id="netcanvas" style={{position: "relative", width, height}}>
             <CanvasContext.Provider value={this.state.canvasContext}>
             <ReactSVGPanZoom
                 ref={(viewerInst: any) => {this.viewerInst = viewerInst}}
@@ -120,6 +121,7 @@ export class Net extends React.Component<any, any> {
                 </svg>
             </ReactSVGPanZoom>
             </CanvasContext.Provider>
+            </div>
         );
     }
 

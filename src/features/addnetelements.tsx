@@ -6,6 +6,7 @@ import {
 import {onMovableMouseDown, onMovableMouseUp} from '../netview/movable'
 import {NetTool} from '../toolbar'
 import {Omit} from '../types'
+import {getPositionOnCanvas, v2dScalarMul, v2dSub} from '../utils';
 import * as Utils from '../utils';
 
 
@@ -52,10 +53,12 @@ const addNetElement = (evt: React.MouseEvent) => {
     const {e: panX, f: panY, a: zoom} = viewerInst.state.value;
     const {width, height} = addingElem.size;
 
-    const position = {
-        x: (evt.clientX - panX)/zoom - width/2,
-        y: (evt.clientY - panY)/zoom - height/2,
-    };
+    const pan = {x: panX, y: panY};
+
+    const mousePosition = getPositionOnCanvas(evt);
+    const position = v2dSub(
+        v2dScalarMul(1/zoom, v2dSub(mousePosition, pan)),
+        {x: width/2, y: height/2});
 
     // somehow add the element into the net
     triggerAddElement({...addingElem, position});

@@ -1,7 +1,7 @@
 import {lensPath, over, path as ramdaPath, reject} from 'ramda';
 import * as React from 'react';
 import {ArcElement, Net as TNet, NetElement} from './netmodel';
-import {BBox, Circle, Line, Position, Size} from './types';
+import {BBox, Circle, Line, Position, Size, Vector2d} from './types';
 import {FontSetting, FontSize, pt2px} from './visualsetting';
 
 const defaultPositions = {
@@ -153,8 +153,15 @@ export function rejectNulls (obj: any) {
     const isNull = (v: any): boolean => (v === null);
     return reject(isNull, obj);
 }
-export function getPosition(evt: React.MouseEvent | MouseEvent): Position {
-    return {x: evt.clientX, y: evt.clientY};
+
+export function getPositionOnCanvas(evt: React.MouseEvent | MouseEvent): Position {
+    const canvas = document.getElementById("netcanvas") as HTMLElement;
+
+    const clientBBox = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - clientBBox.left,
+        y: evt.clientY - clientBBox.top,
+    };
 }
 
 export function computeCenter(bbox: BBox): Position {
@@ -178,19 +185,23 @@ export function floatCheckBound (
     return floatGt(v, a, e) && floatLt(v, b, e);
 }
 
-export function v2dSub (a: Position, b: Position): Position {
+export function v2dSub (a: Vector2d, b: Vector2d): Vector2d {
     return { x: a.x - b.x, y: a.y - b.y };
 }
 
-export function v2dAdd (a: Position, b: Position): Position {
+export function v2dAdd (a: Vector2d, b: Vector2d): Vector2d {
     return { x: a.x + b.x, y: a.y + b.y };
 }
 
-export function v2dSquare (a: Position): Position {
+export function v2dScalarMul (s: number, a: Vector2d): Vector2d {
+    return { x: s * a.x, y: s * a.y };
+}
+
+export function v2dSquare (a: Vector2d): Vector2d {
     return { x: a.x * a.x, y: a.y * a.y };
 }
 
-export function v2dAddComponents (a: Position): number {
+export function v2dAddComponents (a: Vector2d): number {
     return a.x + a.y;
 }
 

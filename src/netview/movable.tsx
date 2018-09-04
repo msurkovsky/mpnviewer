@@ -1,13 +1,13 @@
-import * as React from 'react'
-import * as Utils from '../utils'
+import * as React from 'react';
+import {getPositionOnCanvas, v2dScalarMul, v2dSub} from '../utils';
 
-import {PositionChanged} from '../events'
-import {ArcElement, NetCategory} from '../netmodel'
-import {NetToolbarState} from '../toolbar'
-import {Dict, Position, Size, Vector2d} from '../types'
-import {FontSetting, FontSize} from '../visualsetting'
+import {PositionChanged} from '../events';
+import {ArcElement, NetCategory} from '../netmodel';
+import {NetToolbarState} from '../toolbar';
+import {Dict, Position, Size, Vector2d} from '../types';
+import {FontSetting, FontSize} from '../visualsetting';
 
-import {CanvasContext, CanvasCtxData, Viewer} from './net'
+import {CanvasContext, CanvasCtxData, Viewer} from './net';
 
 // Movable binders ==============================================================
 
@@ -35,9 +35,10 @@ const handleMoving = (e: MouseEvent) => {
 
     const {x, y, zoom, pan, paths, triggerPositionChanged} = info;
 
-    const newPos = Utils.v2dSub({
-        x: (e.clientX - pan.x) / zoom,
-        y: (e.clientY - pan.y) / zoom}, pointerElementDiff);
+    const p = getPositionOnCanvas(e);
+    const newPos = v2dSub(
+        v2dScalarMul(1/zoom, v2dSub(p, pan)),
+        pointerElementDiff);
 
     triggerPositionChanged({
         path: paths.base.concat(paths.position),
@@ -57,10 +58,8 @@ export const onMovableMouseDown = (id: string) => (e: React.MouseEvent) => {
 
     const {x, y, zoom, pan} = info;
 
-    pointerElementDiff = Utils.v2dSub({
-        x: (e.clientX - pan.x) / zoom,
-        y: (e.clientY - pan.y) / zoom
-    }, { x, y });
+    const p = getPositionOnCanvas(e);
+    pointerElementDiff = v2dSub(v2dScalarMul(1/zoom, v2dSub(p, pan)), {x, y});
 
     document.addEventListener('mousemove', handleMoving);
 }

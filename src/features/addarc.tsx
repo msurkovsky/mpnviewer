@@ -28,7 +28,7 @@ function arcEndPointMoving(evt: MouseEvent) {
         return;
     }
 
-    const pos = normalizePosition(Utils.getPosition(evt));
+    const pos = normalizePosition(Utils.getPositionOnCanvas(evt));
     ctx.partialArc.endPosition = pos;
     ctx.triggerAddArc(ctx.partialArc);
 }
@@ -39,7 +39,7 @@ function arcAddNewEndPoint(evt: React.MouseEvent) {
     }
 
     const last = ctx.partialArc.endPosition;
-    const pos = normalizePosition(Utils.getPosition(evt));
+    const pos = normalizePosition(Utils.getPositionOnCanvas(evt));
     ctx.partialArc.innerPoints.push({...last});
     ctx.partialArc.endPosition = pos;
     ctx.triggerAddArc(ctx.partialArc);
