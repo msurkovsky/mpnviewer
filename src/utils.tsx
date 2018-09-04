@@ -19,8 +19,8 @@ const defaultPositions = {
     })
 };
 
-export const emptyFn = () => {/*empty*/};
-export const identity = (v: any) => v;
+export const emptyFn: () => any = () => {/* empty */};
+export const identity = (v: any): void => v;
 
 export const getId = ((id: number) => (): string => {
     return (id++).toString();

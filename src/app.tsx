@@ -66,9 +66,12 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 const place = {...ramdaPath(selected.path, this.state.net)} as PlaceElement;
                 settingForm = <PlaceSetting
                     {...place.data}
+                    {...place.position}
                     {...place.size}
                     path={selected.path}
                     key={`setting-place-${place.data.id}`}
+                    triggerAddPlace={this.onAddNetElement("places")}
+                    triggerRemovePlace={this.onRemoveNetElement("places")}
                     triggerChangesSubmit={this.onChangeElementValue} />;
             } else if (selected.path[0] === "transitions") {
                 const transition = {...ramdaPath(
@@ -98,8 +101,9 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 canvasToolbar={canvasToolbar}
                 netToolbar={netToolbar}
                 triggerSelect={this.onSelect}
+                triggerAddPlace={this.onAddNetElement("places")}
                 triggerAddArc={this.onAddArc}
-                triggerRemoveElement={this.onRemoveElement}
+                triggerRemoveElement={this.onRemoveNetElement}
                 triggerChangeValue={this.onChangeCanvasToolbarValue}
                 triggerChangeNetToolbarValue={this.onChangeNetToolbarValue}
                 triggerChangeToolbarTools={this.onChangeToolbarTools}
@@ -139,7 +143,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         });
     }
 
-    private onRemoveElement = (category: "places" | "transitions" | "arcs") => (id: string) => {
+    private onRemoveNetElement = (category: "places" | "transitions" | "arcs") => (id: string) => {
         this.setState(({net}: any) => {
             const elements = net[category];
             delete elements[id];

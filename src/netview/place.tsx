@@ -1,13 +1,13 @@
 import * as React from 'react';
-import * as Utils from '../utils'
+import * as Utils from '../utils';
 
-import {endAddingArc, startAddingArc} from '../features/addarc'
+import {endAddingArc, startAddingArc} from '../features/addarc';
 import {ArcElement, NetCategory, PlaceData, PlaceDataLayout} from '../netmodel';
-import {NetTool, NetToolbarState} from '../toolbar'
+import {NetTool, NetToolbarState} from '../toolbar';
 import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
 import {createMovable, MouseTriggers, PositionTriggers} from './movable';
-import {Viewer} from './net'
+import {Viewer} from './net';
 import {TextElement} from './textelement';
 
 
@@ -21,7 +21,7 @@ type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
         base: string[];
         position: string[];
     };
-    relatedPositions: PlacePositions;
+    relatedPositions?: PlacePositions;
     viewerInst: Viewer;
     netToolbar: NetToolbarState;
     triggerChangeNetToolbarValue: (value: any) => void;
@@ -101,7 +101,6 @@ class CorePlace extends React.PureComponent<Props> {
             </g>);
         }
 
-        let porViewElement = null;
         let porViewBBox: BBox | null = null;
         if (porView) {
             const porWidth = .7 * width;
@@ -109,34 +108,64 @@ class CorePlace extends React.PureComponent<Props> {
             const porX = x + (width - porWidth) / 2;
             const porY = y - porHeight / 2;
             porViewBBox = {x: porX, y: porY, width: porWidth, height: porHeight};
-            porViewElement = ( // NOTE: I don't think it will work ... maybe would be better to implement simpler version of place
-                <CorePlace
-                    paths={{...paths} /* the same as origin place */}
-                    {...porViewBBox}
-                    id={`porView-${id}`}
-                    name={porView}
-                    type={""/* do not show type; is the same as original place*/}
-                    initExpr=""
-                    dataLayout={PlaceDataLayout.MULTISET}
-                    triggerAddArc={triggerAddArc}
-                />
-            );
         }
 
         const ntX = x + width / 2;
-        let ntY;
-        if (cpLabelBBox) {
-            ntY = y + (height - cpLabelBBox.height / 2) / 2;
-        } else {
-            ntY = y + height / 2;
+        let ntY = y + height / 2;
+
+        if (cpLabelBBox) { // shift the middle up about half of the size
+                           // of the compout label box
+            ntY -= cpLabelBBox.height / 4; // /4 -> y = (height - label.height/2) / 2,
+                                           // i.e., shift just half of the half
         }
 
-        const nameText = Utils.textToSVG(id, name, font.description, "small", {
-            x: ntX,
-            y: ntY,
-            textAnchor: "middle",
-            alignmentBaseline: "central",
-        });
+        if (porViewBBox) {
+            ntY += porViewBBox.height / 4;
+        }
+
+        let nameText = null;
+        if (name) {
+            nameText = Utils.textToSVG(id, name, font.description, "small", {
+                x: ntX,
+                y: ntY,
+                textAnchor: "middle",
+                alignmentBaseline: "central",
+            });
+        }
+
+        let typeElement = null;
+        if (type) {
+            typeElement = <TextElement
+                paths={{
+                    base: [...paths.base],
+                    position: ["relatedPositions", "type"],
+                }}
+                data={{id: `${id}-type`, text: type}}
+                parentPosition={{x, y}}
+                netToolbar={netToolbar}
+                x={relatedPositions!.type.x}
+                y={relatedPositions!.type.y}
+                font={font.code}
+                fontSize="normal"
+                triggerPositionChanged={triggerPositionChanged}/>;
+        }
+
+        let initExprElement = null;
+        if (initExpr) {
+            initExprElement = <TextElement
+                paths={{
+                    base: [...paths.base],
+                    position: ["relatedPositions", "initExpr"],
+                }}
+                data={{id: `${id}-initExpr`, text: initExpr}}
+                parentPosition={{x, y}}
+                netToolbar={netToolbar}
+                x={relatedPositions!.initExpr.x}
+                y={relatedPositions!.initExpr.y}
+                font={font.code}
+                fontSize="small"
+                triggerPositionChanged={triggerPositionChanged}/>
+        }
 
         return (
             <g>
@@ -148,32 +177,8 @@ class CorePlace extends React.PureComponent<Props> {
                 />
                 {cpLabelElement}
                 {nameText}
-                <TextElement
-                    paths={{
-                        base: [...paths.base],
-                        position: ["relatedPositions", "type"],
-                    }}
-                    data={{id: `${id}-type`, text: type}}
-                    parentPosition={{x, y}}
-                    netToolbar={netToolbar}
-                    x={relatedPositions.type.x}
-                    y={relatedPositions.type.y}
-                    font={font.code}
-                    fontSize="normal"
-                    triggerPositionChanged={triggerPositionChanged}/>
-                <TextElement
-                    paths={{
-                        base: [...paths.base],
-                        position: ["relatedPositions", "initExpr"],
-                    }}
-                    data={{id: `${id}-initExpr`, text: initExpr}}
-                    parentPosition={{x, y}}
-                    netToolbar={netToolbar}
-                    x={relatedPositions.initExpr.x}
-                    y={relatedPositions.initExpr.y}
-                    font={font.code}
-                    fontSize="small"
-                    triggerPositionChanged={triggerPositionChanged}/>
+                {typeElement}
+                {initExprElement}
             </g>
         );
     }

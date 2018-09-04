@@ -4,13 +4,16 @@ import {Button, ButtonGroup,
         Input, Label} from 'reactstrap'
 
 import {ElementValueChanged} from './events'
-import {PlaceData, PlaceDataLayout} from './netmodel'
-import {Size} from './types'
+import {PlaceData, PlaceDataLayout, PlaceElement} from './netmodel'
+import {Position, Size} from './types'
 import {identity, rejectNulls} from './utils';
+import {font} from './visualsetting';
 
-type Props = PlaceData & Size & {
+type Props = PlaceData & Position & Size & {
     path: string[];
     triggerChangesSubmit: (evt: ElementValueChanged) => void;
+    triggerAddPlace: (place: PlaceElement) => void;
+    triggerRemovePlace: (id: string) => void;
 };
 
 export class PlaceSetting extends React.Component<Props, any> {
@@ -18,27 +21,64 @@ export class PlaceSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {name, type, initExpr, dataLayout, cpLabel,
+        const {name, type, initExpr, dataLayout, cpLabel, porView,
                width, height} = this.props;
-        this.state = {name, type, initExpr, dataLayout, cpLabel: cpLabel || null,
-                      width, height};
+        this.state = {
+            dataLayout,
+            width, height,
+            name: name || null,
+            type: type || null,
+            initExpr: initExpr || null,
+            cpLabel: cpLabel || null,
+            porView: porView || null,
+        };
     }
 
     public render() {
-        const {name, type, initExpr, dataLayout, cpLabel,
+        const {name, type, initExpr, dataLayout, cpLabel, porView,
                width, height} = this.state;
-        const {triggerChangesSubmit, id, path} = this.props;
+        const {id, path, x, y, triggerChangesSubmit,
+               triggerAddPlace, triggerRemovePlace} = this.props;
 
         const submit = () => {
+            const out = rejectNulls({
+                id, name, type, initExpr, dataLayout, cpLabel, porView,
+            });
+            console.log(out);
             triggerChangesSubmit({
                 path,
                 value: {
                     data: rejectNulls({
-                        id, name, type, initExpr, dataLayout, cpLabel
+                        id, name, type, initExpr, dataLayout, cpLabel, porView,
                     }),
                     size: {width, height}
                 },
             });
+
+            if (porView) {
+                const porWidth = .7 * width;
+                const porHeight = 2 * font.code.size.small;
+                const porX = x + (width - porWidth) / 2;
+                const porY = y - porHeight / 2;
+
+                triggerAddPlace({
+                    data: {
+                        id: `porView-${id}`,
+                        name: porView,
+                        dataLayout: PlaceDataLayout.MULTISET,
+                    },
+                    position: {
+                        x: porX,
+                        y: porY,
+                    },
+                    size: {
+                        width: porWidth,
+                        height: porHeight,
+                    },
+                });
+            } else {
+                triggerRemovePlace(`porView-${id}`);
+            }
         };
 
 
@@ -62,7 +102,7 @@ export class PlaceSetting extends React.Component<Props, any> {
                     <Label>
                        Name
                         <Input
-                            value={name}
+                            value={name || ""}
                             type="text"
                             onChange={onChange("name")} />
                     </Label>
@@ -72,7 +112,7 @@ export class PlaceSetting extends React.Component<Props, any> {
                     <Label>
                         Type:
                         <Input
-                            value={type}
+                            value={type || ""}
                             type="text"
                             onChange={onChange("type")} />
                     </Label>
@@ -82,7 +122,7 @@ export class PlaceSetting extends React.Component<Props, any> {
                     <Label>
                         Initial Expression:
                         <Input
-                            value={initExpr}
+                            value={initExpr || ""}
                             type="text"
                             onChange={onChange("initExpr")} />
                     </Label>
@@ -113,6 +153,16 @@ export class PlaceSetting extends React.Component<Props, any> {
                             value={cpLabel || ""}
                             type="text"
                             onChange={onChange("cpLabel")} />
+                    </Label>
+                </FormGroup>
+
+                <FormGroup>
+                    <Label>
+                        POR View:
+                        <Input
+                            value={porView || ""}
+                            type="text"
+                            onChange={onChange("porView")} />
                     </Label>
                 </FormGroup>
 
