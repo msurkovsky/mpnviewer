@@ -15,16 +15,16 @@ export enum PlaceDataLayout {
 
 export interface PlaceData {
     id: string;
-    name: string;
-    type: DataType;
-    initExpr: string;
     dataLayout: PlaceDataLayout;
+    name?: string;
+    type?: DataType;
+    initExpr?: string;
     cpLabel?: string; // compound place
 }
 
 export interface TransitionData {
     id: string;
-    name: string;
+    name?: string;
     codeRef?: number | [number, number]; // specific reference or range
     guard?: string[];
 }

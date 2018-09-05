@@ -20,8 +20,14 @@ export class PlaceSetting extends React.Component<Props, any> {
 
         const {name, type, initExpr, dataLayout, cpLabel,
                width, height} = this.props;
-        this.state = {name, type, initExpr, dataLayout, cpLabel: cpLabel || null,
-                      width, height};
+
+        this.state = {
+            dataLayout, width, height,
+            name: name || null,
+            type: type || null,
+            initExpr: initExpr || null,
+            cpLabel: cpLabel || null,
+        };
     }
 
     public render() {
@@ -62,7 +68,7 @@ export class PlaceSetting extends React.Component<Props, any> {
                     <Label>
                        Name
                         <Input
-                            value={name}
+                            value={name || ""}
                             type="text"
                             onChange={onChange("name")} />
                     </Label>
@@ -72,7 +78,7 @@ export class PlaceSetting extends React.Component<Props, any> {
                     <Label>
                         Type:
                         <Input
-                            value={type}
+                            value={type || ""}
                             type="text"
                             onChange={onChange("type")} />
                     </Label>
@@ -82,7 +88,7 @@ export class PlaceSetting extends React.Component<Props, any> {
                     <Label>
                         Initial Expression:
                         <Input
-                            value={initExpr}
+                            value={initExpr || ""}
                             type="text"
                             onChange={onChange("initExpr")} />
                     </Label>

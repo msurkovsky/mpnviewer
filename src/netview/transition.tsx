@@ -115,12 +115,16 @@ class CoreTransition extends React.PureComponent<Props> {
             ntY = y + height /2
         }
 
-        const nameText = Utils.textToSVG(id, name, font.description, "small", {
-            x: ntX,
-            y: ntY,
-            textAnchor: "middle",
-            alignmentBaseline: "central",
-        });
+        let nameText = null;
+        if (name) {
+            nameText = Utils.textToSVG(id, name, font.description, "small", {
+                x: ntX,
+                y: ntY,
+                textAnchor: "middle",
+                alignmentBaseline: "central",
+            });
+        }
+
         return (
             <g>
                 <rect className="transition"

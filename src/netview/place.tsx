@@ -109,12 +109,49 @@ class CorePlace extends React.PureComponent<Props> {
             ntY = y + height / 2;
         }
 
-        const nameText = Utils.textToSVG(id, name, font.description, "small", {
-            x: ntX,
-            y: ntY,
-            textAnchor: "middle",
-            alignmentBaseline: "central",
-        });
+        let nameText = null;
+        if (name) {
+          nameText = Utils.textToSVG(id, name, font.description, "small", {
+              x: ntX,
+              y: ntY,
+              textAnchor: "middle",
+              alignmentBaseline: "central",
+          });
+        }
+
+        let typeElement = null;
+        if (type) {
+            typeElement = <TextElement
+                paths={{
+                    base: [...paths.base],
+                    position: ["relatedPositions", "type"],
+                }}
+                data={{id: `${id}-type`, text: type}}
+                parentPosition={{x, y}}
+                netToolbar={netToolbar}
+                x={relatedPositions.type.x}
+                y={relatedPositions.type.y}
+                font={font.code}
+                fontSize="normal"
+                triggerPositionChanged={triggerPositionChanged}/>;
+        }
+
+        let initExprElement = null;
+        if (initExpr) {
+            initExprElement = <TextElement
+                paths={{
+                    base: [...paths.base],
+                    position: ["relatedPositions", "initExpr"],
+                }}
+                data={{id: `${id}-initExpr`, text: initExpr}}
+                parentPosition={{x, y}}
+                netToolbar={netToolbar}
+                x={relatedPositions.initExpr.x}
+                y={relatedPositions.initExpr.y}
+                font={font.code}
+                fontSize="small"
+                triggerPositionChanged={triggerPositionChanged}/>
+        }
 
         return (
             <g>
@@ -125,33 +162,9 @@ class CorePlace extends React.PureComponent<Props> {
                     onClick={triggerClick}
                 />
                 {cpLabelElement}
+                {typeElement}
+                {initExprElement}
                 {nameText}
-                <TextElement
-                    paths={{
-                        base: [...paths.base],
-                        position: ["relatedPositions", "type"],
-                    }}
-                    data={{id: `${id}-type`, text: type}}
-                    parentPosition={{x, y}}
-                    netToolbar={netToolbar}
-                    x={relatedPositions.type.x}
-                    y={relatedPositions.type.y}
-                    font={font.code}
-                    fontSize="normal"
-                    triggerPositionChanged={triggerPositionChanged}/>
-                <TextElement
-                    paths={{
-                        base: [...paths.base],
-                        position: ["relatedPositions", "initExpr"],
-                    }}
-                    data={{id: `${id}-initExpr`, text: initExpr}}
-                    parentPosition={{x, y}}
-                    netToolbar={netToolbar}
-                    x={relatedPositions.initExpr.x}
-                    y={relatedPositions.initExpr.y}
-                    font={font.code}
-                    fontSize="small"
-                    triggerPositionChanged={triggerPositionChanged}/>
             </g>
         );
     }
