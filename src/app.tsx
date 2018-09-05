@@ -66,9 +66,13 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 const place = {...ramdaPath(selected.path, this.state.net)} as PlaceElement;
                 settingForm = <PlaceSetting
                     {...place.data}
+                    {...place.position}
                     {...place.size}
                     path={selected.path}
                     key={`setting-place-${place.data.id}`}
+                    triggerAddPlace={this.onAddNetElement("places")}
+                    triggerRemovePlace={this.onRemoveElement("places")}
+                    triggerGetPlace={this.onGetNetElement("places")}
                     triggerChangesSubmit={this.onChangeElementValue} />;
             } else if (selected.path[0] === "transitions") {
                 const transition = {...ramdaPath(
@@ -147,6 +151,11 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 net: {...over(lensPath([category]), () => ({...elements}), net)}
             };
         });
+    }
+
+    private onGetNetElement = (category: "places" | "transitions" | "arcs") => (id: string): any => {
+        const {net} = this.state;
+        return ramdaPath([category, id], net);
     }
 
     private onSelect = (path: string[] | null) => () => {

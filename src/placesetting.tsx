@@ -4,13 +4,17 @@ import {Button, ButtonGroup,
         Input, Label} from 'reactstrap'
 
 import {ElementValueChanged} from './events'
-import {PlaceData, PlaceDataLayout} from './netmodel'
-import {Size} from './types'
+import {PlaceData, PlaceDataLayout, PlaceElement} from './netmodel'
+import {Position, Positionable, RelativePosition, Size} from './types'
 import {identity, rejectNulls} from './utils';
+import {font} from './visualsetting'
 
-type Props = PlaceData & Size & {
+type Props = PlaceData & (Position | RelativePosition) & Size & {
     path: string[];
     triggerChangesSubmit: (evt: ElementValueChanged) => void;
+    triggerAddPlace: (place: PlaceElement) => void;
+    triggerRemovePlace: (id: string) => void;
+    triggerGetPlace: (id: string) => PlaceElement;
 };
 
 export class PlaceSetting extends React.Component<Props, any> {
@@ -18,7 +22,7 @@ export class PlaceSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {name, type, initExpr, dataLayout, cpLabel,
+        const {name, type, initExpr, dataLayout, cpLabel, porView,
                width, height} = this.props;
 
         this.state = {
@@ -27,24 +31,73 @@ export class PlaceSetting extends React.Component<Props, any> {
             type: type || null,
             initExpr: initExpr || null,
             cpLabel: cpLabel || null,
+            porView: porView || null,
         };
     }
 
     public render() {
-        const {name, type, initExpr, dataLayout, cpLabel,
+        const {name, type, initExpr, dataLayout, cpLabel, porView,
                width, height} = this.state;
-        const {triggerChangesSubmit, id, path} = this.props;
+        const {triggerChangesSubmit, x, y,
+               triggerAddPlace, triggerRemovePlace, triggerGetPlace, id, path} = this.props;
+
 
         const submit = () => {
-            triggerChangesSubmit({
-                path,
-                value: {
-                    data: rejectNulls({
-                        id, name, type, initExpr, dataLayout, cpLabel
-                    }),
-                    size: {width, height}
-                },
-            });
+          triggerChangesSubmit({
+              path,
+              value: {
+                  data: rejectNulls({
+                      id, name, type, initExpr, dataLayout, cpLabel
+                  }),
+                  size: {width, height},
+              },
+          });
+
+          if (porView) {
+              const porWidth = .7 * width;
+              const porHeight = 2 * font.code.size.small;
+
+              const PORRelPos = class extends RelativePosition {
+                  constructor (anchorElement: Positionable) {
+                      super(anchorElement);
+                  }
+
+                  public fetch() {
+                      const {
+                          data: {id: fId},
+                          position: {x: fX, y: fY},
+                          size: {width: fW, height: fH},
+                      } = triggerGetPlace(this.anchorElement.id);
+
+                      return {id: fId, x: fX, y: fY, width: fW, height: fH};
+                  }
+
+                  public getX () {
+
+                      const {x: anchorX, width: anchorWidth} = this.fetch();
+
+                      return anchorX + (anchorWidth - porWidth) / 2;
+                  }
+
+                  public getY() {
+                      const {y: anchorY} = this.fetch();
+                      return anchorY - porHeight / 2;
+                  }
+              }
+
+              const relPos = new PORRelPos({id, x, y, width, height});
+              triggerAddPlace({
+                  data: {
+                      id: `${id}-porView`,
+                      name: porView,
+                      dataLayout: PlaceDataLayout.MULTISET,
+                  },
+                  position: relPos,
+                  size: {width: porWidth, height: porHeight},
+              });
+          } else {
+              triggerRemovePlace(`${id}-porView`);
+          }
         };
 
 
@@ -119,6 +172,16 @@ export class PlaceSetting extends React.Component<Props, any> {
                             value={cpLabel || ""}
                             type="text"
                             onChange={onChange("cpLabel")} />
+                    </Label>
+                </FormGroup>
+
+                <FormGroup>
+                    <Label>
+                        Partial order view:
+                        <Input
+                            value={porView || ""}
+                            type="text"
+                            onChange={onChange("porView")} />
                     </Label>
                 </FormGroup>
 

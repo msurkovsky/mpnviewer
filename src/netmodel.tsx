@@ -1,4 +1,4 @@
-import {Dict, Omit, Position, Size} from './types'
+import {Dict, Omit, Position, RelativePosition, Size} from './types'
 
 export enum AMT {
     UNIT = "unit",
@@ -20,6 +20,7 @@ export interface PlaceData {
     type?: DataType;
     initExpr?: string;
     cpLabel?: string; // compound place
+    porView?: string;
 }
 
 export interface TransitionData {
@@ -45,7 +46,7 @@ export interface ArcData {
 }
 
 interface CommonAttributes {
-    position: Position;
+    position: Position | RelativePosition;
     size: Size;
     relatedPositions?: Dict<Position>;
 }

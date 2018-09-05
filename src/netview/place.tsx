@@ -1,3 +1,4 @@
+import {pick} from 'ramda';
 import * as React from 'react';
 import * as Utils from '../utils'
 
@@ -31,6 +32,10 @@ type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
 };
 
 class CorePlace extends React.PureComponent<Props> {
+
+    public getPosition (): Position {
+        return pick(['x','y'], this.props);
+    }
 
     public render () {
 
