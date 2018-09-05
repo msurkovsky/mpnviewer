@@ -9,7 +9,7 @@ import {Position, Positionable, RelativePosition, Size} from './types'
 import {identity, rejectNulls} from './utils';
 import {font} from './visualsetting'
 
-type Props = PlaceData & (Position | RelativePosition) & Size & {
+type Props = PlaceData & Position & Size & {
     path: string[];
     triggerChangesSubmit: (evt: ElementValueChanged) => void;
     triggerAddPlace: (place: PlaceElement) => void;
@@ -72,14 +72,13 @@ export class PlaceSetting extends React.Component<Props, any> {
                       return {id: fId, x: fX, y: fY, width: fW, height: fH};
                   }
 
-                  public getX () {
-
+                  public get x () {
                       const {x: anchorX, width: anchorWidth} = this.fetch();
 
                       return anchorX + (anchorWidth - porWidth) / 2;
                   }
 
-                  public getY() {
+                  public get y () {
                       const {y: anchorY} = this.fetch();
                       return anchorY - porHeight / 2;
                   }

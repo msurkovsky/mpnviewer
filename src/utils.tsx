@@ -28,7 +28,8 @@ export const getId = ((id: number) => (): string => {
 
 export function fillElementDefaultRelatedPosition(element: NetElement, category: string) {
     const relatedPositions = defaultPositions[category](element.size);
-    return {...element, relatedPositions};
+    return Object.assign({}, element, {relatedPositions});
+    /* return {...element, relatedPositions}; */
 }
 
 export function fillArcsDefaultRelatedPosition(net: TNet) {

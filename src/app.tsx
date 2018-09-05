@@ -66,7 +66,8 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 const place = {...ramdaPath(selected.path, this.state.net)} as PlaceElement;
                 settingForm = <PlaceSetting
                     {...place.data}
-                    {...place.position}
+                    x={place.position.x}
+                    y={place.position.y}
                     {...place.size}
                     path={selected.path}
                     key={`setting-place-${place.data.id}`}
@@ -128,7 +129,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
             const elements = net[category];
             elements[element.data.id] = fillElementDefaultRelatedPosition(element, category);
             return {
-                net: {...over(lensPath([category]), () => ({...elements}), net)}
+                net: {...over(lensPath([category]), () => elements, net)}
             };
         });
     }
@@ -168,7 +169,8 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
 
     private onPositionChanged = (e: PositionChanged) => {
         this.setState(({net}: any) => ({
-            net: {...over(lensPath(e.path), () => ({...e.new}), net)}
+            /* net: {...over(lensPath(e.path), () => ({...e.new}), net)} */
+            net: {...over(lensPath(e.path), () => Object.assign({}, e.new), net)}
         }));
     }
 

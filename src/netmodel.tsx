@@ -1,4 +1,4 @@
-import {Dict, Omit, Position, RelativePosition, Size} from './types'
+import {Dict, Omit, Position, Size} from './types'
 
 export enum AMT {
     UNIT = "unit",
@@ -46,7 +46,7 @@ export interface ArcData {
 }
 
 interface CommonAttributes {
-    position: Position | RelativePosition;
+    position: Position;
     size: Size;
     relatedPositions?: Dict<Position>;
 }

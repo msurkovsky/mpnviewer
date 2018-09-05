@@ -157,7 +157,8 @@ export class Net extends React.Component<any, any> {
                 }
             }
 
-            const startPosition = Utils.computeCenter({...s.position, ...s.size});
+            /* const startPosition = Utils.computeCenter({...s.position, ...s.size}); */
+            const startPosition = Utils.computeCenter({x: s.position.x, y: s.position.y, ...s.size});
 
             let prelastPos = startPosition;
             if (innerPoints.length > 0) {
@@ -168,7 +169,8 @@ export class Net extends React.Component<any, any> {
             if (isEndPlace) { // TODO: better check
                 r = e.size.height / 2;
             }
-            const endPosition = Utils.rrectCollision({...e.position, ...e.size}, prelastPos, r);
+            /* const endPosition = Utils.rrectCollision({...e.position, ...e.size}, prelastPos, r); */
+            const endPosition = Utils.rrectCollision({x: e.position.x, y: e.position.y, ...e.size}, prelastPos, r);
             const points = [startPosition, ...innerPoints, endPosition];
 
             const basePath = ["arcs", key];
@@ -212,7 +214,8 @@ export class Net extends React.Component<any, any> {
                     }}
                     data={data}
                     parentPosition={{x: 0, y: 0}}
-                    {...position}
+                    x={position.x}
+                    y={position.y}
                     {...size}
                     viewerInst={this.state.viewerInst}
                     triggerSelect={triggerSelect(basePath)}
@@ -254,7 +257,8 @@ export class Net extends React.Component<any, any> {
                     }}
                     data={data}
                     parentPosition={{x: 0, y: 0}}
-                    {...position}
+                    x={position.x}
+                    y={position.y}
                     {...size}
                     viewerInst={this.state.viewerInst}
                     triggerSelect={triggerSelect(basePath)}
