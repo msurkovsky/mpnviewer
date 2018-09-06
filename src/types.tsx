@@ -1,5 +1,9 @@
+
 export interface Dict<T> { [key: string]: T };
+
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export type Path = string[];
 
 export interface Position {
     x: number;

@@ -28,6 +28,7 @@ interface Props { // TODO: what about the any arguments of events?
     triggerRemoveTransition: (evt: any) => void;
     triggerSaveNet: (evt: any) => void;
     triggerLoadNet: (evt: any) => void;
+    triggerPositionChanged: (evt: any) => void;
 }
 
 export class Toolbar extends React.Component<Props, any> {
@@ -44,6 +45,7 @@ export class Toolbar extends React.Component<Props, any> {
             triggerChangeToolbarTools,
             triggerAddPlace, triggerAddTransition,
             triggerRemovePlace, triggerRemoveTransition,
+            triggerPositionChanged,
             triggerSaveNet,
             triggerLoadNet,
         } = this.props;
@@ -62,6 +64,7 @@ export class Toolbar extends React.Component<Props, any> {
                 element,
                 triggerAddNetElement,
                 triggerRemoveNetElement,
+                triggerPositionChanged,
                 triggerChangeToolbarTools,
             )(evt);
         };

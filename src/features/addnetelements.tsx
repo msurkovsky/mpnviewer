@@ -1,13 +1,15 @@
 import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
+import {PositionChanged} from '../events';
 import {
-    AMT, NetElement, PlaceDataLayout,
+    AMT, isPlace, isTransition,
+    NetElement, PlaceDataLayout,
     PlaceElement, TransitionElement, UnpositionedNetElement
 } from '../netmodel';
-import {onMovableMouseDown, onMovableMouseUp} from '../netview/movable'
 import {Viewer} from '../netview/net'
 import {NetTool} from '../toolbar'
 import {Omit} from '../types'
 import * as Utils from '../utils';
+import {startMoving, stopMoving} from './move'
 
 const {getPositionOnCanvas, v2dScalarMul, v2dSub} = Utils;
 
@@ -47,6 +49,7 @@ let ctx: {
     viewerInst: Viewer;
     triggerAddNetElement: (elem: NetElement) => void;
     triggerRemoveNetElement: (id: string) => void;
+    triggerPositionChanged: (evt: PositionChanged) => void;
     triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
 } | null = null;
 
@@ -66,10 +69,21 @@ const addNetElement = (evt: React.MouseEvent) => {
         {x: width/2, y: height/2});
 
     // somehow add the element into the net
-    ctx.triggerAddNetElement({...ctx.addingElement, position});
+    const elem = {...ctx.addingElement, position};
+    ctx.triggerAddNetElement(elem);
 
     // pass the control to movable component and remove enter event
-    onMovableMouseDown(ctx.addingElement.data.id)(evt);
+    let posPath;
+
+    if (isPlace(elem)) {
+        posPath = ["places", elem.data.id, "position"];
+    } else if (isTransition(elem)) {
+        posPath = ["transitions", elem.data.id, "position"];
+    } else {
+        throw new Error("invalid element");
+    }
+    const {x, y} = position;
+    startMoving(x, y, zoom, pan, posPath, ctx.triggerPositionChanged)(evt);
     ctx.viewerInst.ViewerDOM.removeEventListener("mouseenter", addNetElement);
 }
 
@@ -78,19 +92,18 @@ export const startAddingNetElement = (
     addingElement: UnpositionedNetElement,
     triggerAddNetElement: (elem: NetElement) => void,
     triggerRemoveNetElement: (id: string) => void,
+    triggerPositionChanged: (evt: PositionChanged) => void,
     triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void,
 ) => (evt: React.MouseEvent) => {
 
     ctx = {addingElement, viewerInst,
            triggerAddNetElement, triggerRemoveNetElement,
-           triggerChangeToolbarTools};
+           triggerPositionChanged, triggerChangeToolbarTools};
     ctx.triggerChangeToolbarTools(TOOL_NONE, null);
     attachEvents();
 }
 
 export function endAddingNetElement(evt: React.MouseEvent) {
-    onMovableMouseUp(evt);
-
     if (ctx === null) {
         return;
     }
@@ -107,16 +120,13 @@ export function cancelAddingNetElement(evt?: React.MouseEvent) {
     }
 
     if (evt) {
-        onMovableMouseUp(evt);
+        stopMoving(evt);
         evt.preventDefault();
     }
 
     ctx.triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE);
     ctx.triggerRemoveNetElement(ctx.addingElement.data.id);
 
-    /*
-    ctx.triggerChangeNetToolbarValue(null); // TODO: ?
-    */
     detachEvents();
     ctx = null;
 }

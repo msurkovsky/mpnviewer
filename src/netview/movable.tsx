@@ -1,80 +1,14 @@
 import * as React from 'react';
-import {emptyFn, getPositionOnCanvas, v2dScalarMul, v2dSub} from '../utils';
+import * as Utils from '../utils';
 
 import {PositionChanged} from '../events';
 import {ArcElement, NetCategory} from '../netmodel';
 import {NetToolbarState} from '../toolbar';
-import {Dict, Position, Size, Vector2d} from '../types';
+import {Dict, Position, Size} from '../types';
 import {FontSetting, FontSize} from '../visualsetting';
 
+import {startMoving, stopMoving} from '../features/move';
 import {CanvasContext, CanvasCtxData, Viewer} from './net';
-
-// Movable binders ==============================================================
-
-let activeId: string | null = null;
-let pointerElementDiff: Vector2d | null = null;
-
-const moveInfo: Dict<{
-    x: number;
-    y: number;
-    zoom: number;
-    pan: Position;
-    paths: Dict<string[]>;
-    triggerPositionChanged: (evt: PositionChanged) => void;
-} | null> = {};
-
-const handleMoving = (e: MouseEvent) => {
-    if (activeId === null) {
-        return;
-    }
-
-    const info = moveInfo[activeId];
-    if (pointerElementDiff === null || info === null) {
-        return;
-    }
-    e.stopPropagation();
-
-    const {x, y, zoom, pan, paths, triggerPositionChanged} = info;
-
-    const p = getPositionOnCanvas(e);
-    const newPos = v2dSub(
-        v2dScalarMul(1/zoom, v2dSub(p, pan)),
-        pointerElementDiff);
-
-    triggerPositionChanged({
-        path: paths.base.concat(paths.position),
-        new: newPos,
-        old: {x, y},
-    });
-}
-
-export const onMovableMouseDown = (id: string) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const info = moveInfo[id];
-    if (info === null) {
-        return;
-    }
-    activeId = id;
-
-    const {x, y, zoom, pan} = info;
-
-    const p = getPositionOnCanvas(e);
-    pointerElementDiff = v2dSub(v2dScalarMul(1/zoom, v2dSub(p, pan)), {x, y});
-
-    document.addEventListener('mousemove', handleMoving);
-}
-
-export const onMovableMouseUp = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    document.removeEventListener('mousemove', handleMoving);
-    activeId = null;
-    // NOTE: do not remove moveInfo[activeId]; need to keep the last info
-    // otherwise it would have to be passed by `onMovableMouseDown`
-    pointerElementDiff = null;
-}
-
 
 // Moveable HOC ================================================================
 
@@ -141,10 +75,11 @@ export function createMovable<ComponentProps extends BaseComponentProps,
                    triggerAddArc, triggerRemoveElement,
                    netToolbar, triggerChangeNetToolbarValue,
                    font, fontSize,
-                   triggerPositionChanged=emptyFn} = this.props;
+                   triggerPositionChanged=Utils.emptyFn} = this.props;
 
-            moveInfo[data.id] = {x, y, zoom, pan, paths, triggerPositionChanged};
-            const handleMouseDown = onMovableMouseDown(data.id);
+            const handleMouseDown = startMoving(
+                x, y, zoom, pan,
+                paths.base.concat(paths.position), triggerPositionChanged);
 
             return (
                 <Component
@@ -165,7 +100,7 @@ export function createMovable<ComponentProps extends BaseComponentProps,
                     triggerRemoveElement={triggerRemoveElement}
                     triggerChangeNetToolbarValue={triggerChangeNetToolbarValue}
                     triggerMouseDown={handleMouseDown}
-                    triggerMouseUp={onMovableMouseUp}
+                    triggerMouseUp={stopMoving}
                     triggerPositionChanged={triggerPositionChanged}
                 />
             );

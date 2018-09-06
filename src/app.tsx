@@ -116,7 +116,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerRemoveTransition={this.onRemoveNetElement("transitions")}
                 triggerSaveNet={this.onSaveNet}
                 triggerLoadNet={this.onLoadNet}
-            />
+                triggerPositionChanged={this.onPositionChanged} />
             {settingForm}
             </div>
         );
