@@ -4,11 +4,12 @@ import {
     PlaceElement, TransitionElement, UnpositionedNetElement
 } from '../netmodel';
 import {onMovableMouseDown, onMovableMouseUp} from '../netview/movable'
+import {Viewer} from '../netview/net'
 import {NetTool} from '../toolbar'
 import {Omit} from '../types'
-import {getPositionOnCanvas, v2dScalarMul, v2dSub} from '../utils';
 import * as Utils from '../utils';
 
+const {getPositionOnCanvas, v2dScalarMul, v2dSub} = Utils;
 
 export function emptyPlace (): Omit<PlaceElement, "position"> {
     return {
@@ -41,19 +42,21 @@ export function emptyTransition(): Omit<TransitionElement, "position"> {
     };
 }
 
-let addingElem: UnpositionedNetElement | null = null;
-let triggerAddElement: ((elem: NetElement) => void) | null = null;
-let triggerChangeToolbarTools: ((canvasTool: any, netTool: NetTool | null) => void) | null = null;
-let viewerInst: {ViewerDOM: any, state: any} | null = null;
+let ctx: {
+    addingElement: UnpositionedNetElement;
+    viewerInst: Viewer;
+    triggerAddNetElement: (elem: NetElement) => void;
+    triggerRemoveNetElement: (id: string) => void;
+    triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
+} | null = null;
 
 const addNetElement = (evt: React.MouseEvent) => {
-    if (addingElem === null || triggerAddElement === null || viewerInst === null) {
-        // TODO: make one "nullable" element
+    if (ctx === null) {
         return;
     }
 
-    const {e: panX, f: panY, a: zoom} = viewerInst.state.value;
-    const {width, height} = addingElem.size;
+    const {e: panX, f: panY, a: zoom} = ctx.viewerInst.state.value;
+    const {width, height} = ctx.addingElement.size;
 
     const pan = {x: panX, y: panY};
 
@@ -63,42 +66,77 @@ const addNetElement = (evt: React.MouseEvent) => {
         {x: width/2, y: height/2});
 
     // somehow add the element into the net
-    triggerAddElement({...addingElem, position});
+    ctx.triggerAddNetElement({...ctx.addingElement, position});
 
     // pass the control to movable component and remove enter event
-    onMovableMouseDown(addingElem.data.id)(evt);
-    viewerInst.ViewerDOM.removeEventListener("mouseenter", addNetElement);
+    onMovableMouseDown(ctx.addingElement.data.id)(evt);
+    ctx.viewerInst.ViewerDOM.removeEventListener("mouseenter", addNetElement);
 }
 
 export const startAddingNetElement = (
-    elem: UnpositionedNetElement,
-    viewer: {ViewerDOM: any, state: any},
-    onAddElement: (elem: NetElement) => void,
-    onChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void,
+    viewerInst: Viewer,
+    addingElement: UnpositionedNetElement,
+    triggerAddNetElement: (elem: NetElement) => void,
+    triggerRemoveNetElement: (id: string) => void,
+    triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void,
 ) => (evt: React.MouseEvent) => {
 
-    addingElem = elem;
-    viewerInst = viewer;
-    triggerAddElement = onAddElement;
-    triggerChangeToolbarTools = onChangeToolbarTools;
-    triggerChangeToolbarTools(TOOL_NONE, null);
-    viewerInst.ViewerDOM.addEventListener("mouseenter", addNetElement)
-    viewerInst.ViewerDOM.addEventListener("click", endAddingNetElement);
+    ctx = {addingElement, viewerInst,
+           triggerAddNetElement, triggerRemoveNetElement,
+           triggerChangeToolbarTools};
+    ctx.triggerChangeToolbarTools(TOOL_NONE, null);
+    attachEvents();
 }
 
 export function endAddingNetElement(evt: React.MouseEvent) {
     onMovableMouseUp(evt);
 
-    if (viewerInst !== null) {
-        viewerInst.ViewerDOM.removeEventListener("click", endAddingNetElement);
+    if (ctx === null) {
+        return;
     }
 
-    if (triggerChangeToolbarTools !== null) {
-        triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE);
-        triggerChangeToolbarTools = null;
+    ctx.triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE);
+    detachEvents();
+    ctx = null;
+}
+
+export function cancelAddingNetElement(evt?: React.MouseEvent) {
+
+    if (ctx === null) {
+        return;
     }
 
-    addingElem = null;
-    viewerInst = null;
-    triggerAddElement = null;
+    if (evt) {
+        onMovableMouseUp(evt);
+        evt.preventDefault();
+    }
+
+    ctx.triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE);
+    ctx.triggerRemoveNetElement(ctx.addingElement.data.id);
+
+    /*
+    ctx.triggerChangeNetToolbarValue(null); // TODO: ?
+    */
+    detachEvents();
+    ctx = null;
+}
+
+function attachEvents () {
+    if (ctx === null) {
+        return;
+    }
+
+    ctx.viewerInst.ViewerDOM.addEventListener("mouseenter", addNetElement)
+    ctx.viewerInst.ViewerDOM.addEventListener("click", endAddingNetElement);
+    ctx.viewerInst.ViewerDOM.addEventListener("contextmenu", cancelAddingNetElement);
+}
+
+function detachEvents () {
+    if (ctx === null) {
+        return;
+    }
+
+    ctx.viewerInst.ViewerDOM.removeEventListener("mouseenter", addNetElement)
+    ctx.viewerInst.ViewerDOM.removeEventListener("click", endAddingNetElement);
+    ctx.viewerInst.ViewerDOM.removeEventListener("contextmenu", cancelAddingNetElement);
 }

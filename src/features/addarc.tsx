@@ -7,10 +7,10 @@ import * as Utils from '../utils';
 type AE = ArcElement | PartialArcElement;
 
 let ctx: {
-    viewerInst: Viewer,
-    partialArc: PartialArcElement,
+    viewerInst: Viewer;
+    partialArc: PartialArcElement;
     triggerAddArc: (arc: AE) => void;
-    triggerRemoveArc: (id: string) => void,
+    triggerRemoveArc: (id: string) => void;
     triggerChangeNetToolbarValue: (value: any) => void;
 } | null = null;
 

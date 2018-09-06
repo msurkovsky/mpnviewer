@@ -3,6 +3,7 @@ import * as React from 'react';
 import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom'
 
 import {ArcElement,
+        NetCategory,
         NetElement,
         PlaceElement,
         TransitionElement} from './netmodel';
@@ -99,7 +100,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 netToolbar={netToolbar}
                 triggerSelect={this.onSelect}
                 triggerAddArc={this.onAddArc}
-                triggerRemoveElement={this.onRemoveElement}
+                triggerRemoveElement={this.onRemoveNetElement}
                 triggerChangeValue={this.onChangeCanvasToolbarValue}
                 triggerChangeNetToolbarValue={this.onChangeNetToolbarValue}
                 triggerChangeToolbarTools={this.onChangeToolbarTools}
@@ -111,6 +112,8 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerChangeToolbarTools={this.onChangeToolbarTools}
                 triggerAddPlace={this.onAddNetElement("places")}
                 triggerAddTransition={this.onAddNetElement("transitions")}
+                triggerRemovePlace={this.onRemoveNetElement("places")}
+                triggerRemoveTransition={this.onRemoveNetElement("transitions")}
                 triggerSaveNet={this.onSaveNet}
                 triggerLoadNet={this.onLoadNet}
             />
@@ -139,7 +142,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         });
     }
 
-    private onRemoveElement = (category: "places" | "transitions" | "arcs") => (id: string) => {
+    private onRemoveNetElement = (category: NetCategory) => (id: string) => {
         this.setState(({net}: any) => {
             const elements = net[category];
             delete elements[id];

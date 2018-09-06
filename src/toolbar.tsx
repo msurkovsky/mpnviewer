@@ -17,13 +17,15 @@ export interface NetToolbarState {
     value: any
 }
 
-interface Props {
+interface Props { // TODO: what about the any arguments of events?
     activeTool: any;
     activeNetTool: NetTool,
     triggerFitNet: (evt: any) => void;
     triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
     triggerAddPlace: (evt: any) => void;
     triggerAddTransition: (evt: any) => void;
+    triggerRemovePlace: (evt: any) => void;
+    triggerRemoveTransition: (evt: any) => void;
     triggerSaveNet: (evt: any) => void;
     triggerLoadNet: (evt: any) => void;
 }
@@ -41,22 +43,25 @@ export class Toolbar extends React.Component<Props, any> {
             activeTool, activeNetTool,
             triggerChangeToolbarTools,
             triggerAddPlace, triggerAddTransition,
+            triggerRemovePlace, triggerRemoveTransition,
             triggerSaveNet,
             triggerLoadNet,
         } = this.props;
 
-        const addNetElement =
-            (netTool: NetTool,
+        const addNetElement = (
+            netTool: NetTool,
             getElement: () => UnpositionedNetElement,
-             triggerAddElement: (evt: any) => void) =>
-                (evt: React.MouseEvent) => {
+            triggerAddNetElement: (evt: any) => void,
+            triggerRemoveNetElement: (id: string) => void
+        ) => (evt: React.MouseEvent) => {
 
-            const elem = getElement();
+            const element = getElement();
 
             startAddingNetElement(
-                elem,
                 this.viewerInst,
-                triggerAddElement,
+                element,
+                triggerAddNetElement,
+                triggerRemoveNetElement,
                 triggerChangeToolbarTools,
             )(evt);
         };
@@ -78,13 +83,15 @@ export class Toolbar extends React.Component<Props, any> {
             <ButtonGroup>
                 <Button onClick={addNetElement(NetTool.ADD_PLACE,
                                                emptyPlace,
-                                               triggerAddPlace)}
+                                               triggerAddPlace,
+                                               triggerRemovePlace)}
                         active={activeNetTool === NetTool.ADD_PLACE}>
                     Place
                 </Button>
                 <Button onClick={addNetElement(NetTool.ADD_TRANSITION,
                                                emptyTransition,
-                                               triggerAddTransition)}
+                                               triggerAddTransition,
+                                               triggerRemoveTransition)}
                         active={activeNetTool === NetTool.ADD_TRANSITION}>
                     Transition
                 </Button>

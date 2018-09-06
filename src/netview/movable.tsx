@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {getPositionOnCanvas, v2dScalarMul, v2dSub} from '../utils';
+import {emptyFn, getPositionOnCanvas, v2dScalarMul, v2dSub} from '../utils';
 
 import {PositionChanged} from '../events';
 import {ArcElement, NetCategory} from '../netmodel';
@@ -13,14 +13,15 @@ import {CanvasContext, CanvasCtxData, Viewer} from './net';
 
 let activeId: string | null = null;
 let pointerElementDiff: Vector2d | null = null;
-const moveInfo: {[key: string]: {
+
+const moveInfo: Dict<{
     x: number;
     y: number;
     zoom: number;
     pan: Position;
-    paths: {[key: string]: string[]};
+    paths: Dict<string[]>;
     triggerPositionChanged: (evt: PositionChanged) => void;
-} | null} = {};
+} | null> = {};
 
 const handleMoving = (e: MouseEvent) => {
     if (activeId === null) {
@@ -67,9 +68,7 @@ export const onMovableMouseDown = (id: string) => (e: React.MouseEvent) => {
 export const onMovableMouseUp = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (handleMoving !== null) {
-        document.removeEventListener('mousemove', handleMoving);
-    }
+    document.removeEventListener('mousemove', handleMoving);
     activeId = null;
     // NOTE: do not remove moveInfo[activeId]; need to keep the last info
     // otherwise it would have to be passed by `onMovableMouseDown`
@@ -107,23 +106,24 @@ type BaseComponentProps = Position & Partial<Size> & MouseTriggers & PositionTri
     className?: string;
 };
 
+// => // shared props of BaseComponentProps and Moveable Props
 type Props<T extends {}> = Position & Partial<Size> & PositionTriggers & {
-    paths: {
+    paths: {                                                                    //
         base: string[];
         position: string[];
     };
     data: T;
     parentPosition: Position;
-    triggerSelect?: () => void;
-    relatedPositions?: Dict<Position>;
-    viewerInst?: Viewer;
-    netToolbar?: NetToolbarState;
-    triggerChangeNetToolbarValue?: (value: any) => void;
-    triggerAddArc?: (arc: ArcElement) => void;
-    triggerRemoveElement?: (category: NetCategory) => (id: string) => void;
-    font?: FontSetting;
-    fontSize?: FontSize;
-    className?: string;
+    triggerSelect?: () => void;                                                 //
+    relatedPositions?: Dict<Position>;                                          //
+    viewerInst?: Viewer;                                                        //
+    netToolbar?: NetToolbarState;                                               //
+    triggerChangeNetToolbarValue?: (value: any) => void;                        //
+    triggerAddArc?: (arc: ArcElement) => void;                                  //
+    triggerRemoveElement?: (category: NetCategory) => (id: string) => void;     //
+    font?: FontSetting;                                                         //
+    fontSize?: FontSize;                                                        //
+    className?: string;                                                         //
 };
 
 export function createMovable<ComponentProps extends BaseComponentProps,
@@ -141,7 +141,7 @@ export function createMovable<ComponentProps extends BaseComponentProps,
                    triggerAddArc, triggerRemoveElement,
                    netToolbar, triggerChangeNetToolbarValue,
                    font, fontSize,
-                   triggerPositionChanged=(() => {/* empty function */})} = this.props;
+                   triggerPositionChanged=emptyFn} = this.props;
 
             moveInfo[data.id] = {x, y, zoom, pan, paths, triggerPositionChanged};
             const handleMouseDown = onMovableMouseDown(data.id);
