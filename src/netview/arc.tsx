@@ -50,7 +50,7 @@ export class Arc extends React.PureComponent<Props> {
                     position: ["relatedPositions", "expression"],
                 }}
                 data={{id: `${id}-expression`, text: expression}}
-                parentPosition={{...points[0]}}
+                parentPosition={{x: 0, y: 0}}
                 x={relatedPositions.expression.x}
                 y={relatedPositions.expression.y}
                 font={font.code}

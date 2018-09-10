@@ -1,23 +1,11 @@
-import {lensPath, over, path as ramdaPath, reject} from 'ramda';
+import * as Ramda from 'ramda';
 import * as React from 'react';
-import {ArcElement, Net as TNet, NetElement} from './netmodel';
-import {BBox, Circle, Line, Position, Size, Vector2d} from './types';
-import {FontSetting, FontSize, pt2px} from './visualsetting';
 
-const defaultPositions = {
-    places: (placeSize: Size) => ({
-        "type": {x: placeSize.width, y: placeSize.height},
-        "initExpr": {x: placeSize.width, y: 0},
-    }),
-    transitions: (transSize: Size) => ({
-        guard: {x: 0, y: -5} // TODO: transSize.height + 5 -> align at bottom of transition
-                             //       but have to find out how to propagate (anonymously)
-                             //       other parameters to SVG elements from HOC
-    }),
-    arcs: (startElemSize: Size) => ({
-        expression: {x: startElemSize.width + 5, y: startElemSize.height / 2 - 5}
-    })
-};
+import {ArcElement, isArc, isPlace, isTransition,
+        Net as TNet, NetCategory, NetElement,
+        PlaceElement, TransitionElement} from './netmodel';
+import {BBox, Circle, Dict, Line, Position, Vector2d} from './types';
+import {font, FontSetting, FontSize, pt2px} from './visualsetting';
 
 export const emptyFn = () => {/*empty*/};
 export const identity = (v: any) => v;
@@ -26,43 +14,51 @@ export const getId = ((id: number) => (): string => {
     return (id++).toString();
 })(new Date().getTime());
 
-export function fillElementDefaultRelatedPosition(element: NetElement, category: string) {
-    const relatedPositions = defaultPositions[category](element.size);
-    return {...element, relatedPositions};
+export function computeDefaultRelatedPositions(
+    element: NetElement,
+    net: TNet
+): Dict<Position> {
+
+    if (isPlace(element)) {
+        const size = (element as PlaceElement).size;
+        return {
+            dataType: { x: size.width, y: size.height },
+            initExpr: {x: size.width, y: 0}
+        };
+    } else if (isTransition(element)) {
+        const size = (element as TransitionElement).size;
+        return {guard: {
+            x: 0,
+            y: size.height + 5 + pt2px(font.code.size.small) / 2,
+        }};
+    } else if (isArc(element)) {
+        const points = getArcPoints(element as ArcElement, net);
+        return {
+            expression: computePolylineCentroid(points)
+        };
+    } else {
+        throw new Error("Invalid element type");
+    }
 }
 
-export function fillArcsDefaultRelatedPosition(net: TNet) {
-
-    for (const key of Object.keys(net.arcs)) {
-        const path = lensPath(["arcs", key]);
-        const arc = ramdaPath(["arcs", key], net) as ArcElement;
-
-        const startElem = ramdaPath(arc.startElementPath, net) as NetElement;
-        const arcDefaultPos = defaultPositions.arcs(startElem.size);
-        net = over(path, ({relatedPositions: defined, ...rest}) => {
-            const relatedPositions = {...defined};
-
-            for (const p of Object.keys(arcDefaultPos)) {
-                if (!relatedPositions[p]) {
-                    relatedPositions[p] =  arcDefaultPos[p];
-                }
-            }
-
-            return {...rest, relatedPositions};
-        }, net);
-    }
-    return net;
+export function fillElementDefaultRelatedPosition(
+    element: NetElement,
+    net: TNet
+) {
+    const relatedPositions = computeDefaultRelatedPositions(element, net);
+    return {...element, relatedPositions};
 }
 
 export function fillDefaultRelatedPositions(net: TNet) {
 
-    const fill = (n: TNet, elem: string) => {
-        for (const key of Object.keys(net[elem])) {
-            const path = lensPath([elem, key]);
+    const fill = (n: TNet, category: NetCategory) => {
+        for (const key of Object.keys(net[category])) {
+            const element = net[category][key];
 
-            n = over(path, ({size, relatedPositions: defined, ...rest}) => {
+            const path = Ramda.lensPath([category, key]);
+            n = Ramda.over(path, ({size, relatedPositions: defined, ...rest}) => {
                 const relatedPositions = {...defined};
-                const elemDefaultPos = defaultPositions[elem](size);
+                const elemDefaultPos = computeDefaultRelatedPositions(element, net);
 
                 for (const p of Object.keys(elemDefaultPos)) {
                     if (!relatedPositions[p]) {
@@ -81,8 +77,57 @@ export function fillDefaultRelatedPositions(net: TNet) {
 
     newNet = fill(newNet, "places");
     newNet = fill(newNet, "transitions");
-    newNet = fillArcsDefaultRelatedPosition(newNet);
+    newNet = fill(newNet, "arcs");
     return newNet;
+}
+
+export function getArcPoints(arc: ArcElement, net: TNet): Position[] {
+
+    type PT = PlaceElement | TransitionElement;
+
+    const startElement = Ramda.path(arc.startElementPath, net) as PT;
+    const startPoint = computeCenter({...startElement.position, ...startElement.size});
+
+    let endPoint;
+    const wArc = arc as any;
+    if (wArc.endPosition !== undefined) {
+        endPoint = wArc.endPosition;
+    } else if (wArc.endElementPath !== undefined) {
+        let preLastPoint = startPoint;
+        if (arc.innerPoints.length > 0) {
+            preLastPoint = arc.innerPoints[arc.innerPoints.length - 1];
+        }
+        const endElement = Ramda.path(wArc.endElementPath, net) as PT;
+        let radius = 0;
+        if (isPlace(endElement)) {
+            radius = endElement.size.height / 2;
+        }
+        endPoint = rrectCollision(
+            {...endElement.position, ...endElement.size},
+            preLastPoint,
+            radius);
+    } else {
+        throw new Error ("Invalid arc!");
+    }
+
+    return [startPoint, ...arc.innerPoints, endPoint];
+}
+
+export function getArcId(arc: ArcElement, net: TNet): string {
+
+    const startElement = Ramda.path(arc.startElementPath, net) as NetElement;
+
+    const wArc = arc as any;
+
+    let endId;
+    if (wArc.endElementPath !== undefined) {
+        const endElement = Ramda.path(wArc.endElementPath, net) as NetElement;
+        endId = endElement.data.id;
+    } else {
+        endId = "dummyend";
+    }
+
+    return `${startElement.data.id}-${endId}`;
 }
 
 export function textToSVG(
@@ -151,7 +196,7 @@ export function codeRef2String(v: null | number | [number, number]): string {
 
 export function rejectNulls (obj: any) {
     const isNull = (v: any): boolean => (v === null);
-    return reject(isNull, obj);
+    return Ramda.reject(isNull, obj);
 }
 
 export function getPositionOnCanvas(evt: React.MouseEvent | MouseEvent): Position {
@@ -169,6 +214,25 @@ export function computeCenter(bbox: BBox): Position {
         x: bbox.x + bbox.width / 2,
         y: bbox.y + bbox.height / 2,
     };
+}
+
+export function computePolylineCentroid(points: Position[]): Position {
+    if (points.length < 2) {
+        throw new Error("Polyline hast to have at least two points!");
+    }
+
+    let cx = 0, cy = 0;
+    let i, j;
+    for (i = 0, j = 1; j < points.length; i++, j++) {
+        cx += points[i].x + (points[j].x - points[i].x) / 2;
+        cy += points[i].y + (points[j].y - points[i].y) / 2;
+    }
+
+    const ret =  {
+        x: cx / i,
+        y: cy / i,
+    };
+    return ret;
 }
 
 export function floatLt (v: number, a: number, e: number = 0.000001): boolean {
