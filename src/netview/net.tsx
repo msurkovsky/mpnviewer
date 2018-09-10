@@ -1,11 +1,10 @@
-import {path} from 'ramda'
 import * as React from 'react';
 import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
 import {ArcElement, ArcType, NetCategory} from '../netmodel';
 import * as Utils from '../utils';
 
 import {NetToolbarState} from '../toolbar'
-import {Position, Size, Vector2d} from '../types'
+import {Vector2d} from '../types'
 import {Arc} from './arc'
 import {Place} from './place';
 import {Transition} from './transition';
@@ -67,8 +66,7 @@ export class Net extends React.Component<any, any> {
                 tool={canvasToolbar.tool} onChangeTool={triggerChangeToolbarTools}
                 onPan={this.onPan}
                 onZoom={this.onZoom}
-                onClick={triggerSelect(null)}
-            >
+                onClick={triggerSelect(null)}>
 
                 <svg width={width} height={height}>
                     <defs>
@@ -128,7 +126,7 @@ export class Net extends React.Component<any, any> {
     protected renderArcs(
         arcs: any,
         triggerSelect: (path: string[]) => () => void
-    ) { // TODO: refactore
+    ) {
 
         const net = this.props.net;
 
@@ -137,51 +135,19 @@ export class Net extends React.Component<any, any> {
         const arcComponents = [];
         for (const key of Object.keys(arcs)) {
             const arc = arcs[key];
-            const {data, startElementPath, innerPoints} = arc;
-
-            const s = path(startElementPath, net) as {position: Position, size: Size, data: any};
-
-            let isEndPlace = false;
-            let e;
-            if (arc.endElementPath !== undefined) { // TODO: rather use instanceof check
-                // ArcElement
-                e = path(arc.endElementPath, net) as {
-                    position: Position, size: Size, data: any};
-                isEndPlace = arc.endElementPath[0] === "places"; // TODO: better check
-            } else {
-                // PartialArcElement
-                e = {
-                    position: arcs[key].endPosition,
-                    size: {width: 0, height: 0},
-                    data: {id: "dummyend"}
-                }
-            }
-
-            const startPosition = Utils.computeCenter({...s.position, ...s.size});
-
-            let prelastPos = startPosition;
-            if (innerPoints.length > 0) {
-                prelastPos = innerPoints[innerPoints.length - 1];
-            }
-
-            let r = 0;
-            if (isEndPlace) { // TODO: better check
-                r = e.size.height / 2;
-            }
-            const endPosition = Utils.rrectCollision({...e.position, ...e.size}, prelastPos, r);
-            const points = [startPosition, ...innerPoints, endPosition];
+            const points = Utils.getArcPoints(arc, net);
 
             const basePath = ["arcs", key];
             arcComponents.push(
                 <Arc
                     elementType="arc"
-                    key={`${s.data.id}-${e.data.id}`}
+                    key={`${Utils.getArcId(arc, net)}`}
                     paths={{base: basePath}}
                     points={points}
                     triggerSelect={triggerSelect(basePath)}
                     triggerPositionChanged={triggerPositionChanged}
                     relatedPositions={{...arc.relatedPositions}}
-                    {...data}
+                    {...arc.data}
                 />
             );
         }
