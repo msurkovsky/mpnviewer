@@ -2,27 +2,26 @@ import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
 import {PositionChanged} from '../events';
 import {
     AMT, isPlace, isTransition,
-    NetElement, PlaceDataLayout,
-    PlaceElement, TransitionElement, UnpositionedNetElement
+    NetElement, PlaceDataLayout
 } from '../netmodel';
 import {Viewer} from '../netview/net'
 import {NetTool} from '../toolbar'
-import {Omit} from '../types'
+import {Resizable} from '../types'
 import * as Utils from '../utils';
 import {startMoving, stopMoving} from './move'
 
 const {getPositionOnCanvas, v2dScalarMul, v2dSub} = Utils;
 
-export function emptyPlace (): Omit<PlaceElement, "position"> {
+export function emptyPlace (): NetElement & Resizable {
     return {
         data: {
             id: Utils.getId(),
-            elementType: "place",
             name: "",
-            type: AMT.UNIT,
+            dataType: AMT.UNIT,
             initExpr: "",
             dataLayout: PlaceDataLayout.QUEUE,
         },
+        type: "place",
         size: {
             width: 40,
             height: 40
@@ -30,13 +29,13 @@ export function emptyPlace (): Omit<PlaceElement, "position"> {
     };
 }
 
-export function emptyTransition(): Omit<TransitionElement, "position"> {
+export function emptyTransition(): NetElement & Resizable {
     return {
         data: {
             id: Utils.getId(),
-            elementType: "transition",
             name: "",
         },
+        type: "transition",
         size: {
             width: 60,
             height: 40,
@@ -45,7 +44,7 @@ export function emptyTransition(): Omit<TransitionElement, "position"> {
 }
 
 let ctx: {
-    addingElement: UnpositionedNetElement;
+    addingElement: NetElement & Resizable;
     viewerInst: Viewer;
     triggerAddNetElement: (elem: NetElement) => void;
     triggerRemoveNetElement: (id: string) => void;
@@ -89,7 +88,7 @@ const addNetElement = (evt: React.MouseEvent) => {
 
 export const startAddingNetElement = (
     viewerInst: Viewer,
-    addingElement: UnpositionedNetElement,
+    addingElement: NetElement & Resizable,
     triggerAddNetElement: (elem: NetElement) => void,
     triggerRemoveNetElement: (id: string) => void,
     triggerPositionChanged: (evt: PositionChanged) => void,

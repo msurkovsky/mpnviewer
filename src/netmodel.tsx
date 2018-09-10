@@ -1,4 +1,4 @@
-import {Dict, Omit, Position, Size} from './types'
+import {Dict, Position, Positionable, Resizable} from './types'
 
 export enum AMT {
     UNIT = "unit",
@@ -17,17 +17,15 @@ export type NetElementType = "place" | "transition" | "arc";
 
 export interface PlaceData {
     id: string;
-    elementType: NetElementType;
     dataLayout: PlaceDataLayout;
     name?: string;
-    type?: DataType;
+    dataType?: DataType;
     initExpr?: string;
     cpLabel?: string; // compound place
 }
 
 export interface TransitionData {
     id: string;
-    elementType: NetElementType;
     name?: string;
     codeRef?: number | [number, number]; // specific reference or range
     guard?: string[];
@@ -44,42 +42,39 @@ export interface ArcData {
     /* source: PlaceData | TransitionData; */
     /* destination: PlaceData | TransitionData; */
     id: string;
-    elementType: NetElementType;
     expression: string;
     type: ArcType;
 }
 
-interface CommonAttributes {
-    position: Position;
-    size: Size;
+export type NetElementData = PlaceData | TransitionData | ArcData;
+
+export interface NetElement {
+    data: NetElementData;
+    type: NetElementType;
     relatedPositions?: Dict<Position>;
 }
 
-export interface PlaceElement extends CommonAttributes {
+export interface PlaceElement extends NetElement, Positionable, Resizable {
     data: PlaceData;
 }
 
-export interface TransitionElement extends CommonAttributes {
+export interface TransitionElement extends NetElement, Positionable, Resizable {
     data: TransitionData,
 }
 
-export type NetElement = PlaceElement | TransitionElement;
-
-export type UnpositionedNetElement = Omit<NetElement, "position">
-
-export interface ArcElement {
-    data: ArcData
-    // Source and destination should be used to compute the start and
-    // end position of an arrow.
+export interface ArcElement extends NetElement {
+    data: ArcData;
     startElementPath: string[];
-    endElementPath: string[];
-    innerPoints: Position[]; // these are fixed and given (also relative to the parent)
-    relatedPositions?: Dict<Position>; // position of arc's expression(s)
+    innerPoints: Position[];
 }
 
-export type PartialArcElement = Omit<ArcElement, "endElementPath"> & {
+export interface PartialArcElement extends ArcElement {
     endPosition: Position;
-};
+}
+
+export interface FullArcElement extends ArcElement {
+    endElementPath: string[];
+}
 
 export type NetCategory = "places" | "transitions" | "arcs";
 
@@ -89,15 +84,14 @@ export interface Net {
     arcs: Dict<ArcElement | PartialArcElement>;
 }
 
-
 export function isTransition(element: NetElement): boolean {
-    return element.data.elementType === "transition";
+    return element.type === "transition";
 }
 
 export function isPlace(element: NetElement): boolean {
-    return element.data.elementType === "place";
+    return element.type === "place";
 }
 
 export function isArc(element: NetElement): boolean {
-    return element.data.elementType === "arc";
+    return element.type === "arc";
 }

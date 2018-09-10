@@ -16,8 +16,7 @@ import {PlaceSetting} from './placesetting';
 import {TransitionSetting} from './transitionsetting';
 
 import {NetTool, Toolbar} from './toolbar';
-import {fillArcsDefaultRelatedPosition,
-        fillDefaultRelatedPositions,
+import {fillDefaultRelatedPositions,
         fillElementDefaultRelatedPosition} from './utils';
 
 const state = {
@@ -99,7 +98,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 canvasToolbar={canvasToolbar}
                 netToolbar={netToolbar}
                 triggerSelect={this.onSelect}
-                triggerAddArc={this.onAddArc}
+                triggerAddArc={this.onAddNetElement("arcs")}
                 triggerRemoveElement={this.onRemoveNetElement}
                 triggerChangeValue={this.onChangeCanvasToolbarValue}
                 triggerChangeNetToolbarValue={this.onChangeNetToolbarValue}
@@ -122,22 +121,15 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         );
     }
 
-    private onAddNetElement = (category: "places" | "transitions") => (element: NetElement) => {
+    private onAddNetElement = (category: NetCategory) => (element: NetElement) => {
         this.setState(({net}: any) => {
-            const elements = net[category];
-            elements[element.data.id] = fillElementDefaultRelatedPosition(element, category);
+            const filledElement = fillElementDefaultRelatedPosition(element, net);
             return {
-                net: {...over(lensPath([category]), () => ({...elements}), net)}
-            };
-        });
-    }
-
-    private onAddArc = (arc: ArcElement) => {
-        this.setState(({net}: any) => {
-            const arcs = net.arcs;
-            arcs[arc.data.id] = arc;
-            return {
-                net: fillArcsDefaultRelatedPosition({...over(lensPath(["arcs"]), () => ({...arcs}), net)})
+                net: {...over(
+                    lensPath([category, element.data.id]),
+                    () => filledElement,
+                    net
+                )}
             };
         });
     }

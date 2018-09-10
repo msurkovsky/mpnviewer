@@ -2,7 +2,8 @@ import * as React from 'react';
 import * as Utils from '../utils'
 
 import {endAddingArc, startAddingArc} from '../features/addarc'
-import {ArcElement, NetCategory, PlaceData, PlaceDataLayout} from '../netmodel';
+import {ArcElement, NetCategory,
+        PlaceData, PlaceDataLayout, PlaceElement} from '../netmodel';
 import {NetTool, NetToolbarState} from '../toolbar'
 import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
@@ -34,7 +35,7 @@ class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, id, elementType, type, initExpr, dataLayout, cpLabel,
+        const {paths, name, id, dataType, initExpr, dataLayout, cpLabel,
                x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
@@ -50,8 +51,9 @@ class CorePlace extends React.PureComponent<Props> {
             }
 
             if (netToolbar.value === null) {
-                const place = {
-                    data: {id, elementType, name, type, initExpr, dataLayout},
+                const place: PlaceElement = {
+                    data: {id, name, dataType, initExpr, dataLayout},
+                    type: "place",
                     position: {x, y},
                     size: {width, height},
                 };
@@ -119,18 +121,18 @@ class CorePlace extends React.PureComponent<Props> {
           });
         }
 
-        let typeElement = null;
-        if (type) {
-            typeElement = <TextElement
+        let dataTypeElement = null;
+        if (dataType) {
+            dataTypeElement = <TextElement
                 paths={{
                     base: [...paths.base],
-                    position: ["relatedPositions", "type"],
+                    position: ["relatedPositions", "dataType"],
                 }}
-                data={{id: `${id}-type`, text: type}}
+                data={{id: `${id}-datatType`, text: dataType}}
                 parentPosition={{x, y}}
                 netToolbar={netToolbar}
-                x={relatedPositions.type.x}
-                y={relatedPositions.type.y}
+                x={relatedPositions.dataType.x}
+                y={relatedPositions.dataType.y}
                 font={font.code}
                 fontSize="normal"
                 triggerPositionChanged={triggerPositionChanged}/>;
@@ -162,7 +164,7 @@ class CorePlace extends React.PureComponent<Props> {
                     onClick={triggerClick}
                 />
                 {cpLabelElement}
-                {typeElement}
+                {dataTypeElement}
                 {initExprElement}
                 {nameText}
             </g>

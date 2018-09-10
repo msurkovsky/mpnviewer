@@ -2,7 +2,8 @@ import * as React from 'react';
 import * as Utils from '../utils'
 
 import {endAddingArc, startAddingArc} from '../features/addarc'
-import {ArcElement, NetCategory, TransitionData} from '../netmodel'
+import {ArcElement, NetCategory,
+        TransitionData, TransitionElement} from '../netmodel'
 import {NetTool, NetToolbarState} from '../toolbar'
 import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
@@ -32,7 +33,7 @@ class CoreTransition extends React.PureComponent<Props> {
 
     public render() {
 
-        const {paths, id, elementType, name, guard, codeRef,
+        const {paths, id, name, guard, codeRef,
                x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
@@ -45,8 +46,9 @@ class CoreTransition extends React.PureComponent<Props> {
             }
 
             if (netToolbar.value === null) {
-                const transition = {
-                    data: {id, elementType, name, guard},
+                const transition: TransitionElement = {
+                    data: {id, name, guard},
+                    type: "transition",
                     position: {x, y},
                     size: {width, height}
                 };

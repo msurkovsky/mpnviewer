@@ -1,10 +1,11 @@
+import {dissoc} from 'ramda'
 
-import {ArcElement, ArcType, NetElement, PartialArcElement} from '../netmodel';
+import {ArcType, FullArcElement, NetElement, PartialArcElement} from '../netmodel';
 import {Viewer} from '../netview/net';
-import {Position} from '../types';
+import {Position, Positionable, Resizable} from '../types';
 import * as Utils from '../utils';
 
-type AE = ArcElement | PartialArcElement;
+type AE = FullArcElement | PartialArcElement;
 
 let ctx: {
     viewerInst: Viewer;
@@ -47,7 +48,7 @@ function arcAddNewEndPoint(evt: React.MouseEvent) {
 
 export function startAddingArc(
     viewerInst: Viewer,
-    startElement: NetElement,
+    startElement: NetElement & Positionable & Resizable,
     path: string[],
     triggerAddArc: (arc: AE) => void,
     triggerRemoveArc: (id: string) => void,
@@ -56,10 +57,10 @@ export function startAddingArc(
     const partialArc: PartialArcElement = {
         data: {
             id: Utils.getId(),
-            elementType: "arc",
             expression: "",
             type: ArcType.SINGLE_HEADED
         },
+        type: "arc",
         startElementPath: [...path],
         endPosition: Utils.computeCenter(
             {...startElement.position, ...startElement.size}),
@@ -78,18 +79,19 @@ export function endAddingArc(path: string[]) {
         return;
     }
 
-    const {data, startElementPath, innerPoints} = ctx.partialArc;
+    const {data, innerPoints, ...rest} = dissoc("endPosition", ctx.partialArc);
     const fullArc = {
+        ...rest,
         data: {
             ...data,
             id: `${data.id}-full` // change id to safely remove
                                   // partial arc after adding the full one
         },
-        startElementPath: [...startElementPath],
         // cut off the last element
         innerPoints: innerPoints.splice(0, innerPoints.length-1),
         endElementPath: [...path],
-    };
+    } as FullArcElement; // cast type because of '...rest' construct
+
     ctx.triggerAddArc(fullArc);
     cancelAddingArc();
 }

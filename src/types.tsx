@@ -10,6 +10,14 @@ export interface Position {
     y: number;
 }
 
+export interface Positionable {
+    position: Position;
+}
+
+export interface Resizable {
+    size: Size;
+}
+
 export interface Size {
     width: number;
     height: number;
@@ -28,4 +36,3 @@ export interface Circle {
     c: Position; // center
     r: number;   // radius
 }
-

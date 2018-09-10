@@ -18,13 +18,13 @@ export class PlaceSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {name, type, initExpr, dataLayout, cpLabel,
+        const {name, dataType, initExpr, dataLayout, cpLabel,
                width, height} = this.props;
 
         this.state = {
             dataLayout, width, height,
             name: name || null,
-            type: type || null,
+            dataType: dataType || null,
             initExpr: initExpr || null,
             cpLabel: cpLabel || null,
         };
@@ -76,11 +76,11 @@ export class PlaceSetting extends React.Component<Props, any> {
 
                 <FormGroup>
                     <Label>
-                        Type:
+                        Data type:
                         <Input
                             value={type || ""}
                             type="text"
-                            onChange={onChange("type")} />
+                            onChange={onChange("dataType")} />
                     </Label>
                 </FormGroup>
 
