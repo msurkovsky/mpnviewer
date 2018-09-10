@@ -174,6 +174,7 @@ export class Net extends React.Component<any, any> {
             const basePath = ["arcs", key];
             arcComponents.push(
                 <Arc
+                    elementType="arc"
                     key={`${s.data.id}-${e.data.id}`}
                     paths={{base: basePath}}
                     points={points}
@@ -205,6 +206,7 @@ export class Net extends React.Component<any, any> {
 
             results.push(
                 <Place
+                    elementType="place"
                     key={data.id}
                     paths={{
                         base: basePath,
@@ -247,6 +249,7 @@ export class Net extends React.Component<any, any> {
 
             results.push(
                 <Transition
+                    elementType="transition"
                     key={data.id}
                     paths={{
                         base: basePath,

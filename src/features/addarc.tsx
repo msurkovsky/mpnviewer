@@ -53,9 +53,10 @@ export function startAddingArc(
     triggerRemoveArc: (id: string) => void,
     triggerChangeNetToolbarValue: (value: any) => void
 ){
-    const partialArc = {
+    const partialArc: PartialArcElement = {
         data: {
             id: Utils.getId(),
+            elementType: "arc",
             expression: "",
             type: ArcType.SINGLE_HEADED
         },

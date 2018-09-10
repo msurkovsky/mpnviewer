@@ -32,7 +32,7 @@ class CoreTransition extends React.PureComponent<Props> {
 
     public render() {
 
-        const {paths, id, name, guard, codeRef,
+        const {paths, id, elementType, name, guard, codeRef,
                x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
@@ -46,7 +46,7 @@ class CoreTransition extends React.PureComponent<Props> {
 
             if (netToolbar.value === null) {
                 const transition = {
-                    data: {id, name, guard},
+                    data: {id, elementType, name, guard},
                     position: {x, y},
                     size: {width, height}
                 };

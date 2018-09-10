@@ -34,7 +34,7 @@ class CorePlace extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, id, type, initExpr, dataLayout, cpLabel,
+        const {paths, name, id, elementType, type, initExpr, dataLayout, cpLabel,
                x, y, width, height, relatedPositions,
                viewerInst, triggerAddArc, triggerRemoveElement,
                netToolbar, triggerChangeNetToolbarValue,
@@ -51,7 +51,7 @@ class CorePlace extends React.PureComponent<Props> {
 
             if (netToolbar.value === null) {
                 const place = {
-                    data: {id, name, type, initExpr, dataLayout},
+                    data: {id, elementType, name, type, initExpr, dataLayout},
                     position: {x, y},
                     size: {width, height},
                 };

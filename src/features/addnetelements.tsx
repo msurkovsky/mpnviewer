@@ -14,6 +14,7 @@ export function emptyPlace (): Omit<PlaceElement, "position"> {
     return {
         data: {
             id: Utils.getId(),
+            elementType: "place",
             name: "",
             type: AMT.UNIT,
             initExpr: "",
@@ -30,6 +31,7 @@ export function emptyTransition(): Omit<TransitionElement, "position"> {
     return {
         data: {
             id: Utils.getId(),
+            elementType: "transition",
             name: "",
         },
         size: {

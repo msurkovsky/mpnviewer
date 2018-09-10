@@ -13,8 +13,11 @@ export enum PlaceDataLayout {
     MULTISET = "multiset",
 }
 
+export type NetElementType = "place" | "transition" | "arc";
+
 export interface PlaceData {
     id: string;
+    elementType: NetElementType;
     dataLayout: PlaceDataLayout;
     name?: string;
     type?: DataType;
@@ -24,6 +27,7 @@ export interface PlaceData {
 
 export interface TransitionData {
     id: string;
+    elementType: NetElementType;
     name?: string;
     codeRef?: number | [number, number]; // specific reference or range
     guard?: string[];
@@ -40,6 +44,7 @@ export interface ArcData {
     /* source: PlaceData | TransitionData; */
     /* destination: PlaceData | TransitionData; */
     id: string;
+    elementType: NetElementType;
     expression: string;
     type: ArcType;
 }
@@ -82,4 +87,17 @@ export interface Net {
     places: Dict<PlaceElement>;
     transitions: Dict<TransitionElement>;
     arcs: Dict<ArcElement | PartialArcElement>;
+}
+
+
+export function isTransition(element: NetElement): boolean {
+    return element.data.elementType === "transition";
+}
+
+export function isPlace(element: NetElement): boolean {
+    return element.data.elementType === "place";
+}
+
+export function isArc(element: NetElement): boolean {
+    return element.data.elementType === "arc";
 }
