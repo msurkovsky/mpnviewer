@@ -5,6 +5,8 @@ export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export type Path = string[];
 
+export type ID = string;
+
 export interface Position {
     x: number;
     y: number;
