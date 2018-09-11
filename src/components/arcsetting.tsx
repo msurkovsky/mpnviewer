@@ -32,11 +32,7 @@ export class ArcSetting extends React.Component<Props, any> {
         const submit = () => {
             triggerChangesSubmit({
                 path,
-                value: {
-                    data: rejectNulls({
-                        id, type, expression
-                    }),
-                },
+                value: rejectNulls({id, type, expression}),
             });
         };
 

@@ -7,7 +7,7 @@ import {isArc, isPlace, isTransition,
         NetCategory, NetElement} from './netmodel';
 import {Net} from './netview';
 
-import {NetElementDataValueChanged, PositionChanged} from './events';
+import {NetElementDataChanged, PositionChanged} from './events';
 
 import {ArcSetting, PlaceSetting, TransitionSetting} from './components'
 
@@ -157,7 +157,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         }));
     }
 
-    private onChangeElementValue = (evt: NetElementDataValueChanged) => {
+    private onChangeElementValue = (evt: NetElementDataChanged) => {
 
         this.setState(({net}: any) => {
             const keys = Object.keys(evt.value);

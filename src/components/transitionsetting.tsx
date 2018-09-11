@@ -5,7 +5,7 @@ import {Button,
         Input, Label} from 'reactstrap'
 
 import {TransitionData} from '../netmodel'
-import {codeRef2String, identity, undefinedToNulls} from '../utils'
+import {codeRef2String, identity, rejectNulls, undefinedToNulls} from '../utils'
 import {NetElementSettingFormProps} from './types';
 
 
@@ -31,9 +31,7 @@ export class TransitionSetting extends React.Component<Props, any> {
         const submit = () => {
             triggerChangesSubmit({
                 path,
-                value: {
-                    data: {id, name, guard, codeRef},
-                },
+                value: rejectNulls({id, name, guard, codeRef}),
             });
         };
 
@@ -70,7 +68,7 @@ export class TransitionSetting extends React.Component<Props, any> {
                     <Label>
                         Name:
                         <Input
-                            value={name}
+                            value={name || ""}
                             type="text"
                             onChange={onChange("name")} />
                     </Label>
@@ -80,7 +78,7 @@ export class TransitionSetting extends React.Component<Props, any> {
                     <Label>
                         Guard:
                         <Input
-                            value={guard}
+                            value={guard || ""}
                             type="text"
                             onChange={onChangeGuard} />
                     </Label>

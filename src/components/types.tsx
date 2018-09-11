@@ -6,7 +6,7 @@ import {Path} from '../types'
 export interface NetElementSettingFormProps {
     data: NetElementData;
     path: Path;
-    triggerChangesSubmit: CbChangeNetElementDataValue;
+    triggerChangesSubmit: CbChangeNetElementData;
 };
 
 export type NetElementSettingForm = React.ComponentType<NetElementSettingFormProps>;
