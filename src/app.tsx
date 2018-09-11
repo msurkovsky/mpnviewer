@@ -12,6 +12,7 @@ import {NetElementDataChanged, PositionChanged} from './events';
 import {ArcSetting, PlaceSetting, TransitionSetting} from './components'
 
 import {NetTool, Toolbar} from './toolbar';
+import {Resizable} from './types';
 import {fillDefaultRelatedPositions,
         fillElementDefaultRelatedPosition} from './utils';
 
@@ -57,6 +58,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         const {selected, net, canvasToolbar, netToolbar} = this.state;
 
         let settingForm = null;
+        let resizeForm = null;
         if (selected.path !== null) {
             const element = Ramda.path(selected.path, net);
             if (element) {
@@ -73,6 +75,12 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                     throw new Error("Invalid selected element");
                 }
 
+                if (isPlace(netElement) || isTransition(netElement)) {
+                    resizeForm = <ResizableSetting
+                        size={(netElement as Resizable).size}
+                        path={selected.path.concat(["size"])}
+                        triggerChangesSubmit={this.onChangeNetProperty} />
+                }
                 settingForm = <SettingForm
                     data={netElement.data}
                     key={`setting-${netElement.type}-${netElement.data.id}`}
@@ -108,6 +116,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerLoadNet={this.onLoadNet}
                 triggerPositionChanged={this.onPositionChanged} />
             {settingForm}
+            {resizeForm}
             </div>
         );
     }
@@ -147,11 +156,11 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         this.setState(() => ({selected: {path}}));
     }
 
-    private onPositionChanged = (e: PositionChanged) => {
+    private onChangeNetProperty = (evt: NetPropertyChanged) => {
         this.setState(({net}: any) => ({
             net: {...Ramda.over(
-                Ramda.lensPath(e.path),
-                () => ({...e.value}),
+                Ramda.lensPath(evt.path),
+                () => ({...evt.value}),
                 net
             )}
         }));
