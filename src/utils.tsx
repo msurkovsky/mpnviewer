@@ -1,7 +1,7 @@
 import * as Ramda from 'ramda';
 import * as React from 'react';
 
-import {ArcElement, isArc, isPlace, isTransition,
+import {ArcElement, BaseNetElement, isArc, isPlace, isTransition,
         Net as TNet, NetCategory, NetElement,
         PlaceElement, TransitionElement} from './netmodel';
 import {BBox, Circle, Dict, Line, Position, Vector2d} from './types';
@@ -15,7 +15,7 @@ export const getId = ((id: number) => (): string => {
 })(new Date().getTime());
 
 export function computeDefaultRelatedPositions(
-    element: NetElement,
+    element: BaseNetElement,
     net: TNet
 ): Dict<Position> {
 
@@ -42,7 +42,7 @@ export function computeDefaultRelatedPositions(
 }
 
 export function fillElementDefaultRelatedPosition(
-    element: NetElement,
+    element: BaseNetElement,
     net: TNet
 ) {
     const relatedPositions = computeDefaultRelatedPositions(element, net);

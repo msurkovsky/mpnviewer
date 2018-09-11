@@ -3,7 +3,7 @@ import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
 import {Button, ButtonGroup, ButtonToolbar, Input} from 'reactstrap';
 
 import {emptyPlace, emptyTransition, startAddingNetElement} from './features/addnetelements'
-import {NetElement} from './netmodel'
+import {BaseNetElement} from './netmodel'
 import {Resizable} from './types'
 
 export enum NetTool {
@@ -53,7 +53,7 @@ export class Toolbar extends React.Component<Props, any> {
 
         const addNetElement = (
             netTool: NetTool,
-            getElement: () => NetElement & Resizable,
+            getElement: () => BaseNetElement & Resizable,
             triggerAddNetElement: (evt: any) => void,
             triggerRemoveNetElement: (id: string) => void
         ) => (evt: React.MouseEvent) => {

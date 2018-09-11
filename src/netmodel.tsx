@@ -48,21 +48,21 @@ export interface ArcData {
 
 export type NetElementData = PlaceData | TransitionData | ArcData;
 
-export interface NetElement {
+export interface BaseNetElement {
     data: NetElementData;
     type: NetElementType;
     relatedPositions?: Dict<Position>;
 }
 
-export interface PlaceElement extends NetElement, Positionable, Resizable {
+export interface PlaceElement extends BaseNetElement, Positionable, Resizable {
     data: PlaceData;
 }
 
-export interface TransitionElement extends NetElement, Positionable, Resizable {
+export interface TransitionElement extends BaseNetElement, Positionable, Resizable {
     data: TransitionData,
 }
 
-export interface ArcElement extends NetElement {
+export interface ArcElement extends BaseNetElement {
     data: ArcData;
     startElementPath: string[];
     innerPoints: Position[];
@@ -76,6 +76,11 @@ export interface FullArcElement extends ArcElement {
     endElementPath: string[];
 }
 
+export type NetElement = PlaceElement
+                        | TransitionElement
+                        | PartialArcElement
+                        | FullArcElement;
+
 export type NetCategory = "places" | "transitions" | "arcs";
 
 export interface Net {
@@ -84,14 +89,14 @@ export interface Net {
     arcs: Dict<ArcElement | PartialArcElement>;
 }
 
-export function isTransition(element: NetElement): boolean {
+export function isTransition(element: BaseNetElement): boolean {
     return element.type === "transition";
 }
 
-export function isPlace(element: NetElement): boolean {
+export function isPlace(element: BaseNetElement): boolean {
     return element.type === "place";
 }
 
-export function isArc(element: NetElement): boolean {
+export function isArc(element: BaseNetElement): boolean {
     return element.type === "arc";
 }

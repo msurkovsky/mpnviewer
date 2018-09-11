@@ -1,7 +1,7 @@
 import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
 import {PositionChanged} from '../events';
 import {
-    AMT, isPlace, isTransition,
+    AMT, BaseNetElement, isPlace, isTransition,
     NetElement, PlaceDataLayout
 } from '../netmodel';
 import {Viewer} from '../netview/net'
@@ -12,7 +12,7 @@ import {startMoving, stopMoving} from './move'
 
 const {getPositionOnCanvas, v2dScalarMul, v2dSub} = Utils;
 
-export function emptyPlace (): NetElement & Resizable {
+export function emptyPlace (): BaseNetElement & Resizable {
     return {
         data: {
             id: Utils.getId(),
@@ -29,7 +29,7 @@ export function emptyPlace (): NetElement & Resizable {
     };
 }
 
-export function emptyTransition(): NetElement & Resizable {
+export function emptyTransition(): BaseNetElement & Resizable {
     return {
         data: {
             id: Utils.getId(),
@@ -44,7 +44,7 @@ export function emptyTransition(): NetElement & Resizable {
 }
 
 let ctx: {
-    addingElement: NetElement & Resizable;
+    addingElement: BaseNetElement & Resizable;
     viewerInst: Viewer;
     triggerAddNetElement: (elem: NetElement) => void;
     triggerRemoveNetElement: (id: string) => void;
@@ -88,7 +88,7 @@ const addNetElement = (evt: React.MouseEvent) => {
 
 export const startAddingNetElement = (
     viewerInst: Viewer,
-    addingElement: NetElement & Resizable,
+    addingElement: BaseNetElement & Resizable,
     triggerAddNetElement: (elem: NetElement) => void,
     triggerRemoveNetElement: (id: string) => void,
     triggerPositionChanged: (evt: PositionChanged) => void,
