@@ -151,14 +151,6 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         });
     }
 
-    private onSelect = (path: string[] | null) => () => {
-        if (this.state.canvasToolbar.tool !== TOOL_AUTO) {
-            return;
-        }
-
-        this.setState(() => ({selected: {path}}));
-    }
-
     private onChangeNetProperty = (evt: NetPropertyChanged) => {
         this.setState(({net}: any) => ({
             net: {...Ramda.over(
@@ -166,33 +158,6 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 () => ({...evt.value}),
                 net
             )}
-        }));
-    }
-
-    private onChangeCanvasToolbarValue = (value: any) => {
-        this.setState(({canvasToolbar}: any) => ({canvasToolbar: {
-            value,
-            tool: canvasToolbar.tool,
-        }}));
-    }
-
-    private onChangeNetToolbarValue = (value: any) => {
-        this.setState(({netToolbar}: any) => ({netToolbar: {
-            value,
-            tool: netToolbar.tool,
-        }}));
-    }
-
-    private onChangeToolbarTools = (canvasTool: any, netTool: NetTool | null=null) => {
-        this.setState(({canvasToolbar, netToolbar}: any) => ({
-            canvasToolbar: {
-                value: canvasToolbar.value,
-                tool: canvasTool,
-            },
-            netToolbar: {
-                value: netToolbar.value,
-                tool: netTool !== null ? netTool : netToolbar.tool
-            }
         }));
     }
 
@@ -232,5 +197,40 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
             this.setState(() => ({net: fillDefaultRelatedPositions(net)}));
         };
         fr.readAsText(evt.target.files[0]);
+    }
+
+    private onSelect = (path: string[] | null) => () => {
+        if (this.state.canvasToolbar.tool !== TOOL_AUTO) {
+            return;
+        }
+
+        this.setState(() => ({selected: {path}}));
+    }
+
+    private onChangeCanvasToolbarValue = (value: any) => {
+        this.setState(({canvasToolbar}: any) => ({canvasToolbar: {
+            value,
+            tool: canvasToolbar.tool,
+        }}));
+    }
+
+    private onChangeNetToolbarValue = (value: any) => {
+        this.setState(({netToolbar}: any) => ({netToolbar: {
+            value,
+            tool: netToolbar.tool,
+        }}));
+    }
+
+    private onChangeToolbarTools = (canvasTool: any, netTool: NetTool | null=null) => {
+        this.setState(({canvasToolbar, netToolbar}: any) => ({
+            canvasToolbar: {
+                value: canvasToolbar.value,
+                tool: canvasTool,
+            },
+            netToolbar: {
+                value: netToolbar.value,
+                tool: netTool !== null ? netTool : netToolbar.tool
+            }
+        }));
     }
 }
