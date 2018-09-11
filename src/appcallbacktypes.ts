@@ -1,5 +1,5 @@
 
-import { NetElementDataChanged, PositionChanged } from './events';
+import { NetElementDataChanged, PositionChanged, SizeChanged } from './events';
 import { NetCategory, NetElement } from './netmodel';
 import { NetTool } from './toolbar';
 import { ID, Path } from './types';
@@ -11,6 +11,8 @@ export type CbRemoveNetElement = (category: NetCategory) => (id: ID) => void;
 export type CbSelect = (path: Path | null) => () => void;
 
 export type CbChangePosition = (evt: PositionChanged) => void;
+
+export type CbChangeSize = (evt: SizeChanged) => void;
 
 export type CbChangeNetElementData = (evt: NetElementDataChanged) => void;
 
