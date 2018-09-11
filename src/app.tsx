@@ -8,7 +8,7 @@ import {isArc, isPlace, isTransition,
         NetCategory, NetElement} from './netmodel';
 import {Net} from './netview';
 
-import {NetElementDataChanged, NetPropertyChanged} from './events';
+import {NetPropertyChanged} from './events';
 
 import {ArcSetting, PlaceSetting,
         ResizableSetting, TransitionSetting} from './components';
@@ -88,7 +88,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                     data={netElement.data}
                     key={`setting-${netElement.type}-${netElement.data.id}`}
                     path={selected.path.concat(["data"])}
-                    triggerChangesSubmit={this.onChangeElementValue} />
+                    triggerChangesSubmit={this.onChangeNetProperty} />
             }
         }
 
@@ -167,23 +167,6 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 net
             )}
         }));
-    }
-
-    private onChangeElementValue = (evt: NetElementDataChanged) => {
-
-        this.setState(({net}: any) => {
-            const keys = Object.keys(evt.value);
-            let o = Ramda.path(evt.path, net);
-            for (const key of keys) {
-                o = Ramda.over(
-                    Ramda.lensProp(key), () => ({...evt.value[key]}), o);
-            }
-
-            return {
-                net: Ramda.over(
-                    Ramda.lensPath(evt.path), () => ({...o}), net),
-            };
-        });
     }
 
     private onChangeCanvasToolbarValue = (value: any) => {
