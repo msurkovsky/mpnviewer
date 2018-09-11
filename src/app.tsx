@@ -2,14 +2,16 @@ import * as Ramda from 'ramda';
 import * as React from 'react';
 import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom';
 
-import {NetElementSettingForm} from './components/types'
+import {NetElementSettingForm} from './components/types';
+
 import {isArc, isPlace, isTransition,
         NetCategory, NetElement} from './netmodel';
 import {Net} from './netview';
 
-import {NetElementDataChanged, PositionChanged} from './events';
+import {NetElementDataChanged, NetPropertyChanged} from './events';
 
-import {ArcSetting, PlaceSetting, TransitionSetting} from './components'
+import {ArcSetting, PlaceSetting,
+        ResizableSetting, TransitionSetting} from './components';
 
 import {NetTool, Toolbar} from './toolbar';
 import {Resizable} from './types';
@@ -81,10 +83,11 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                         path={selected.path.concat(["size"])}
                         triggerChangesSubmit={this.onChangeNetProperty} />
                 }
+
                 settingForm = <SettingForm
                     data={netElement.data}
                     key={`setting-${netElement.type}-${netElement.data.id}`}
-                    path={selected.path}
+                    path={selected.path.concat(["data"])}
                     triggerChangesSubmit={this.onChangeElementValue} />
             }
         }
@@ -102,7 +105,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerChangeValue={this.onChangeCanvasToolbarValue}
                 triggerChangeNetToolbarValue={this.onChangeNetToolbarValue}
                 triggerChangeToolbarTools={this.onChangeToolbarTools}
-                triggerPositionChanged={this.onPositionChanged} />
+                triggerPositionChanged={this.onChangeNetProperty} />
             <Toolbar ref={(toolbarInst) => {this.toolbarInst = toolbarInst}}
                 activeTool={this.state.canvasToolbar.tool}
                 activeNetTool={this.state.netToolbar.tool}
@@ -114,7 +117,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 triggerRemoveTransition={this.onRemoveNetElement("transitions")}
                 triggerSaveNet={this.onSaveNet}
                 triggerLoadNet={this.onLoadNet}
-                triggerPositionChanged={this.onPositionChanged} />
+                triggerPositionChanged={this.onChangeNetProperty} />
             {settingForm}
             {resizeForm}
             </div>
