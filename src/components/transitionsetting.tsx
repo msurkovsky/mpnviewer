@@ -1,39 +1,38 @@
+import {pickAll} from 'ramda'
 import * as React from 'react'
 import {Button,
         Form, FormGroup,
         Input, Label} from 'reactstrap'
 
-import {ElementValueChanged} from './events'
-import {TransitionData} from './netmodel'
-import {Size} from './types'
-import {codeRef2String, identity} from './utils'
+import {TransitionData} from '../netmodel'
+import {codeRef2String, identity, undefinedToNulls} from '../utils'
+import {NetElementSettingFormProps} from './types';
 
-type Props = TransitionData & Size & {
-    path: string[];
-    triggerChangesSubmit: (evt: ElementValueChanged) => void;
-};
+
+interface Props extends NetElementSettingFormProps {
+    data: TransitionData;
+}
 
 export class TransitionSetting extends React.Component<Props, any> {
 
     constructor (props: Props) {
         super(props);
 
-        const {name, guard, codeRef, width, height} = this.props;
-        this.state = {
-            name, width, height,
-            guard: guard || "" , codeRef: codeRef || null};
+        this.state = undefinedToNulls(pickAll([
+            "name",
+            "guard",
+            "codeRef"], this.props.data));
     }
 
     public render() {
-        const {name, width, height, guard, codeRef} = this.state;
-        const {triggerChangesSubmit, id, path} = this.props;
+        const {name, guard, codeRef} = this.state;
+        const {triggerChangesSubmit, data: {id}, path} = this.props;
 
         const submit = () => {
             triggerChangesSubmit({
                 path,
                 value: {
                     data: {id, name, guard, codeRef},
-                    size: {width, height}
                 },
             });
         };
@@ -94,24 +93,6 @@ export class TransitionSetting extends React.Component<Props, any> {
                             value={codeRef2String(codeRef)}
                             type="text"
                             onChange={onChange("codeRef", codeRefTransform)} />
-                    </Label>
-                </FormGroup>
-
-                <FormGroup inline={true}>
-                    <Label>
-                        Width:
-                        <Input
-                            value={width}
-                            type="text"
-                            onChange={onChange("width", parseInt)} />
-                    </Label>
-
-                    <Label>
-                        Height:
-                        <Input
-                            value={height}
-                            type="text"
-                            onChange={onChange("height", parseInt)} />
                     </Label>
                 </FormGroup>
 

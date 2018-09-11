@@ -196,7 +196,12 @@ export function codeRef2String(v: null | number | [number, number]): string {
 
 export function rejectNulls (obj: any) {
     const isNull = (v: any): boolean => (v === null);
-    return Ramda.reject(isNull, obj);
+    return Ramda.reject(isNull, obj) as any;
+}
+
+export function undefinedToNulls (obj: any) {
+    const toNull = (v: any) => v === undefined ? null : v;
+    return Ramda.map(toNull, obj);
 }
 
 export function getPositionOnCanvas(evt: React.MouseEvent | MouseEvent): Position {

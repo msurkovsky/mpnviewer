@@ -1,39 +1,33 @@
-import * as React from 'react'
+import {pickAll} from 'ramda';
+import * as React from 'react';
 import {Button, ButtonGroup,
         Form, FormGroup,
-        Input, Label} from 'reactstrap'
+        Input, Label} from 'reactstrap';
 
-import {ElementValueChanged} from './events'
-import {PlaceData, PlaceDataLayout} from './netmodel'
-import {Size} from './types'
-import {identity, rejectNulls} from './utils';
+import {PlaceData, PlaceDataLayout} from '../netmodel';
+import {identity, rejectNulls, undefinedToNulls} from '../utils';
+import {NetElementSettingFormProps} from './types';
 
-type Props = PlaceData & Size & {
-    path: string[];
-    triggerChangesSubmit: (evt: ElementValueChanged) => void;
-};
+interface Props extends NetElementSettingFormProps {
+    data: PlaceData;
+}
 
 export class PlaceSetting extends React.Component<Props, any> {
 
     constructor (props: Props) {
         super(props);
 
-        const {name, dataType, initExpr, dataLayout, cpLabel,
-               width, height} = this.props;
-
-        this.state = {
-            dataLayout, width, height,
-            name: name || null,
-            dataType: dataType || null,
-            initExpr: initExpr || null,
-            cpLabel: cpLabel || null,
-        };
+        this.state = undefinedToNulls(pickAll([
+            "name",
+            "dataType",
+            "initExpr",
+            "dataLayout",
+            "cpLabel"], this.props.data));
     }
 
     public render() {
-        const {name, type, initExpr, dataLayout, cpLabel,
-               width, height} = this.state;
-        const {triggerChangesSubmit, id, path} = this.props;
+        const {name, type, initExpr, dataLayout, cpLabel} = this.state;
+        const {triggerChangesSubmit, data: {id}, path} = this.props;
 
         const submit = () => {
             triggerChangesSubmit({
@@ -42,11 +36,9 @@ export class PlaceSetting extends React.Component<Props, any> {
                     data: rejectNulls({
                         id, name, type, initExpr, dataLayout, cpLabel
                     }),
-                    size: {width, height}
                 },
             });
         };
-
 
         const onChange = (key: string,
                           transform: (v: string) => any = identity) => (evt: any) => {
@@ -119,24 +111,6 @@ export class PlaceSetting extends React.Component<Props, any> {
                             value={cpLabel || ""}
                             type="text"
                             onChange={onChange("cpLabel")} />
-                    </Label>
-                </FormGroup>
-
-                <FormGroup inline={true}>
-                    <Label>
-                        Width:
-                        <Input
-                            value={width}
-                            type="text"
-                            onChange={onChange("width", parseInt)} />
-                    </Label>
-
-                    <Label>
-                        Height:
-                        <Input
-                            value={height}
-                            type="text"
-                            onChange={onChange("height", parseInt)} />
                     </Label>
                 </FormGroup>
 

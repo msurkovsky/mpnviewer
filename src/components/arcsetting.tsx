@@ -1,15 +1,16 @@
-import * as React from 'react'
+import {pickAll} from 'ramda'
+import * as React from 'react';
 import {Button, ButtonGroup, ButtonToolbar,
         Form, FormGroup,
-        Input, Label} from 'reactstrap'
+        Input, Label} from 'reactstrap';
 
-import {ElementValueChanged} from './events'
-import {ArcData, ArcType} from './netmodel'
+import {ArcData, ArcType} from '../netmodel';
+import {rejectNulls, undefinedToNulls} from '../utils';
+import {NetElementSettingFormProps} from './types';
 
-type Props = ArcData & {
-    path: string[];
-    triggerChangesSubmit: (evt: ElementValueChanged) => void;
-};
+interface Props extends NetElementSettingFormProps {
+    data: ArcData;
+}
 
 const {SINGLE_HEADED, DOUBLE_HEADED,
        SINGLE_HEADED_RO, DOUBLE_HEADED_RO} = ArcType;
@@ -19,19 +20,22 @@ export class ArcSetting extends React.Component<Props, any> {
     constructor (props: Props) {
         super(props);
 
-        const {expression, type} = this.props;
-        this.state = {expression, type};
+        this.state = undefinedToNulls(pickAll([
+            "expression",
+            "type"], this.props.data));
     }
 
     public render() {
         const {expression, type} = this.state;
-        const {triggerChangesSubmit, id, path} = this.props;
+        const {triggerChangesSubmit, data: {id}, path} = this.props;
 
         const submit = () => {
             triggerChangesSubmit({
                 path,
                 value: {
-                    data: {id, name, type, expression},
+                    data: rejectNulls({
+                        id, type, expression
+                    }),
                 },
             });
         };

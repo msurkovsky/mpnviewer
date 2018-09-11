@@ -2,18 +2,14 @@ import {lensPath, lensProp, over, path as ramdaPath} from 'ramda';
 import * as React from 'react';
 import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom'
 
-import {ArcElement,
-        NetCategory,
-        NetElement,
-        PlaceElement,
-        TransitionElement} from './netmodel';
+import {NetElementSettingForm} from './components/types'
+import {isArc, isPlace, isTransition,
+        NetCategory, NetElement} from './netmodel';
 import {Net} from './netview';
 
-import {ElementValueChanged, PositionChanged} from './events';
+import {NetElementDataValueChanged, PositionChanged} from './events';
 
-import {ArcSetting} from './arcsetting';
-import {PlaceSetting} from './placesetting';
-import {TransitionSetting} from './transitionsetting';
+import {ArcSetting, PlaceSetting, TransitionSetting} from './components'
 
 import {NetTool, Toolbar} from './toolbar';
 import {fillDefaultRelatedPositions,
@@ -62,31 +58,26 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
 
         let settingForm = null;
         if (selected.path !== null) {
-            if (selected.path[0] === "places") {
-                const place = {...ramdaPath(selected.path, this.state.net)} as PlaceElement;
-                settingForm = <PlaceSetting
-                    {...place.data}
-                    {...place.size}
+            const element = Ramda.path(selected.path, net);
+            if (element) {
+                let SettingForm: NetElementSettingForm;
+
+                const netElement = element as NetElement;
+                if (isPlace(netElement)) {
+                    SettingForm = PlaceSetting;
+                } else if (isTransition(netElement)) {
+                    SettingForm = TransitionSetting;
+                } else if (isArc(netElement)) {
+                    SettingForm = ArcSetting;
+                } else {
+                    throw new Error("Invalid selected element");
+                }
+
+                settingForm = <SettingForm
+                    data={netElement.data}
+                    key={`setting-${netElement.type}-${netElement.data.id}`}
                     path={selected.path}
-                    key={`setting-place-${place.data.id}`}
-                    triggerChangesSubmit={this.onChangeElementValue} />;
-            } else if (selected.path[0] === "transitions") {
-                const transition = {...ramdaPath(
-                    selected.path, this.state.net)} as TransitionElement;
-                settingForm = <TransitionSetting
-                    {...transition.data}
-                    {...transition.size}
-                    path={selected.path}
-                    key={`setting-trans-${transition.data.id}`}
-                    triggerChangesSubmit={this.onChangeElementValue} />;
-            } else if (selected.path[0] === "arcs") {
-                const arc = {...ramdaPath(
-                    selected.path, this.state.net)} as ArcElement;
-                settingForm = <ArcSetting
-                    {...arc.data}
-                    path={selected.path}
-                    key={`setting-arc${arc.data.id}`}
-                    triggerChangesSubmit={this.onChangeElementValue} />;
+                    triggerChangesSubmit={this.onChangeElementValue} />
             }
         }
 
@@ -158,7 +149,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         }));
     }
 
-    private onChangeElementValue = (evt: ElementValueChanged) => {
+    private onChangeElementValue = (evt: NetElementDataValueChanged) => {
 
         this.setState(({net}: any) => {
             const keys = Object.keys(evt.value);
