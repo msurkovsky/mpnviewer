@@ -1,6 +1,6 @@
-import {lensPath, lensProp, over, path as ramdaPath} from 'ramda';
+import * as Ramda from 'ramda';
 import * as React from 'react';
-import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom'
+import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom';
 
 import {NetElementSettingForm} from './components/types'
 import {isArc, isPlace, isTransition,
@@ -116,8 +116,8 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         this.setState(({net}: any) => {
             const filledElement = fillElementDefaultRelatedPosition(element, net);
             return {
-                net: {...over(
-                    lensPath([category, element.data.id]),
+                net: {...Ramda.over(
+                    Ramda.lensPath([category, element.data.id]),
                     () => filledElement,
                     net
                 )}
@@ -130,7 +130,11 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
             const elements = net[category];
             delete elements[id];
             return {
-                net: {...over(lensPath([category]), () => ({...elements}), net)}
+                net: {...Ramda.over(
+                    Ramda.lensPath([category]),
+                    () => ({...elements}),
+                    net
+                )}
             };
         });
     }
@@ -145,7 +149,11 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
 
     private onPositionChanged = (e: PositionChanged) => {
         this.setState(({net}: any) => ({
-            net: {...over(lensPath(e.path), () => ({...e.new}), net)}
+            net: {...Ramda.over(
+                Ramda.lensPath(e.path),
+                () => ({...e.new}),
+                net
+            )}
         }));
     }
 
@@ -153,13 +161,15 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
 
         this.setState(({net}: any) => {
             const keys = Object.keys(evt.value);
-            let o = ramdaPath(evt.path, net);
+            let o = Ramda.path(evt.path, net);
             for (const key of keys) {
-                o = over(lensProp(key), () => ({...evt.value[key]}), o);
+                o = Ramda.over(
+                    Ramda.lensProp(key), () => ({...evt.value[key]}), o);
             }
 
             return {
-                net: over(lensPath(evt.path), () => ({...o}), net),
+                net: Ramda.over(
+                    Ramda.lensPath(evt.path), () => ({...o}), net),
             };
         });
     }
