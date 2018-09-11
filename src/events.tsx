@@ -1,10 +1,9 @@
 import {NetElementData} from './netmodel';
-import {Position} from './types'
+import {Path, Position} from './types'
 
 export interface PositionChanged {
-    "path": string[];
-    "old": Position;
-    "new": Position;
+    "path": Path;
+    "value": Position;
 }
 
 export interface NetElementDataChanged {

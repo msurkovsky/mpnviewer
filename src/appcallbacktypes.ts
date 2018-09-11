@@ -10,7 +10,7 @@ export type CbRemoveNetElement = (category: NetCategory) => (id: ID) => void;
 
 export type CbSelect = (path: Path | null) => () => void;
 
-export type CbPositionChanged = (evt: PositionChanged) => void;
+export type CbChangePosition = (evt: PositionChanged) => void;
 
 export type CbChangeNetElementData = (evt: NetElementDataChanged) => void;
 

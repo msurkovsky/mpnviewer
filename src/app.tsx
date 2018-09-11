@@ -151,7 +151,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         this.setState(({net}: any) => ({
             net: {...Ramda.over(
                 Ramda.lensPath(e.path),
-                () => ({...e.new}),
+                () => ({...e.value}),
                 net
             )}
         }));
