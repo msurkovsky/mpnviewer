@@ -10,15 +10,6 @@ import {font} from '../visualsetting';
 import {TextElement} from './textelement';
 
 
-// data
-// path
-// anchorPosition
-// position
-// size
-// relatedPositions
-// triggers
-// ...rest
-
 type PlacePositions = Dict<Position> & {
     type:  Position;
     initExpr: Position;
@@ -31,14 +22,20 @@ interface Props {
     position: Position;
     size: Size;
     relatedPositions: PlacePositions;
+    select: () => void;
+    remove: () => void;
+    createNewArc: () => void;
 };
 
 export class Place extends React.PureComponent<Props> {
 
     public render () {
 
-        const {data: place, path,
-               anchorPosition, position, size, relatedPositions} = this.props;
+        const {
+            data: place, path,
+            anchorPosition, position, size, relatedPositions,
+            select, remove, createNewArc,
+        } = this.props;
         const {width, height} = size;
 
         const radius = height / 2;

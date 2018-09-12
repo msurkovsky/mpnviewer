@@ -13,8 +13,6 @@ export enum PlaceDataLayout {
     MULTISET = "multiset",
 }
 
-export type NetElementType = "place" | "transition" | "arc";
-
 export interface PlaceData {
     id: string;
     dataLayout: PlaceDataLayout;
@@ -48,6 +46,12 @@ export interface ArcData {
 
 export type NetElementData = PlaceData | TransitionData | ArcData;
 
+export enum NetElementType {
+    PLACE = "place",
+    TRANSITION = "transition",
+    ARC = "arc",
+}
+
 export interface BaseNetElement {
     data: NetElementData;
     type: NetElementType;
@@ -61,6 +65,8 @@ export interface PlaceElement extends BaseNetElement, Positionable, Resizable {
 export interface TransitionElement extends BaseNetElement, Positionable, Resizable {
     data: TransitionData,
 }
+
+export type NetNode = PlaceElement | TransitionElement;
 
 export interface ArcElement extends BaseNetElement {
     data: ArcData;
@@ -77,13 +83,17 @@ export interface FullArcElement extends ArcElement {
 }
 
 export type NetElement = PlaceElement
-                        | TransitionElement
-                        | PartialArcElement
-                        | FullArcElement;
+                       | TransitionElement
+                       | PartialArcElement
+                       | FullArcElement;
 
-export type NetCategory = "places" | "transitions" | "arcs";
+export enum NetCategory {
+    PLACES = "places",
+    TRANSITIONS = "transitions",
+    ARCS = "arcs"
+}
 
-export interface NetModel {
+export interface NetStructure {
     places: Dict<PlaceElement>;
     transitions: Dict<TransitionElement>;
     arcs: Dict<ArcElement | PartialArcElement>;

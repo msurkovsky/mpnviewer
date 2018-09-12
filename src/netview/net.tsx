@@ -1,7 +1,8 @@
 import * as React from 'react';
 import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
-import {ArcElement, ArcType, NetElement, netElementTypeToCategory,
-        NetModel, PlaceElement, TransitionElement} from '../netmodel';
+import {ArcElement, ArcType, NetElement, NetElementType, netElementTypeToCategory,
+        NetNodeType, NetStructure, PlaceElement, TransitionElement
+} from '../netmodel';
 import * as Utils from '../utils';
 
 import {endAddingArc, startAddingArc} from '../features/addarc';
@@ -14,6 +15,8 @@ import {Arc} from './arc';
 import {Place} from './place';
 import {Transition} from './transition';
 
+
+const {ARC, PLACE, TRANSITION} = NetElementType;
 
 export interface CanvasCtxData {
     zoom: number;
@@ -91,8 +94,8 @@ export class Net extends React.Component<Props, State> {
 
                     <g id="mpnet">
                       {this.renderArcs()}
-                      {this.renderPlaces()}
-                      {this.renderTransitions()}
+                      {this.renderNetNode(PLACE)}
+                      {this.renderNetNode(TRANSITION)}
                     </g>
                 </svg>
             </ReactSVGPanZoom>
@@ -128,70 +131,38 @@ export class Net extends React.Component<Props, State> {
         return arcComponents;
     }
 
-    protected renderPlaces () {
-        const results = [];
-        for (const key of Object.keys(places)) {
-            const {data, position, size, relatedPositions} = places[key];
-            const basePath = ["places", key];
-
-            results.push(
-                <Place
-                    elementType="place"
-                    key={data.id}
-                    paths={{
-                        base: basePath,
-                        position: ["position"],
-                    }}
-                    data={data}
-                    parentPosition={{x: 0, y: 0}}
-                    {...position}
-                    {...size}
-                    triggerSelect={triggerSelect(basePath)}
-                    triggerAddArc={triggerAddArc}
-                    triggerRemoveElement={triggerRemoveElement}
-                    netToolbar={netToolbar}
-                    triggerChangeNetToolbarValue={triggerChangeNetToolbarValue}
-                    relatedPositions={relatedPositions}
-                    triggerPositionChanged={triggerPositionChanged}
-                />
-            );
-        }
-
-        return results;
-    }
-
-    protected renderTransitions () {
+    protected renderNetNode(type: NetElementType) {
+        const category = netElementTypeToCategory(type);
         const {
-            net: {transitions},
+            net: {[category]: elements},
             onSelectNetElement,
             onRemoveNetElement,
         } = this.props;
 
+        const Component = Utils.getNetComponet(type);
+
         const results = [];
-        for (const key of Object.keys(transitions)) {
-            const {data, position, size, relatedPositions} = transitions[key];
-            const path = ["transitions", key];
+        for (const key of Object.keys(elements)) {
+            const {data, position, size, relatedPositions} = elements[key];
+            const path = [category, key];
 
-            const selectTrans = () => onSelectNetElement(path);
-            const removeTrans = () => onRemoveNetElement("transitions")(key);
+            const selectPlace = () => onSelectNetElement(path);
+            const removePlace = () => onRemoveNetElement(category)(key);
 
-            results.push(
-                <Transition
-                    key={data.id}
-                    path={path}
-                    data={data}
-                    anchorPosition={{x: 0, y: 0}}
-                    position={position}
-                    size={size}
-                    relatedPositions={relatedPositions}
-                    select={selectTrans}
-                    remove={removeTrans}
-                    createNewArc={this.createNewArc({data,
-                                                     type: "transition",
-                                                     position,
-                                                     size}, path)} />
-            );
+            results.push(<Component
+                             key={data.id}
+                             path={path}
+                             data={data}
+                             anchorPosition={{x: 0, y: 0}}
+                             postion={position}
+                             size={size}
+                             relatedPositions={relatedPositions}
+                             select={selectPlace}
+                             remove={removePlace}
+                             createNewArc={this.createNewArc(
+                                     {data, type, position, size}, path)} />);
         }
+
         return results;
     }
 
@@ -212,10 +183,7 @@ export class Net extends React.Component<Props, State> {
         }}));
     }
 
-    private createNewArc = (
-        startElement: PlaceElement | TransitionElement,
-        path: Path
-    ) => () => {
+    private createNewArc = (startElement: NetNodeType, path: Path) => () => {
         const {netToolbarState} = this.props;
         if (netToolbarState.tool !== NetTool.ADD_ARC) {
             return;

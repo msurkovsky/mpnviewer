@@ -26,7 +26,7 @@ interface Props {
     createNewArc: () => void;
 }
 
-class CoreTransition extends React.PureComponent<Props> {
+export class Transition extends React.PureComponent<Props> {
 
     public render() {
 
@@ -115,5 +115,3 @@ class CoreTransition extends React.PureComponent<Props> {
         );
     }
 }
-
-export const Transition = createMovable<Props, TransitionData>(CoreTransition);
