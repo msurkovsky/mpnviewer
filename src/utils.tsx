@@ -2,9 +2,10 @@ import * as Ramda from 'ramda';
 import * as React from 'react';
 
 import {ArcElement, BaseNetElement, isArc, isPlace, isTransition,
-        Net as TNet, NetCategory, NetElement,
+        NetCategory, NetElement, NetElementType, NetStructure,
         PlaceElement, TransitionElement} from './netmodel';
-import {BBox, Circle, Dict, Line, Position, Vector2d} from './types';
+import {Arc, Place, Transition} from './netview';
+import {BBox, Circle, Dict, ID, Line, Position, Vector2d} from './types';
 import {font, FontSetting, FontSize, pt2px} from './visualsetting';
 
 export const emptyFn = () => {/*empty*/};
@@ -16,7 +17,7 @@ export const getId = ((id: number) => (): string => {
 
 export function computeDefaultRelatedPositions(
     element: BaseNetElement,
-    net: TNet
+    net: NetStructure
 ): Dict<Position> {
 
     if (isPlace(element)) {
@@ -43,15 +44,15 @@ export function computeDefaultRelatedPositions(
 
 export function fillElementDefaultRelatedPosition(
     element: BaseNetElement,
-    net: TNet
+    net: NetStructure
 ) {
     const relatedPositions = computeDefaultRelatedPositions(element, net);
     return {...element, relatedPositions};
 }
 
-export function fillDefaultRelatedPositions(net: TNet) {
+export function fillDefaultRelatedPositions(net: NetStructure) {
 
-    const fill = (n: TNet, category: NetCategory) => {
+    const fill = (n: NetStructure, category: NetCategory) => {
         for (const key of Object.keys(net[category])) {
             const element = net[category][key];
 
@@ -73,15 +74,15 @@ export function fillDefaultRelatedPositions(net: TNet) {
         return n;
     };
 
-    let newNet: TNet = net;
+    let newNet: NetStructure = net;
 
-    newNet = fill(newNet, "places");
-    newNet = fill(newNet, "transitions");
-    newNet = fill(newNet, "arcs");
+    newNet = fill(newNet, NetCategory.PLACES);
+    newNet = fill(newNet, NetCategory.TRANSITIONS);
+    newNet = fill(newNet, NetCategory.ARCS);
     return newNet;
 }
 
-export function getArcPoints(arc: ArcElement, net: TNet): Position[] {
+export function getArcPoints(arc: ArcElement, net: NetStructure): Position[] {
 
     type PT = PlaceElement | TransitionElement;
 
@@ -113,7 +114,7 @@ export function getArcPoints(arc: ArcElement, net: TNet): Position[] {
     return [startPoint, ...arc.innerPoints, endPoint];
 }
 
-export function getArcId(arc: ArcElement, net: TNet): string {
+export function getArcId(arc: ArcElement, net: NetStructure): string {
 
     const startElement = Ramda.path(arc.startElementPath, net) as NetElement;
 
@@ -128,6 +129,18 @@ export function getArcId(arc: ArcElement, net: TNet): string {
     }
 
     return `${startElement.data.id}-${endId}`;
+}
+
+export function getNetComponet(type: NetElementType) {
+    const {ARC, PLACE, TRANSITION} = NetElementType;
+    switch (type) {
+        case ARC:
+            return Arc;
+        case PLACE:
+            return Place;
+        case TRANSITION:
+            return Transition;
+    }
 }
 
 export function textToSVG(
@@ -204,8 +217,11 @@ export function undefinedToNulls (obj: any) {
     return Ramda.map(toNull, obj);
 }
 
-export function getPositionOnCanvas(evt: React.MouseEvent | MouseEvent): Position {
-    const canvas = document.getElementById("netcanvas") as HTMLElement;
+export function getPositionOnCanvas (
+    canvasId: ID,
+    evt: React.MouseEvent | MouseEvent
+): Position {
+    const canvas = document.getElementById(canvasId) as HTMLElement;
 
     const clientBBox = canvas.getBoundingClientRect();
     return {

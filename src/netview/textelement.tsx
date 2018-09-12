@@ -1,30 +1,48 @@
+import * as Ramda from 'ramda';
 import * as React from 'react';
-import * as Utils from '../utils'
+import * as Utils from '../utils';
 
-import {Position} from '../types';
-import {FontSetting, FontSize} from '../visualsetting'
-import {createMovable, MouseTriggers} from './movable';
+import {ID} from '../types';
+import {FontSetting, FontSize} from '../visualsetting';
 
-interface Data {id: string, text: string}
-type Props = Data & Position & MouseTriggers & {
+import {onMouseDown, onMouseUp, PositionableProps} from './positionable';
+
+interface Data {
+    id: ID;
+    text: string;
+}
+
+type Props = PositionableProps & {
+    data: Data;
     font: FontSetting;
     fontSize: FontSize;
-    className?: string;
+    svgTextAttrs?: React.SVGProps<SVGTextElement>;
 };
 
-class CoreTextElement extends React.PureComponent<Props> {
+export class TextElement extends React.PureComponent<Props> {
+
+    public static defaultProps = {
+        svgTextAttrs: {}
+    };
 
     public render() {
-        const {id, text, x, y, className, font, fontSize} = this.props;
-        const {triggerMouseDown, triggerMouseUp} = this.props;
+        const {data, anchorPosition, position,
+               font, fontSize, svgTextAttrs} = this.props;
 
-        const jsxText = Utils.textToSVG(id, text, font, fontSize, {
-            x, y, className,
-            onMouseDown: triggerMouseDown,
-            onMouseUp: triggerMouseUp,
-        });
+        const {x, y} = Utils.v2dAdd(anchorPosition, position);
+        const jsxText = Utils.textToSVG(
+            data.id,
+            data.text,
+            font,
+            fontSize,
+            Ramda.merge(
+                svgTextAttrs, {
+                    x, y,
+                    onMouseDown: onMouseDown(this.props, []), // TODO: empty path means the path
+                                                              // already contains position part
+                    onMouseUp
+                }
+            ));
         return jsxText;
     }
 }
-
-export const TextElement = createMovable<Props, Data>(CoreTextElement);

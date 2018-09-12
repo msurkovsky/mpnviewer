@@ -1,67 +1,63 @@
 import * as Utils from '../utils'
 
 import {PositionChanged} from '../events';
-import {Path, Position, Vector2d} from '../types'
+import {ID, Path, Position, Vector2d} from '../types'
 
 let ctx: {
-    // TODO: rename
-    pointerElementDiff: Vector2d; // diff between mouse pointer and element position
+    canvasId: ID;
     zoom: number;
     pan: Position;
+    pointerElementDiff: Vector2d; // diff between mouse pointer and element position
     positionPath: Path;
-    triggerPositionChanged: (evt: PositionChanged) => void; // TODO: create sth. like callback/events types
+    changePosition: (evt: PositionChanged) => void;
 } | null = null;
 
 const {v2dSub, v2dScalarMul} = Utils;
+
 const handleMoving = (evt: MouseEvent) => {
     if (ctx === null) {
         return;
     }
 
-    evt.stopPropagation();
-
     const {pointerElementDiff, zoom, pan,
-           positionPath, triggerPositionChanged} = ctx;
+           positionPath, changePosition} = ctx;
 
-    const pos = Utils.getPositionOnCanvas(evt);
+    const pos = Utils.getPositionOnCanvas(ctx.canvasId, evt);
     const newPos = v2dSub(
         v2dScalarMul(1/zoom, v2dSub(pos, pan)),
         pointerElementDiff);
 
-    triggerPositionChanged({
+    changePosition({
         path: positionPath,
         value: newPos,
     });
 }
 
 export const startMoving = (
+    canvasId: ID,
     x: number,
     y: number,
     zoom: number,
     pan: Position,
     positionPath: Path,
-    triggerPositionChanged: (evt: PositionChanged) => void
-) => (evt: React.MouseEvent) => {
+    changePosition: (evt: PositionChanged) => void
+) => (evt: MouseEvent) => {
 
-    evt.stopPropagation();
-
-    const pos = Utils.getPositionOnCanvas(evt);
+    const pos = Utils.getPositionOnCanvas(canvasId, evt);
     const pointerElementDiff = v2dSub(
         v2dScalarMul(1/zoom, v2dSub(pos, pan)),
         {x, y});
 
-    ctx = {pointerElementDiff, zoom, pan,
-           positionPath, triggerPositionChanged};
+    ctx = {canvasId, pointerElementDiff, zoom, pan,
+           positionPath, changePosition};
 
     document.addEventListener('mousemove', handleMoving);
 }
 
-export const stopMoving = (e: React.MouseEvent) => {
+export const stopMoving = (evt: MouseEvent) => {
     if (ctx === null) {
         return;
     }
-
-    e.stopPropagation();
 
     document.removeEventListener('mousemove', handleMoving);
     ctx = null;

@@ -22,15 +22,15 @@ export class ArcSetting extends React.Component<Props, any> {
 
         this.state = undefinedToNulls(pickAll([
             "expression",
-            "type"], this.props.data));
+            "type"] as Array<keyof ArcData>, this.props.data));
     }
 
     public render() {
         const {expression, type} = this.state;
-        const {triggerChangesSubmit, data: {id}, path} = this.props;
+        const {submitChanges, data: {id}, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({
+            submitChanges({
                 path,
                 value: rejectNulls({id, type, expression}),
             });

@@ -1,11 +1,11 @@
 import * as Ramda from 'ramda';
 import * as React from 'react';
-import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom';
+import {TOOL_AUTO} from 'react-svg-pan-zoom';
 
 import {NetElementSettingForm} from './components/types';
 
 import {isArc, isPlace, isTransition,
-        NetCategory, NetElement} from './netmodel';
+        NetCategory, NetElement, NetStructure} from './netmodel';
 import {Net} from './netview';
 
 import {NetPropertyChanged} from './events';
@@ -13,14 +13,27 @@ import {NetPropertyChanged} from './events';
 import {ArcSetting, PlaceSetting,
         ResizableSetting, TransitionSetting} from './components';
 
-import {NetTool, Toolbar} from './toolbar';
-import {Resizable} from './types';
+import {NetTool, ToolbarType} from './toolbar';
+import {ID, Path, Resizable} from './types';
 import {fillDefaultRelatedPositions,
         fillElementDefaultRelatedPosition} from './utils';
 
-const state = {
+export const CANVAS_ID = "netcanvas";
+
+export interface AppEvents {
+    loadNet: (data: string) => void;
+    serializeNetSVG: () => string;
+    onSelectNetElement: (path: Path | null) => () => void;
+    onAddNetElement: (category: NetCategory) => (element: NetElement) => void;
+    onRemoveNetElement: (category: NetCategory) => (id: ID) => void;
+    onChangeNetProperty: (evt: NetPropertyChanged) => void;
+    onChangeToolbarValue: (toolbar: ToolbarType) => (value: any) => void;
+    onChangeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void;
+}
+
+const initState = {
     selected: {
-        path: null,
+        path: null as Path | null,
     },
     canvasToolbar: {
         value: null,
@@ -34,27 +47,12 @@ const state = {
         places: {},
         transitions: {},
         arcs: {},
-    },
+    } as NetStructure,
 };
 
 export class App extends React.Component<any, any> { // TODO: change `any` to specific types
 
-    private netInst: Net | null = null;
-    private toolbarInst: Toolbar | null = null;
-
-    constructor(props: any) {
-        super(props);
-
-        this.state = state;
-    }
-
-    public componentDidMount () {
-        if (this.toolbarInst === null || this.netInst === null) {
-            throw Error("Getting reference on toolbar and net instance failed.");
-        }
-
-        this.toolbarInst.setViewer(this.netInst.viewerInst);
-    }
+    public state = initState;
 
     public render () {
         const {selected, net, canvasToolbar, netToolbar} = this.state;
@@ -81,47 +79,89 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                     resizeForm = <ResizableSetting
                         size={(netElement as Resizable).size}
                         path={selected.path.concat(["size"])}
-                        triggerChangesSubmit={this.onChangeNetProperty} />
+                        submitChanges={this.onChangeNetProperty} />
                 }
 
                 settingForm = <SettingForm
                     data={netElement.data}
                     key={`setting-${netElement.type}-${netElement.data.id}`}
                     path={selected.path.concat(["data"])}
-                    triggerChangesSubmit={this.onChangeNetProperty} />
+                    submitChanges={this.onChangeNetProperty} />
             }
         }
 
         return (
             <div id="app">
-            <Net ref={(netInst) => {this.netInst = netInst}}
-                x={50} y={50} width={1600} height={700}
-                net={net}
-                canvasToolbar={canvasToolbar}
-                netToolbar={netToolbar}
-                triggerSelect={this.onSelect}
-                triggerAddArc={this.onAddNetElement("arcs")}
-                triggerRemoveElement={this.onRemoveNetElement}
-                triggerChangeValue={this.onChangeCanvasToolbarValue}
-                triggerChangeNetToolbarValue={this.onChangeNetToolbarValue}
-                triggerChangeToolbarTools={this.onChangeToolbarTools}
-                triggerPositionChanged={this.onChangeNetProperty} />
-            <Toolbar ref={(toolbarInst) => {this.toolbarInst = toolbarInst}}
-                activeTool={this.state.canvasToolbar.tool}
-                activeNetTool={this.state.netToolbar.tool}
-                triggerFitNet={this.onFitNet}
-                triggerChangeToolbarTools={this.onChangeToolbarTools}
-                triggerAddPlace={this.onAddNetElement("places")}
-                triggerAddTransition={this.onAddNetElement("transitions")}
-                triggerRemovePlace={this.onRemoveNetElement("places")}
-                triggerRemoveTransition={this.onRemoveNetElement("transitions")}
-                triggerSaveNet={this.onSaveNet}
-                triggerLoadNet={this.onLoadNet}
-                triggerPositionChanged={this.onChangeNetProperty} />
-            {settingForm}
-            {resizeForm}
+                <Net
+                    canvasId={CANVAS_ID}
+                    width={1600} height={700}
+                    net={net}
+                    canvasToolbarState={canvasToolbar}
+                    netToolbarState={netToolbar}
+                    loadNet={this.loadNet}
+                    serializeNetSVG={this.serializeNetSVG}
+                    onSelectNetElement={this.onSelectNetElement}
+                    onAddNetElement={this.onAddNetElement}
+                    onRemoveNetElement={this.onRemoveNetElement}
+                    onChangeNetProperty={this.onChangeNetProperty}
+                    onChangeToolbarValue={this.onChangeToolbarValue}
+                    onChangeToolbarsTool={this.onChangeToolbarsTool} />
+                {settingForm}
+                {resizeForm}
             </div>
         );
+    }
+
+    private loadNet = (data: string) => {
+        const net = JSON.parse(data);
+        this.setState(() => ({net: fillDefaultRelatedPositions(net)}));
+    }
+
+    private serializeNetSVG = () => {
+
+        const canvas = document.getElementById(CANVAS_ID);
+        const defs = document.getElementById(`${CANVAS_ID}-defs`);
+        const elements = document.getElementById(`${CANVAS_ID}-netelements`);
+        if (canvas && defs && elements) {
+            const cvsBbox = canvas.getBoundingClientRect();
+            const {top: cvsY, left: cvsX} = cvsBbox;
+
+            const serializer = new XMLSerializer();
+            const defsStr = serializer.serializeToString(defs);
+            const elementsStr = serializer.serializeToString(elements);
+
+            const bbox = elements.getBoundingClientRect();
+            let {top: y, left: x} = bbox;
+            x -= cvsX;
+            y -= cvsY;
+
+            const {width, height} = bbox;
+
+            const canvasValue = this.state.canvasToolbar.value;
+            if (canvasValue) {
+                const {e: panX, f: panY} = canvasValue as {e: number, f: number};
+                x -= panX;
+                y -= panY;
+            }
+            return `<?xml version="1.0" standalone="no"?>
+                    <svg viewBox="${x} ${y} ${width} ${height}"
+                         xmlns="http://www.w3.org/2000/svg"
+                         width="${width}"
+                         heigh="${height}">
+                      ${defsStr}
+                      ${elementsStr}
+                    </svg>`;
+        }
+
+        return "";
+    }
+
+    private onSelectNetElement = (path: Path | null) => () => {
+        if (this.state.canvasToolbar.tool !== TOOL_AUTO) {
+            return;
+        }
+
+        this.setState(() => ({selected: {path}}));
     }
 
     private onAddNetElement = (category: NetCategory) => (element: NetElement) => {
@@ -137,7 +177,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         });
     }
 
-    private onRemoveNetElement = (category: NetCategory) => (id: string) => {
+    private onRemoveNetElement = (category: NetCategory) => (id: ID) => {
         this.setState(({net}: any) => {
             const elements = net[category];
             delete elements[id];
@@ -161,67 +201,18 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         }));
     }
 
-    private onFitNet = (evt: any) => {
-        // TODO: the bounding box of the net
-        this.setState(({canvasToolbar}: any) => ({canvasToolbar: {
-            // TODO: I can use this to fit selection on net bounding box
-            value: fitSelection(canvasToolbar.value, 40, 40, 200, 200),
-            tool: canvasToolbar.tool,
-        }}));
-    }
+    private onChangeToolbarValue = (toolbar: ToolbarType) => (value: any) => {
 
-    private onSaveNet = (evt: any) => {
-
-        const data = JSON.stringify(this.state.net, null, 2);
-        const blob = new Blob( [ data ], {
-            type: 'application/octet-stream'
-        });
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'mpnet.json');
-
-        const event = document.createEvent('MouseEvents');
-        event.initMouseEvent(
-            'click', true, true, window, 1, 0, 0, 0, 0,
-            false, false, false, false, 0, null);
-        link.dispatchEvent(event);
-    }
-
-    private onLoadNet = (evt: any) => {
-        const fr = new FileReader();
-        fr.onload = () => {
-            const data = fr.result as string;
-            const net = JSON.parse(data);
-            this.setState(() => ({net: fillDefaultRelatedPositions(net)}));
-        };
-        fr.readAsText(evt.target.files[0]);
-    }
-
-    private onSelect = (path: string[] | null) => () => {
-        if (this.state.canvasToolbar.tool !== TOOL_AUTO) {
-            return;
-        }
-
-        this.setState(() => ({selected: {path}}));
-    }
-
-    private onChangeCanvasToolbarValue = (value: any) => {
-        this.setState(({canvasToolbar}: any) => ({canvasToolbar: {
+        this.setState(({[toolbar]: currentToolbar}: any) => ({[toolbar]: {
             value,
-            tool: canvasToolbar.tool,
+            tool: currentToolbar.tool,
         }}));
     }
 
-    private onChangeNetToolbarValue = (value: any) => {
-        this.setState(({netToolbar}: any) => ({netToolbar: {
-            value,
-            tool: netToolbar.tool,
-        }}));
-    }
-
-    private onChangeToolbarTools = (canvasTool: any, netTool: NetTool | null=null) => {
+    private onChangeToolbarsTool = (
+        canvasTool: any,
+        netTool: NetTool | null = null
+    ) => {
         this.setState(({canvasToolbar, netToolbar}: any) => ({
             canvasToolbar: {
                 value: canvasToolbar.value,

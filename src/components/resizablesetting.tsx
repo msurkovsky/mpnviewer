@@ -16,10 +16,10 @@ export class ResizableSetting extends React.Component<Props, any> {
 
     public render() {
         const {width, height} = this.state;
-        const {triggerChangesSubmit, path} = this.props;
+        const {submitChanges, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({
+            submitChanges({
                 path,
                 value: {width, height},
             });
@@ -29,7 +29,7 @@ export class ResizableSetting extends React.Component<Props, any> {
             (dimension: keyof Size) =>
                 (evt: React.FormEvent<HTMLInputElement>) => {
 
-            const val = evt.currentTarget.value;
+            const val = parseInt(evt.currentTarget.value, 10);
             this.setState(() => ({[dimension]: val}));
         };
 

@@ -1,4 +1,4 @@
-import {Dict, Position, Positionable, Resizable} from './types'
+import {Dict, Position, Positionable, Resizable} from './types';
 
 export enum AMT {
     UNIT = "unit",
@@ -12,8 +12,6 @@ export enum PlaceDataLayout {
     QUEUE = "queue",
     MULTISET = "multiset",
 }
-
-export type NetElementType = "place" | "transition" | "arc";
 
 export interface PlaceData {
     id: string;
@@ -48,6 +46,12 @@ export interface ArcData {
 
 export type NetElementData = PlaceData | TransitionData | ArcData;
 
+export enum NetElementType {
+    PLACE = "place",
+    TRANSITION = "transition",
+    ARC = "arc",
+}
+
 export interface BaseNetElement {
     data: NetElementData;
     type: NetElementType;
@@ -61,6 +65,8 @@ export interface PlaceElement extends BaseNetElement, Positionable, Resizable {
 export interface TransitionElement extends BaseNetElement, Positionable, Resizable {
     data: TransitionData,
 }
+
+export type NetNode = PlaceElement | TransitionElement;
 
 export interface ArcElement extends BaseNetElement {
     data: ArcData;
@@ -77,13 +83,17 @@ export interface FullArcElement extends ArcElement {
 }
 
 export type NetElement = PlaceElement
-                        | TransitionElement
-                        | PartialArcElement
-                        | FullArcElement;
+                       | TransitionElement
+                       | PartialArcElement
+                       | FullArcElement;
 
-export type NetCategory = "places" | "transitions" | "arcs";
+export enum NetCategory {
+    PLACES = "places",
+    TRANSITIONS = "transitions",
+    ARCS = "arcs"
+}
 
-export interface Net {
+export interface NetStructure {
     places: Dict<PlaceElement>;
     transitions: Dict<TransitionElement>;
     arcs: Dict<ArcElement | PartialArcElement>;
@@ -99,4 +109,8 @@ export function isPlace(element: BaseNetElement): boolean {
 
 export function isArc(element: BaseNetElement): boolean {
     return element.type === "arc";
+}
+
+export function netElementTypeToCategory (type: NetElementType): NetCategory {
+    return `${type}s` as NetCategory;
 }

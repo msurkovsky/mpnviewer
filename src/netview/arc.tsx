@@ -1,62 +1,71 @@
-import * as React from 'react'
+import * as React from 'react';
+import * as Utils from '../utils';
 
-import {ArcData} from '../netmodel'
-import {Dict, Position} from '../types';
+import {PositionChanged} from '../events';
+
+import {ArcData} from '../netmodel';
+import {Dict, ID, Path, Position} from '../types';
 import {font} from '../visualsetting';
-import {MouseTriggers, PositionTriggers} from './movable';
 import {TextElement} from './textelement';
 
-type ArcsPositions = Dict<Position> & {
+export type ArcPositions = Dict<Position> & {
     expression: Position;
 }
 
-type Props = ArcData & MouseTriggers & PositionTriggers & {
-    paths: { base: string[] }
+interface Props {
+    canvasId: ID;
+    data: ArcData;
+    path: Path;
+    zoom: number;
+    pan: Position;
+    anchorPosition: Position;
     points: Array<{x: number, y: number}>;
-    relatedPositions: ArcsPositions;
-    triggerSelect: () => void;
-};
+    relatedPositions: ArcPositions;
+    select: () => void;
+    remove: () => void;
+    changePosition: (evt: PositionChanged) => void;
+}
 
 export class Arc extends React.PureComponent<Props> {
 
     public render() {
-        const {id, expression, type, triggerSelect,
-               points, paths, relatedPositions,
-                triggerPositionChanged
-        } = this.props;
+        const {canvasId, data: arc, path, zoom, pan,
+            anchorPosition, points, relatedPositions,
+            changePosition} = this.props;
 
-        const onArcClick = (evt: React.MouseEvent) => {
-            triggerSelect();
-
-            evt.stopPropagation();
-        };
-
-        // NOTE: onMouseDown has to be used when click does not work
+        const anchoredPoints = points.map(p => Utils.v2dAdd(anchorPosition, p));
         return (
             <g>
             <polyline
-                className="arc"
-                fill="transparent"
-                strokeWidth={10}
+                fillOpacity="0.0"
+                stroke="#000"
+                strokeWidth="1.5px"
                 strokeLinejoin="round"
-                points={points.map(({x,y}) => ([x, y])).join(" ")}
-                markerEnd={`url(#${type})`}
-                onClick={onArcClick}
+                pointerEvents="stroke"
+                points={anchoredPoints.map(({x,y}) => ([x, y])).join(" ")}
+                markerEnd={`url(#${arc.type})`}
+                onClick={this.onClick}
             />
+
             <TextElement
-                className="small"
-                paths={{
-                    base: [...paths.base],
-                    position: ["relatedPositions", "expression"],
-                }}
-                data={{id: `${id}-expression`, text: expression}}
-                parentPosition={{x: 0, y: 0}}
-                x={relatedPositions.expression.x}
-                y={relatedPositions.expression.y}
+                canvasId={canvasId}
+                path={path.concat(["relatedPositions", "expressions"])}
+                data={{id: `${arc.id}-expression`, text: arc.expression}}
+                zoom={zoom}
+                pan={pan}
+                anchorPosition={anchorPosition}
+                position={relatedPositions.expression}
                 font={font.code}
                 fontSize="small"
-                triggerPositionChanged={triggerPositionChanged}/>
+                changePosition={changePosition}/>
             </g>
         );
+    }
+
+    private onClick = (evt: React.MouseEvent) => {
+        const select = this.props.select;
+        select();
+
+        evt.stopPropagation();
     }
 }

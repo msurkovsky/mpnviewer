@@ -1,241 +1,203 @@
 import * as React from 'react';
 import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
-import {ArcElement, ArcType, NetCategory} from '../netmodel';
 import * as Utils from '../utils';
 
-import {NetToolbarState} from '../toolbar'
-import {Vector2d} from '../types'
-import {Arc} from './arc'
-import {Place} from './place';
-import {Transition} from './transition';
+import {endAddingArc, startAddingArc} from '../features/addarc';
+import {
+    emptyPlace, emptyTransition,
+    startAddingNetElement
+} from '../features/addnetelements';
 
+import {AppEvents} from '../app';
+import {
+    ArcType, BaseNetElement, NetCategory, NetElementType,
+    netElementTypeToCategory, NetNode, NetStructure
+} from '../netmodel';
+import {
+    CanvasToolbarState, NetTool,
+    NetToolbarState, Toolbar, ToolbarType
+} from '../toolbar';
+import {ID, Path, Resizable, Size, Vector2d} from '../types';
 
-interface State {
-    canvasContext: CanvasCtxData
-    viewerInst: Viewer | null;
-}
+import {Arc, ArcPositions} from './arc';
 
-export interface Viewer {
-    ViewerDOM: any;
-    state: any;
-}
-
-const defaultState = {
-    canvasContext: {
-        zoom: 1.0,
-        pan: {x: 0.0, y: 0.0},
-    },
-    viewerInst: null,
-};
 
 export interface CanvasCtxData {
     zoom: number;
     pan: Vector2d;
 }
 
-export const CanvasContext = React.createContext({...defaultState.canvasContext});
+type Props = Size & AppEvents & {
+    canvasId: ID;
+    net: NetStructure;
+    netToolbarState: NetToolbarState;
+    canvasToolbarState: CanvasToolbarState;
+}
 
-export class Net extends React.Component<any, any> {
+interface State {
+    canvasContext: CanvasCtxData
+}
 
-    public state = {...defaultState};
-    public viewerInst: any = null;
+export const CanvasContext = React.createContext({zoom: 1.0, pan: {x: 0, y: 0}});
 
-    public componentDidMount() {
-        this.setState({viewerInst: this.viewerInst});
-    }
+export class Net extends React.Component<Props, State> {
+
+    public state = {
+        canvasContext: {
+            zoom: 1.0,
+            pan: {x: 0, y: 0}
+        }
+    };
 
     public render() {
-        const {net, width, height,
-               canvasToolbar, netToolbar,
-               triggerSelect,
-               triggerAddArc, triggerRemoveElement,
-               triggerChangeNetToolbarValue,
-               triggerChangeValue, triggerChangeToolbarTools} = this.props;
+        const {canvasId,
+               net, width, height, canvasToolbarState: cts, netToolbarState: nts,
+               onSelectNetElement,
+               serializeNetSVG, loadNet,
+               onChangeToolbarValue, onChangeToolbarsTool} = this.props;
 
         return (
-            <div id="netcanvas" style={{position: "relative", width, height}}>
             <CanvasContext.Provider value={this.state.canvasContext}>
+            <Toolbar
+                activeCanvasTool={cts.tool}
+                activeNetTool={nts.tool}
+                serializeNetSVG={serializeNetSVG}
+                currentNet={net}
+                loadNet={loadNet}
+                addNewPlace={this.createNetNode(emptyPlace)}
+                addNewTransition={this.createNetNode(emptyTransition)}
+                changeToolbarsTool={onChangeToolbarsTool} />
+            <div id={canvasId} style={{position: "relative", width, height}}>
             <ReactSVGPanZoom
-                ref={(viewerInst: any) => {this.viewerInst = viewerInst}}
                 width={width} height={height}
                 background="#ffe"
                 SVGBackground="#ffe"
                 miniaturePosition={POSITION_NONE}
                 toolbarPosition={POSITION_NONE}
-                value={canvasToolbar.value} onChangeValue={triggerChangeValue}
-                tool={canvasToolbar.tool} onChangeTool={triggerChangeToolbarTools}
+                value={cts.value} onChangeValue={onChangeToolbarValue(ToolbarType.CANVAS)}
+                tool={cts.tool} onChangeTool={onChangeToolbarsTool}
                 onPan={this.onPan}
                 onZoom={this.onZoom}
-                onClick={triggerSelect(null)}>
+                onClick={onSelectNetElement(null)}>
 
-                <svg width={width} height={height}>
-                    <defs>
+                <svg width={width/2} height={height/2}>
+                    <defs id={`${canvasId}-defs`}>
                         <marker id={ArcType.SINGLE_HEADED} viewBox="0 0 10 10" refX="8" refY="5"
                                 markerWidth="10" markerHeight="8"
-                                orient="auto-start-reverse">
+                                orient="auto">
                             <path d="M 0 0 L 10 5 L 0 10 Z" />
                         </marker>
 
                         <marker id={ArcType.DOUBLE_HEADED} viewBox="0 0 20 10" refX="18" refY="5"
                                 markerWidth="18" markerHeight="8"
-                                orient="auto-start-reverse">
-                            <path d="M 0 0 L 10 5 L 0 10 Z" />
+                                orient="auto">
+                            <path d="M 0 0 L 10 5 L 0 10 Z" />>
                             <path d="M 10 0 L 20 5 L 10 10 Z" />
                         </marker>
 
                         <marker id={ArcType.SINGLE_HEADED_RO} viewBox="0 0 10 10" refX="8" refY="5"
                                 markerWidth="10" markerHeight="8"
-                                orient="auto-start-reverse">
+                                orient="auto">
                             <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
                         </marker>
 
                         <marker id={ArcType.DOUBLE_HEADED_RO} viewBox="0 0 20 10" refX="18" refY="5"
                                 markerWidth="18" markerHeight="8"
-                                orient="auto-start-reverse">
+                                orient="auto">
                             <path d="M 0 0 L 10 5 L 0 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5"/>
                             <path d="M 10 0 L 20 5 L 10 10 Z" fill="#fff" stroke="#000" strokeWidth="1.5" />
                         </marker>
                     </defs>
 
-                    <g id="mpnet">
-                      {this.renderArcs(net.arcs, triggerSelect)}
-                        {this.renderPlaces(
-                             net.places,
-                             netToolbar,
-                             triggerSelect,
-                             triggerAddArc,
-                             triggerRemoveElement,
-                             triggerChangeNetToolbarValue
-                        )}
-                        {this.renderTransitions(
-                             net.transitions,
-                             netToolbar,
-                             triggerSelect,
-                             triggerAddArc,
-                             triggerRemoveElement,
-                             triggerChangeNetToolbarValue
-                        )}
+                    <g id={`${canvasId}-netelements`}>
+                      {this.renderArcs()}
+                      {this.renderNetNode(NetElementType.PLACE)}
+                      {this.renderNetNode(NetElementType.TRANSITION)}
                     </g>
                 </svg>
             </ReactSVGPanZoom>
-            </CanvasContext.Provider>
             </div>
+            </CanvasContext.Provider>
         );
     }
 
-    protected renderArcs(
-        arcs: any,
-        triggerSelect: (path: string[]) => () => void
-    ) {
-
-        const net = this.props.net;
-
-        const triggerPositionChanged = this.props.triggerPositionChanged;
+    protected renderArcs() {
+        const {canvasId,
+               net,
+               onSelectNetElement,
+               onRemoveNetElement,
+               onChangeNetProperty,
+        } = this.props;
+        const {canvasContext: {zoom, pan}} = this.state;
 
         const arcComponents = [];
-        for (const key of Object.keys(arcs)) {
-            const arc = arcs[key];
+        for (const key of Object.keys(net.arcs)) {
+            const arc = net.arcs[key];
             const points = Utils.getArcPoints(arc, net);
+            const {data, relatedPositions} = arc;
 
-            const basePath = ["arcs", key];
+            const path = ["arcs", key];
+
+            const removeArc = () => onRemoveNetElement(NetCategory.ARCS)(key);
+
             arcComponents.push(
                 <Arc
-                    elementType="arc"
+                    canvasId={canvasId}
                     key={`${Utils.getArcId(arc, net)}`}
-                    paths={{base: basePath}}
+                    path={path}
+                    data={data}
+                    zoom={zoom}
+                    pan={pan}
+                    anchorPosition={{x: 0, y: 0}}
                     points={points}
-                    triggerSelect={triggerSelect(basePath)}
-                    triggerPositionChanged={triggerPositionChanged}
-                    relatedPositions={{...arc.relatedPositions}}
-                    {...arc.data}
-                />
-            );
+                    relatedPositions={relatedPositions as ArcPositions}
+                    select={onSelectNetElement(path)}
+                    remove={removeArc}
+                    changePosition={onChangeNetProperty} />);
         }
 
         return arcComponents;
     }
 
-    protected renderPlaces (
-        places: any,
-        netToolbar: NetToolbarState,
-        triggerSelect: (path: string[]) => () => void,
-        triggerAddArc: (arc: ArcElement) => void,
-        triggerRemoveElement: (category: NetCategory) => (id: string) => void,
-        triggerChangeNetToolbarValue: (value: any) => void
-    ) {
-        const triggerPositionChanged = this.props.triggerPositionChanged;
+    protected renderNetNode(type: NetElementType) {
+        const category = netElementTypeToCategory(type);
+        const {
+            canvasId,
+            net: {[category]: elements},
+            onSelectNetElement,
+            onRemoveNetElement,
+            onChangeNetProperty,
+        } = this.props;
+        const {canvasContext: {zoom, pan}} = this.state;
+
+        const Component = Utils.getNetComponet(type);
 
         const results = [];
-        for (const key of Object.keys(places)) {
-            const {data, position, size, relatedPositions} = places[key];
-            const basePath = ["places", key];
+        for (const key of Object.keys(elements)) {
+            const {data, position, size, relatedPositions} = elements[key];
+            const path = [category, key];
+
+            const removeNetElement = () => onRemoveNetElement(category)(key);
 
             results.push(
-                <Place
-                    elementType="place"
+                <Component
+                    canvasId={canvasId}
                     key={data.id}
-                    paths={{
-                        base: basePath,
-                        position: ["position"],
-                    }}
+                    path={path}
                     data={data}
-                    parentPosition={{x: 0, y: 0}}
-                    {...position}
-                    {...size}
-                    viewerInst={this.state.viewerInst}
-                    triggerSelect={triggerSelect(basePath)}
-                    triggerAddArc={triggerAddArc}
-                    triggerRemoveElement={triggerRemoveElement}
-                    netToolbar={netToolbar}
-                    triggerChangeNetToolbarValue={triggerChangeNetToolbarValue}
+                    zoom={zoom}
+                    pan={pan}
+                    anchorPosition={{x: 0, y: 0}}
+                    position={position}
+                    size={size}
                     relatedPositions={relatedPositions}
-                    triggerPositionChanged={triggerPositionChanged}
-                />
-            );
+                    select={onSelectNetElement(path)}
+                    remove={removeNetElement}
+                    createNewArc={this.createNewArc(
+                            {data, type, position, size}, path)}
+                    changePosition={onChangeNetProperty} />);
         }
 
-        return results;
-    }
-
-    protected renderTransitions (
-        transitions: any,
-        netToolbar: NetToolbarState,
-        triggerSelect: (path: string[]) => () => void,
-        triggerAddArc: (arc: ArcElement) => void,
-        triggerRemoveElement: (category: NetCategory) => (id: string) => void,
-        triggerChangeNetToolbarValue: (value: any) => void
-    ) {
-
-        const triggerPositionChanged = this.props.triggerPositionChanged;
-
-        const results = [];
-        for (const key of Object.keys(transitions)) {
-            const {data, position, size, relatedPositions} = transitions[key];
-            const basePath = ["transitions", key];
-
-            results.push(
-                <Transition
-                    elementType="transition"
-                    key={data.id}
-                    paths={{
-                        base: basePath,
-                        position: ["position"],
-                    }}
-                    data={data}
-                    parentPosition={{x: 0, y: 0}}
-                    {...position}
-                    {...size}
-                    viewerInst={this.state.viewerInst}
-                    triggerSelect={triggerSelect(basePath)}
-                    triggerAddArc={triggerAddArc}
-                    triggerRemoveElement={triggerRemoveElement}
-                    netToolbar={netToolbar}
-                    triggerChangeNetToolbarValue={triggerChangeNetToolbarValue}
-                    relatedPositions={relatedPositions}
-                    triggerPositionChanged={triggerPositionChanged}
-                />
-            );
-        }
         return results;
     }
 
@@ -254,5 +216,48 @@ export class Net extends React.Component<any, any> {
             ...oldCC,
             pan: {x: evt.e, y: evt.f}
         }}));
+    }
+
+    private createNewArc = (startNode: NetNode, path: Path) => () => {
+        const {netToolbarState} = this.props;
+        if (netToolbarState.tool !== NetTool.ADD_ARC) {
+            return false;
+        }
+
+        const {canvasId, onAddNetElement, onRemoveNetElement, onChangeToolbarValue} = this.props;
+
+        const {canvasContext: {zoom, pan}} = this.state;
+        if (netToolbarState.value === null) {
+            // no value is set => start creating arc
+            startAddingArc(
+                canvasId, zoom, pan,
+                startNode, path,
+                onAddNetElement(NetCategory.ARCS),
+                onRemoveNetElement(NetCategory.ARCS),
+                onChangeToolbarValue(ToolbarType.NET)
+            );
+        } else {
+            // value is set => end creating arc
+            endAddingArc(path);
+        }
+        return true;
+    }
+
+    private createNetNode = (create: () => BaseNetElement & Resizable) => () => {
+        const {canvasId,
+               onAddNetElement, onRemoveNetElement,
+               onChangeNetProperty, onChangeToolbarsTool} = this.props;
+        const {canvasContext: {zoom, pan}} = this.state;
+
+        const netNode = create();
+        const netCategory = netElementTypeToCategory(netNode.type);
+        startAddingNetElement(
+            canvasId, zoom, pan,
+            netNode,
+            onAddNetElement(netCategory),
+            onRemoveNetElement(netCategory),
+            onChangeNetProperty,
+            onChangeToolbarsTool
+        );
     }
 }

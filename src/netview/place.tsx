@@ -1,87 +1,43 @@
 import * as React from 'react';
-import * as Utils from '../utils'
+import * as Utils from '../utils';
 
-import {endAddingArc, startAddingArc} from '../features/addarc'
-import {ArcElement, NetCategory,
-        PlaceData, PlaceDataLayout, PlaceElement} from '../netmodel';
-import {NetTool, NetToolbarState} from '../toolbar'
+import {PlaceData, PlaceDataLayout} from '../netmodel';
 import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
-import {createMovable, MouseTriggers, PositionTriggers} from './movable';
-import {Viewer} from './net'
-import {TextElement} from './textelement';
 
+import {onMouseDown, onMouseUp, PositionableProps} from './positionable';
+import {TextElement} from './textelement';
 
 type PlacePositions = Dict<Position> & {
     type:  Position;
     initExpr: Position;
 }
 
-type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
-    paths: {
-        base: string[];
-        position: string[];
-    };
+type Props = PositionableProps & {
+    data: PlaceData;
     relatedPositions: PlacePositions;
-    viewerInst: Viewer;
-    netToolbar: NetToolbarState;
-    triggerChangeNetToolbarValue: (value: any) => void;
-    triggerSelect: () => void;
-    triggerAddArc: (arc: ArcElement) => void;
-    triggerRemoveElement: (category: NetCategory) => (id: string) => void;
+    size: Size;
+    select: () => void;
+    remove: () => void;
+    createNewArc: () => boolean;
 };
 
-class CorePlace extends React.PureComponent<Props> {
+export class Place extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, id, dataType, initExpr, dataLayout, cpLabel,
-               x, y, width, height, relatedPositions,
-               viewerInst, triggerAddArc, triggerRemoveElement,
-               netToolbar, triggerChangeNetToolbarValue,
-               triggerMouseDown, triggerMouseUp, triggerSelect,
-               triggerPositionChanged} = this.props;
+        const {canvasId, data: place, path, zoom, pan,
+            anchorPosition, position, size, relatedPositions,
+            changePosition} = this.props;
+
+        const {x, y} = Utils.v2dAdd(anchorPosition, position);
+        const {width, height} = size;
 
         const radius = height / 2;
-        const cssDataLayout = dataLayout === PlaceDataLayout.MULTISET? "bPlace" : "qPlace";
-
-        const addRemoveArc = (evt: React.MouseEvent) => {
-            if (netToolbar.tool !== NetTool.ADD_ARC) {
-                return;
-            }
-
-            if (netToolbar.value === null) {
-                const place: PlaceElement = {
-                    data: {id, name, dataType, initExpr, dataLayout},
-                    type: "place",
-                    position: {x, y},
-                    size: {width, height},
-                };
-                startAddingArc(
-                    viewerInst,
-                    place,
-                    paths.base,
-                    triggerAddArc,
-                    triggerRemoveElement("arcs"),
-                    triggerChangeNetToolbarValue
-                );
-            } else {
-                endAddingArc(paths.base);
-            }
-        };
-
-        const triggerClick = (evt: React.MouseEvent) => {
-            triggerSelect();
-            addRemoveArc(evt);
-
-            // stop propagation to prevent canvas unselect
-            evt.preventDefault();
-            evt.stopPropagation();
-        }
 
         let cpLabelElement = null;
         let cpLabelBBox: BBox | null = null;
-        if (cpLabel) {
+        if (place.cpLabel) {
             const cplWidth = .6 * width;
             const cplHeight = 1.8 * font.description.size.small;
             const cplX = x + (width - cplWidth) / 2;
@@ -89,10 +45,11 @@ class CorePlace extends React.PureComponent<Props> {
             const cplRadius = cplHeight / 2;
             cpLabelBBox = {x: cplX, y: cplY, width: cplWidth, height: cplHeight};
             cpLabelElement = (<g>
-                <rect className="cpLabel" {...cpLabelBBox} rx={cplRadius} ry={cplRadius} />
+                <rect fill="#f2f2f2" stroke="#000" strokeWidth="1px"
+                      {...cpLabelBBox} rx={cplRadius} ry={cplRadius} />
                 {Utils.textToSVG(
                      `{id}-cpLabel-`,
-                     cpLabel.replace(/\\n/g, ""),
+                     place.cpLabel.replace(/\\n/g, ""),
                      font.description,
                      "small", {
                       x: cplX + cplWidth / 2,
@@ -112,56 +69,59 @@ class CorePlace extends React.PureComponent<Props> {
         }
 
         let nameText = null;
-        if (name) {
-          nameText = Utils.textToSVG(id, name, font.description, "small", {
-              x: ntX,
-              y: ntY,
-              textAnchor: "middle",
-              alignmentBaseline: "central",
-          });
+        if (place.name) {
+            nameText = Utils.textToSVG(
+                place.id,
+                place.name,
+                font.description,
+                "small", {
+                    x: ntX,
+                    y: ntY,
+                    textAnchor: "middle",
+                    alignmentBaseline: "central",
+                });
         }
 
         let dataTypeElement = null;
-        if (dataType) {
+        // TODO: path should be just path of the element, but the text element does not know about te position
+        if (place.dataType) {
             dataTypeElement = <TextElement
-                paths={{
-                    base: [...paths.base],
-                    position: ["relatedPositions", "dataType"],
-                }}
-                data={{id: `${id}-datatType`, text: dataType}}
-                parentPosition={{x, y}}
-                netToolbar={netToolbar}
-                x={relatedPositions.dataType.x}
-                y={relatedPositions.dataType.y}
+                canvasId={canvasId}
+                path={path.concat(["relatedPositions", "dataType"])}
+                data={{id: `${place.id}-datatType`, text: place.dataType}}
+                zoom={zoom}
+                pan={pan}
+                anchorPosition={{x, y}}
+                position={relatedPositions.dataType}
                 font={font.code}
                 fontSize="normal"
-                triggerPositionChanged={triggerPositionChanged}/>;
+                changePosition={changePosition}/>;
         }
 
         let initExprElement = null;
-        if (initExpr) {
+        if (place.initExpr) {
             initExprElement = <TextElement
-                paths={{
-                    base: [...paths.base],
-                    position: ["relatedPositions", "initExpr"],
-                }}
-                data={{id: `${id}-initExpr`, text: initExpr}}
-                parentPosition={{x, y}}
-                netToolbar={netToolbar}
-                x={relatedPositions.initExpr.x}
-                y={relatedPositions.initExpr.y}
+                canvasId={canvasId}
+                path={path.concat(["relatedPositions", "initExpr"])}
+                data={{id: `${place.id}-initExpr`, text: place.initExpr}}
+                zoom={zoom}
+                pan={pan}
+                anchorPosition={{x, y}}
+                position={relatedPositions.initExpr}
                 font={font.code}
                 fontSize="small"
-                triggerPositionChanged={triggerPositionChanged}/>
+                changePosition={changePosition}/>;
         }
 
+        const fillColor = place.dataLayout === PlaceDataLayout.MULTISET ?
+                          "#ccc" : "#fff";
         return (
             <g>
-                <rect className={`place ${cssDataLayout}`}
+                <rect fill={fillColor} stroke="#000" strokeWidth="2px"
                     x={x} y={y} width={width} height={height} rx={radius} ry={radius}
-                    onMouseDown={triggerMouseDown}
-                    onMouseUp={triggerMouseUp}
-                    onClick={triggerClick}
+                    onMouseDown={onMouseDown(this.props, ["position"])}
+                    onMouseUp={onMouseUp}
+                    onClick={this.onClick}
                 />
                 {cpLabelElement}
                 {dataTypeElement}
@@ -170,6 +130,17 @@ class CorePlace extends React.PureComponent<Props> {
             </g>
         );
     }
-}
 
-export const Place = createMovable<Props, PlaceData>(CorePlace);
+    private onClick = (evt: React.MouseEvent) => {
+        const { createNewArc, select } = this.props;
+
+        const successfull = createNewArc();
+        if (!successfull) {
+            select();
+        }
+
+        // stop propagation to prevent canvas unselect
+        evt.preventDefault();
+        evt.stopPropagation();
+    }
+}

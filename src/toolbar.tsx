@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
+import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom';
 import {Button, ButtonGroup, ButtonToolbar, Input} from 'reactstrap';
 
-import {emptyPlace, emptyTransition, startAddingNetElement} from './features/addnetelements'
-import {BaseNetElement} from './netmodel'
-import {Resizable} from './types'
+import Download from '@axetroy/react-download';
+
+import {NetStructure} from './netmodel';
 
 export enum NetTool {
     NONE = "none",
@@ -14,103 +14,85 @@ export enum NetTool {
 }
 
 export interface NetToolbarState {
-    tool: NetTool,
-    value: any
+    tool: NetTool;
+    value: any;
+}
+
+export interface CanvasToolbarState {
+    tool: any;
+    value: any;
+}
+
+export enum ToolbarType {
+    CANVAS = "canvasToolbar",
+    NET = "netToolbar",
 }
 
 interface Props { // TODO: what about the any arguments of events?
-    activeTool: any;
+    currentNet: NetStructure;
+    activeCanvasTool: any;
     activeNetTool: NetTool,
-    triggerFitNet: (evt: any) => void;
-    triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
-    triggerAddPlace: (evt: any) => void;
-    triggerAddTransition: (evt: any) => void;
-    triggerRemovePlace: (evt: any) => void;
-    triggerRemoveTransition: (evt: any) => void;
-    triggerSaveNet: (evt: any) => void;
-    triggerLoadNet: (evt: any) => void;
-    triggerPositionChanged: (evt: any) => void;
+    changeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void;
+    serializeNetSVG: () => string;
+    addNewPlace: () => void;
+    addNewTransition: () => void;
+    loadNet: (data: string) => void;
 }
 
 export class Toolbar extends React.Component<Props, any> {
 
-    private viewerInst: {ViewerDOM: any, state: any};
-
-    public setViewer (viewer: {ViewerDOM: any, state: any}) {
-        this.viewerInst = viewer;
-    }
-
     public render () {
         const {
-            activeTool, activeNetTool,
-            triggerChangeToolbarTools,
-            triggerAddPlace, triggerAddTransition,
-            triggerRemovePlace, triggerRemoveTransition,
-            triggerPositionChanged,
-            triggerSaveNet,
-            triggerLoadNet,
+            currentNet,
+            activeCanvasTool, activeNetTool,
+            changeToolbarsTool,
+            addNewPlace, addNewTransition,
+            loadNet, serializeNetSVG,
         } = this.props;
 
-        const addNetElement = (
-            netTool: NetTool,
-            getElement: () => BaseNetElement & Resizable,
-            triggerAddNetElement: (evt: any) => void,
-            triggerRemoveNetElement: (id: string) => void
-        ) => (evt: React.MouseEvent) => {
-
-            const element = getElement();
-
-            startAddingNetElement(
-                this.viewerInst,
-                element,
-                triggerAddNetElement,
-                triggerRemoveNetElement,
-                triggerPositionChanged,
-                triggerChangeToolbarTools,
-            )(evt);
+        const setAddArcTool = () => {changeToolbarsTool(TOOL_NONE, NetTool.ADD_ARC)};
+        const setAutoTool = () => {changeToolbarsTool(TOOL_AUTO, NetTool.NONE)};
+        const onLoadNet = (evt: React.FormEvent<HTMLInputElement>) => {
+            const fr = new FileReader();
+            fr.onload = () => {loadNet(fr.result as string)};
+            const files = evt.currentTarget.files;
+            if (files && files.length > 0) {
+                fr.readAsText(files[0]);
+            }
         };
-
-        const toggleAddArc = (evt: React.MouseEvent) => {
-            triggerChangeToolbarTools(TOOL_NONE, NetTool.ADD_ARC);
-        };
-
-        const autoTool = () => {triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE)};
 
         return (
           <ButtonToolbar>
             <Button
-                onClick={autoTool}
-                active={activeTool === TOOL_AUTO}>
+                onClick={setAutoTool}
+                active={activeCanvasTool === TOOL_AUTO}>
                 Select
             </Button>
 
             <ButtonGroup>
-                <Button onClick={addNetElement(NetTool.ADD_PLACE,
-                                               emptyPlace,
-                                               triggerAddPlace,
-                                               triggerRemovePlace)}
+                <Button onClick={addNewPlace}
                         active={activeNetTool === NetTool.ADD_PLACE}>
                     Place
                 </Button>
-                <Button onClick={addNetElement(NetTool.ADD_TRANSITION,
-                                               emptyTransition,
-                                               triggerAddTransition,
-                                               triggerRemoveTransition)}
+                <Button onClick={addNewTransition}
                         active={activeNetTool === NetTool.ADD_TRANSITION}>
                     Transition
                 </Button>
-                <Button onClick={toggleAddArc}
+                <Button onClick={setAddArcTool}
                         active={activeNetTool === NetTool.ADD_ARC}>
                     Arc
                 </Button>
             </ButtonGroup>
 
             <ButtonGroup>
-                <Button onClick={triggerSaveNet}>
-                    Save MP net
-                </Button>
+                <Download file="mpnet.svg" content={serializeNetSVG()}>
+                    <Button>Export MP Net</Button>
+                </Download>
+                <Download file="mpnet.json" content={JSON.stringify(currentNet)}>
+                    <Button>Save MP Net</Button>
+                </Download>
 
-                <Input id="loadMPNet" type="file" onChange={triggerLoadNet}/>
+                <Input id="loadMPNet" type="file" onChange={onLoadNet}/>
             </ButtonGroup>
           </ButtonToolbar>
         );

@@ -21,15 +21,15 @@ export class TransitionSetting extends React.Component<Props, any> {
         this.state = undefinedToNulls(pickAll([
             "name",
             "guard",
-            "codeRef"], this.props.data));
+            "codeRef"] as Array<keyof TransitionData>, this.props.data));
     }
 
     public render() {
         const {name, guard, codeRef} = this.state;
-        const {triggerChangesSubmit, data: {id}, path} = this.props;
+        const {submitChanges, data: {id}, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({
+            submitChanges({
                 path,
                 value: rejectNulls({id, name, guard, codeRef}),
             });

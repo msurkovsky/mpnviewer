@@ -1,12 +1,12 @@
 
-import {CbChangeNetElementData, CbChangeSize} from '../appcallbacktypes'
-import {NetElementData} from '../netmodel'
-import {Path, Size} from '../types'
+import {NetElementDataChanged} from '../events';
+import {NetElementData} from '../netmodel';
+import {Path, Size} from '../types';
 
 export interface NetElementSettingFormProps {
     data: NetElementData;
     path: Path;
-    triggerChangesSubmit: CbChangeNetElementData;
+    submitChanges: (evt: NetElementDataChanged) => void;
 };
 
 export type NetElementSettingForm = React.ComponentType<NetElementSettingFormProps>;
@@ -15,7 +15,7 @@ export type NetElementSettingForm = React.ComponentType<NetElementSettingFormPro
 export interface ResizableSettingFormProps {
     size: Size;
     path: Path;
-    triggerChangesSubmit: CbChangeSize;
+    submitChanges: (evt: NetElementDataChanged) => void;
 }
 
 export type ResizableSettingForm = React.ComponentType<ResizableSettingFormProps>;
