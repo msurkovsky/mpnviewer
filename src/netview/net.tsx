@@ -1,72 +1,64 @@
 import * as React from 'react';
 import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
-import {ArcElement, ArcType, NetCategory} from '../netmodel';
+import {ArcElement, ArcType, NetElement, netElementTypeToCategory,
+        NetModel, PlaceElement, TransitionElement} from '../netmodel';
 import * as Utils from '../utils';
 
-import {NetToolbarState} from '../toolbar'
-import {Vector2d} from '../types'
-import {Arc} from './arc'
+import {endAddingArc, startAddingArc} from '../features/addarc';
+
+import {AppEvents} from '../app';
+import {CanvasToolbarState,
+        NetTool, NetToolbarState, ToolbarType} from '../toolbar';
+import {Dict, Path, Size, Vector2d} from '../types';
+import {Arc} from './arc';
 import {Place} from './place';
 import {Transition} from './transition';
 
-
-interface State {
-    canvasContext: CanvasCtxData
-    viewerInst: Viewer | null;
-}
-
-export interface Viewer {
-    ViewerDOM: any;
-    state: any;
-}
-
-const defaultState = {
-    canvasContext: {
-        zoom: 1.0,
-        pan: {x: 0.0, y: 0.0},
-    },
-    viewerInst: null,
-};
 
 export interface CanvasCtxData {
     zoom: number;
     pan: Vector2d;
 }
 
-export const CanvasContext = React.createContext({...defaultState.canvasContext});
+type Props = Size & AppEvents & {
+    net: NetModel;
+    netToolbarState: NetToolbarState;
+    canvasToolbarState: CanvasToolbarState;
+}
 
-export class Net extends React.Component<any, any> {
+interface State {
+    canvasContext: CanvasCtxData
+}
 
-    public state = {...defaultState};
-    public viewerInst: any = null;
+export const CanvasContext = React.createContext({zoom: 0.0, pan: {x: 0, y: 0}});
 
-    public componentDidMount() {
-        this.setState({viewerInst: this.viewerInst});
-    }
+export class Net extends React.Component<Props, State> {
+
+    public state = {
+        canvasContext: {
+            zoom: 0.0,
+            pan: {x: 0, y: 0}
+        }
+    };
 
     public render() {
-        const {net, width, height,
-               canvasToolbar, netToolbar,
-               triggerSelect,
-               triggerAddArc, triggerRemoveElement,
-               triggerChangeNetToolbarValue,
-               triggerChangeValue, triggerChangeToolbarTools} = this.props;
+        const {width, height, canvasToolbarState: cts, onSelectNetElement,
+               onChangeToolbarValue, onChangeToolbarsTool} = this.props;
 
         return (
             <div id="netcanvas" style={{position: "relative", width, height}}>
             <CanvasContext.Provider value={this.state.canvasContext}>
             <ReactSVGPanZoom
-                ref={(viewerInst: any) => {this.viewerInst = viewerInst}}
                 width={width} height={height}
                 background="#ffe"
                 SVGBackground="#ffe"
                 miniaturePosition={POSITION_NONE}
                 toolbarPosition={POSITION_NONE}
-                value={canvasToolbar.value} onChangeValue={triggerChangeValue}
-                tool={canvasToolbar.tool} onChangeTool={triggerChangeToolbarTools}
+                value={cts.value} onChangeValue={onChangeToolbarValue(ToolbarType.CANVAS)}
+                tool={cts.tool} onChangeTool={onChangeToolbarsTool}
                 onPan={this.onPan}
                 onZoom={this.onZoom}
-                onClick={triggerSelect(null)}>
+                onClick={onSelectNetElement(null)}>
 
                 <svg width={width} height={height}>
                     <defs>
@@ -98,23 +90,9 @@ export class Net extends React.Component<any, any> {
                     </defs>
 
                     <g id="mpnet">
-                      {this.renderArcs(net.arcs, triggerSelect)}
-                        {this.renderPlaces(
-                             net.places,
-                             netToolbar,
-                             triggerSelect,
-                             triggerAddArc,
-                             triggerRemoveElement,
-                             triggerChangeNetToolbarValue
-                        )}
-                        {this.renderTransitions(
-                             net.transitions,
-                             netToolbar,
-                             triggerSelect,
-                             triggerAddArc,
-                             triggerRemoveElement,
-                             triggerChangeNetToolbarValue
-                        )}
+                      {this.renderArcs()}
+                      {this.renderPlaces()}
+                      {this.renderTransitions()}
                     </g>
                 </svg>
             </ReactSVGPanZoom>
@@ -123,14 +101,9 @@ export class Net extends React.Component<any, any> {
         );
     }
 
-    protected renderArcs(
-        arcs: any,
-        triggerSelect: (path: string[]) => () => void
-    ) {
+    protected renderArcs() {
 
         const net = this.props.net;
-
-        const triggerPositionChanged = this.props.triggerPositionChanged;
 
         const arcComponents = [];
         for (const key of Object.keys(arcs)) {
@@ -155,16 +128,7 @@ export class Net extends React.Component<any, any> {
         return arcComponents;
     }
 
-    protected renderPlaces (
-        places: any,
-        netToolbar: NetToolbarState,
-        triggerSelect: (path: string[]) => () => void,
-        triggerAddArc: (arc: ArcElement) => void,
-        triggerRemoveElement: (category: NetCategory) => (id: string) => void,
-        triggerChangeNetToolbarValue: (value: any) => void
-    ) {
-        const triggerPositionChanged = this.props.triggerPositionChanged;
-
+    protected renderPlaces () {
         const results = [];
         for (const key of Object.keys(places)) {
             const {data, position, size, relatedPositions} = places[key];
@@ -182,7 +146,6 @@ export class Net extends React.Component<any, any> {
                     parentPosition={{x: 0, y: 0}}
                     {...position}
                     {...size}
-                    viewerInst={this.state.viewerInst}
                     triggerSelect={triggerSelect(basePath)}
                     triggerAddArc={triggerAddArc}
                     triggerRemoveElement={triggerRemoveElement}
@@ -197,43 +160,36 @@ export class Net extends React.Component<any, any> {
         return results;
     }
 
-    protected renderTransitions (
-        transitions: any,
-        netToolbar: NetToolbarState,
-        triggerSelect: (path: string[]) => () => void,
-        triggerAddArc: (arc: ArcElement) => void,
-        triggerRemoveElement: (category: NetCategory) => (id: string) => void,
-        triggerChangeNetToolbarValue: (value: any) => void
-    ) {
-
-        const triggerPositionChanged = this.props.triggerPositionChanged;
+    protected renderTransitions () {
+        const {
+            net: {transitions},
+            onSelectNetElement,
+            onRemoveNetElement,
+        } = this.props;
 
         const results = [];
         for (const key of Object.keys(transitions)) {
             const {data, position, size, relatedPositions} = transitions[key];
-            const basePath = ["transitions", key];
+            const path = ["transitions", key];
+
+            const selectTrans = () => onSelectNetElement(path);
+            const removeTrans = () => onRemoveNetElement("transitions")(key);
 
             results.push(
                 <Transition
-                    elementType="transition"
                     key={data.id}
-                    paths={{
-                        base: basePath,
-                        position: ["position"],
-                    }}
+                    path={path}
                     data={data}
-                    parentPosition={{x: 0, y: 0}}
-                    {...position}
-                    {...size}
-                    viewerInst={this.state.viewerInst}
-                    triggerSelect={triggerSelect(basePath)}
-                    triggerAddArc={triggerAddArc}
-                    triggerRemoveElement={triggerRemoveElement}
-                    netToolbar={netToolbar}
-                    triggerChangeNetToolbarValue={triggerChangeNetToolbarValue}
+                    anchorPosition={{x: 0, y: 0}}
+                    position={position}
+                    size={size}
                     relatedPositions={relatedPositions}
-                    triggerPositionChanged={triggerPositionChanged}
-                />
+                    select={selectTrans}
+                    remove={removeTrans}
+                    createNewArc={this.createNewArc({data,
+                                                     type: "transition",
+                                                     position,
+                                                     size}, path)} />
             );
         }
         return results;
@@ -254,5 +210,32 @@ export class Net extends React.Component<any, any> {
             ...oldCC,
             pan: {x: evt.e, y: evt.f}
         }}));
+    }
+
+    private createNewArc = (
+        startElement: PlaceElement | TransitionElement,
+        path: Path
+    ) => () => {
+        const {netToolbarState} = this.props;
+        if (netToolbarState.tool !== NetTool.ADD_ARC) {
+            return;
+        }
+        const {onAddNetElement, onRemoveNetElement, onChangeToolbarValue} = this.props;
+        const netCategory = netElementTypeToCategory(startElement.type);
+
+        const {canvasContext: {zoom, pan}} = this.state;
+        if (netToolbarState.value === null) {
+            // no value is set => start creating arc
+            startAddingArc(
+                "netcanvas", zoom, pan,
+                startElement, path,
+                onAddNetElement(netCategory),
+                onRemoveNetElement(netCategory),
+                onChangeToolbarValue(ToolbarType.NET)
+            );
+        } else {
+            // value is set => end creating arc
+            endAddingArc(path);
+        }
     }
 }

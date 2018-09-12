@@ -4,9 +4,8 @@ import {
     AMT, BaseNetElement, isPlace, isTransition,
     NetElement, PlaceDataLayout
 } from '../netmodel';
-import {Viewer} from '../netview/net'
 import {NetTool} from '../toolbar'
-import {Resizable} from '../types'
+import {ID, Position, Resizable} from '../types'
 import * as Utils from '../utils';
 import {startMoving, stopMoving} from './move'
 
@@ -44,27 +43,26 @@ export function emptyTransition(): BaseNetElement & Resizable {
 }
 
 let ctx: {
+    canvasId: ID;
+    zoom: number;
+    pan: Position;
     addingElement: BaseNetElement & Resizable;
-    viewerInst: Viewer;
     triggerAddNetElement: (elem: NetElement) => void;
     triggerRemoveNetElement: (id: string) => void;
     triggerPositionChanged: (evt: PositionChanged) => void;
     triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
 } | null = null;
 
-const addNetElement = (evt: React.MouseEvent) => {
+const addNetElement = (evt: MouseEvent) => {
     if (ctx === null) {
         return;
     }
 
-    const {e: panX, f: panY, a: zoom} = ctx.viewerInst.state.value;
     const {width, height} = ctx.addingElement.size;
 
-    const pan = {x: panX, y: panY};
-
-    const mousePosition = getPositionOnCanvas(evt);
+    const mousePosition = getPositionOnCanvas(ctx.canvasId, evt);
     const position = v2dSub(
-        v2dScalarMul(1/zoom, v2dSub(mousePosition, pan)),
+        v2dScalarMul(1/ctx.zoom, v2dSub(mousePosition, ctx.pan)),
         {x: width/2, y: height/2});
 
     // somehow add the element into the net
@@ -82,12 +80,22 @@ const addNetElement = (evt: React.MouseEvent) => {
         throw new Error("invalid element");
     }
     const {x, y} = position;
-    startMoving(x, y, zoom, pan, posPath, ctx.triggerPositionChanged)(evt);
-    ctx.viewerInst.ViewerDOM.removeEventListener("mouseenter", addNetElement);
+    startMoving(
+        ctx.canvasId,
+        x, y,
+        ctx.zoom,
+        ctx.pan,
+        posPath,
+        ctx.triggerPositionChanged)(evt);
+
+    const canvas = document.getElementById(ctx.canvasId) as HTMLElement;
+    canvas.removeEventListener("mouseenter", addNetElement);
 }
 
 export const startAddingNetElement = (
-    viewerInst: Viewer,
+    canvasId: ID,
+    zoom: number,
+    pan: Position,
     addingElement: BaseNetElement & Resizable,
     triggerAddNetElement: (elem: NetElement) => void,
     triggerRemoveNetElement: (id: string) => void,
@@ -95,14 +103,14 @@ export const startAddingNetElement = (
     triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void,
 ) => (evt: React.MouseEvent) => {
 
-    ctx = {addingElement, viewerInst,
+    ctx = {canvasId, addingElement, zoom, pan,
            triggerAddNetElement, triggerRemoveNetElement,
            triggerPositionChanged, triggerChangeToolbarTools};
     ctx.triggerChangeToolbarTools(TOOL_NONE, null);
     attachEvents();
 }
 
-export function endAddingNetElement(evt: React.MouseEvent) {
+export function endAddingNetElement(evt: MouseEvent) {
     if (ctx === null) {
         return;
     }
@@ -112,7 +120,7 @@ export function endAddingNetElement(evt: React.MouseEvent) {
     ctx = null;
 }
 
-export function cancelAddingNetElement(evt?: React.MouseEvent) {
+export function cancelAddingNetElement(evt?: MouseEvent) {
 
     if (ctx === null) {
         return;
@@ -135,9 +143,10 @@ function attachEvents () {
         return;
     }
 
-    ctx.viewerInst.ViewerDOM.addEventListener("mouseenter", addNetElement)
-    ctx.viewerInst.ViewerDOM.addEventListener("click", endAddingNetElement);
-    ctx.viewerInst.ViewerDOM.addEventListener("contextmenu", cancelAddingNetElement);
+    const canvas = document.getElementById(ctx.canvasId) as HTMLElement;
+    canvas.addEventListener("mouseenter", addNetElement)
+    canvas.addEventListener("click", endAddingNetElement);
+    canvas.addEventListener("contextmenu", cancelAddingNetElement);
 }
 
 function detachEvents () {
@@ -145,7 +154,8 @@ function detachEvents () {
         return;
     }
 
-    ctx.viewerInst.ViewerDOM.removeEventListener("mouseenter", addNetElement)
-    ctx.viewerInst.ViewerDOM.removeEventListener("click", endAddingNetElement);
-    ctx.viewerInst.ViewerDOM.removeEventListener("contextmenu", cancelAddingNetElement);
+    const canvas = document.getElementById(ctx.canvasId) as HTMLElement;
+    canvas.removeEventListener("mouseenter", addNetElement)
+    canvas.removeEventListener("click", endAddingNetElement);
+    canvas.removeEventListener("contextmenu", cancelAddingNetElement);
 }

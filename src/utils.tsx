@@ -4,7 +4,7 @@ import * as React from 'react';
 import {ArcElement, BaseNetElement, isArc, isPlace, isTransition,
         Net as TNet, NetCategory, NetElement,
         PlaceElement, TransitionElement} from './netmodel';
-import {BBox, Circle, Dict, Line, Position, Vector2d} from './types';
+import {BBox, Circle, Dict, ID, Line, Position, Vector2d} from './types';
 import {font, FontSetting, FontSize, pt2px} from './visualsetting';
 
 export const emptyFn = () => {/*empty*/};
@@ -204,8 +204,11 @@ export function undefinedToNulls (obj: any) {
     return Ramda.map(toNull, obj);
 }
 
-export function getPositionOnCanvas(evt: React.MouseEvent | MouseEvent): Position {
-    const canvas = document.getElementById("netcanvas") as HTMLElement;
+export function getPositionOnCanvas (
+    canvasId: ID,
+    evt: React.MouseEvent | MouseEvent
+): Position {
+    const canvas = document.getElementById(canvasId) as HTMLElement;
 
     const clientBBox = canvas.getBoundingClientRect();
     return {

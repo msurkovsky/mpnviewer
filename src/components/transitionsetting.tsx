@@ -21,7 +21,7 @@ export class TransitionSetting extends React.Component<Props, any> {
         this.state = undefinedToNulls(pickAll([
             "name",
             "guard",
-            "codeRef"], this.props.data));
+            "codeRef"] as Array<keyof TransitionData>, this.props.data));
     }
 
     public render() {

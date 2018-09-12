@@ -5,66 +5,38 @@ import {endAddingArc, startAddingArc} from '../features/addarc'
 import {ArcElement, NetCategory,
         TransitionData, TransitionElement} from '../netmodel'
 import {NetTool, NetToolbarState} from '../toolbar'
-import {BBox, Dict, Position, Size} from '../types';
+import {BBox, Dict, Path, Position, Size} from '../types';
 import {font} from '../visualsetting';
-import {createMovable, MouseTriggers, PositionTriggers} from './movable';
-import {Viewer} from './net'
 import {TextElement} from './textelement';
+
 
 type TransPositions = Dict<Position> & {
     guard: Position;
 }
 
-type Props = TransitionData & Position & Size & MouseTriggers & PositionTriggers & {
-    paths: {
-        base: string[];
-        position: string[];
-    }
+interface Props {
+    data: TransitionData;
+    path: Path;
+    anchorPosition: Position;
+    position: Position;
+    size: Size;
     relatedPositions: TransPositions;
-    viewerInst: Viewer;
-    netToolbar: NetToolbarState;
-    triggerChangeNetToolbarValue: (value: any) => void;
-    triggerSelect: () => void;
-    triggerAddArc: (arc: ArcElement) => void;
-    triggerRemoveElement: (category: NetCategory) => (id: string) => void;
+    select: () => void;
+    remove: () => void;
+    createNewArc: () => void;
 }
 
 class CoreTransition extends React.PureComponent<Props> {
 
     public render() {
 
-        const {paths, id, name, guard, codeRef,
-               x, y, width, height, relatedPositions,
-               viewerInst, triggerAddArc, triggerRemoveElement,
-               netToolbar, triggerChangeNetToolbarValue,
-               triggerMouseDown, triggerMouseUp, triggerSelect,
-               triggerPositionChanged} = this.props;
+        const {
+            data: transition, path,
+            anchorPosition, position, size, relatedPositions,
+            select, remove, createNewArc,
+        } = this.props;
 
-        const addRemoveArc = (evt: React.MouseEvent) => {
-            if (netToolbar.tool !== NetTool.ADD_ARC) {
-                return;
-            }
-
-            if (netToolbar.value === null) {
-                const transition: TransitionElement = {
-                    data: {id, name, guard},
-                    type: "transition",
-                    position: {x, y},
-                    size: {width, height}
-                };
-                startAddingArc(
-                    viewerInst,
-                    transition,
-                    paths.base,
-                    triggerAddArc,
-                    triggerRemoveElement("arcs"),
-                    triggerChangeNetToolbarValue
-                );
-            } else {
-                endAddingArc(paths.base);
-            }
-        };
-
+        /*
         const triggerClick = (evt: React.MouseEvent) => {
             triggerSelect();
             addRemoveArc(evt);
@@ -72,6 +44,7 @@ class CoreTransition extends React.PureComponent<Props> {
             // stop propagation to prevent canvas unselect
             evt.stopPropagation();
         }
+        */
 
         let guardElement = null;
         if (guard && guard.length > 0) {

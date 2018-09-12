@@ -83,7 +83,7 @@ export type NetElement = PlaceElement
 
 export type NetCategory = "places" | "transitions" | "arcs";
 
-export interface Net {
+export interface NetModel {
     places: Dict<PlaceElement>;
     transitions: Dict<TransitionElement>;
     arcs: Dict<ArcElement | PartialArcElement>;
@@ -99,4 +99,8 @@ export function isPlace(element: BaseNetElement): boolean {
 
 export function isArc(element: BaseNetElement): boolean {
     return element.type === "arc";
+}
+
+export function netElementTypeToCategory (type: NetElementType): NetCategory {
+    return `${type}s` as NetCategory;
 }

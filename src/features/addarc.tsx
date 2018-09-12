@@ -1,58 +1,53 @@
 import {dissoc} from 'ramda'
 
-import {ArcType, FullArcElement, NetElement, PartialArcElement} from '../netmodel';
-import {Viewer} from '../netview/net';
-import {Position, Positionable, Resizable} from '../types';
+import {ArcType, FullArcElement, BaseNetElement, PartialArcElement} from '../netmodel';
+import {ID, Path, Position, Positionable, Resizable} from '../types';
 import * as Utils from '../utils';
 
 type AE = FullArcElement | PartialArcElement;
 
 let ctx: {
-    viewerInst: Viewer;
+    canvasId: ID;
+    zoom: number;
+    pan: Position;
     partialArc: PartialArcElement;
-    triggerAddArc: (arc: AE) => void;
-    triggerRemoveArc: (id: string) => void;
-    triggerChangeNetToolbarValue: (value: any) => void;
+    addArc: (arc: AE) => void;
+    removeArc: (id: string) => void;
+    changeNetToolbarValue: (value: any) => void;
 } | null = null;
 
-function normalizePosition(position: Position) {
-    const {a: zoom, e: panX, f: panY} = ctx!.viewerInst.state.value;
+const {v2dSub, v2dScalarMul} = Utils;
 
-    return {
-        x: (position.x - panX) / zoom,
-        y: (position.y - panY) / zoom,
-    };
-}
-
-function arcEndPointMoving(evt: MouseEvent) {
+const arcAddNewEndPoint = (saveEndPoint: boolean) => (evt: MouseEvent) => {
     if (ctx === null) {
         return;
     }
 
-    const pos = normalizePosition(Utils.getPositionOnCanvas(evt));
-    ctx.partialArc.endPosition = pos;
-    ctx.triggerAddArc(ctx.partialArc);
-}
+    const {canvasId, partialArc, zoom, pan, addArc} = ctx;
 
-function arcAddNewEndPoint(evt: React.MouseEvent) {
-    if (ctx === null) {
-        return;
+    if (saveEndPoint) {
+        const last = ctx.partialArc.endPosition;
+        partialArc.innerPoints.push({...last});
     }
 
-    const last = ctx.partialArc.endPosition;
-    const pos = normalizePosition(Utils.getPositionOnCanvas(evt));
-    ctx.partialArc.innerPoints.push({...last});
-    ctx.partialArc.endPosition = pos;
-    ctx.triggerAddArc(ctx.partialArc);
+    const pos = Utils.getPositionOnCanvas(canvasId, evt);
+    partialArc.endPosition = v2dScalarMul(1/zoom, v2dSub(pos, pan));
+    addArc(ctx.partialArc);
 }
+
+const addTemporaryEndPoint = arcAddNewEndPoint(true);
+
+const addPermamentEndPoint = arcAddNewEndPoint(false);
 
 export function startAddingArc(
-    viewerInst: Viewer,
-    startElement: NetElement & Positionable & Resizable,
-    path: string[],
-    triggerAddArc: (arc: AE) => void,
-    triggerRemoveArc: (id: string) => void,
-    triggerChangeNetToolbarValue: (value: any) => void
+    canvasId: ID,
+    zoom: number,
+    pan: Position,
+    startElement: BaseNetElement & Positionable & Resizable,
+    path: Path,
+    addArc: (arc: AE) => void,
+    removeArc: (id: string) => void,
+    changeNetToolbarValue: (value: any) => void
 ){
     const partialArc: PartialArcElement = {
         data: {
@@ -67,11 +62,11 @@ export function startAddingArc(
         innerPoints: []
     };
 
-    ctx = {viewerInst, partialArc, triggerAddArc, triggerRemoveArc, triggerChangeNetToolbarValue};
-    viewerInst.ViewerDOM.addEventListener("mousemove", arcEndPointMoving);
-    viewerInst.ViewerDOM.addEventListener("click", arcAddNewEndPoint);
-    viewerInst.ViewerDOM.addEventListener("contextmenu", cancelAddingArc);
-    triggerChangeNetToolbarValue({value: {partialArcId: partialArc.data.id}});
+    ctx = {canvasId, zoom, pan, partialArc,
+           addArc, removeArc, changeNetToolbarValue};
+
+    attachEvents();
+    changeNetToolbarValue({value: {partialArcId: partialArc.data.id}});
 }
 
 export function endAddingArc(path: string[]) {
@@ -92,11 +87,11 @@ export function endAddingArc(path: string[]) {
         endElementPath: [...path],
     } as FullArcElement; // cast type because of '...rest' construct
 
-    ctx.triggerAddArc(fullArc);
+    ctx.addArc(fullArc);
     cancelAddingArc();
 }
 
-export function cancelAddingArc(evt?: React.MouseEvent) {
+export function cancelAddingArc(evt?: MouseEvent) {
     if (ctx === null) {
         return;
     }
@@ -105,12 +100,27 @@ export function cancelAddingArc(evt?: React.MouseEvent) {
         evt.preventDefault();
     }
 
-    ctx.triggerRemoveArc(ctx.partialArc.data.id);
+    ctx.removeArc(ctx.partialArc.data.id);
 
-    ctx.triggerChangeNetToolbarValue(null);
-    ctx.viewerInst.ViewerDOM.removeEventListener("mousemove", arcEndPointMoving);
-    ctx.viewerInst.ViewerDOM.removeEventListener("click", arcAddNewEndPoint);
-    ctx.viewerInst.ViewerDOM.removeEventListener("contextmenu", cancelAddingArc);
+    ctx.changeNetToolbarValue(null);
+
+    detachEvents();
     // remove context
     ctx = null;
+}
+
+function attachEvents () {
+    const canvas = document.getElementById(ctx!.canvasId) as HTMLElement;
+
+    canvas.addEventListener("mousemove", addTemporaryEndPoint);
+    canvas.addEventListener("click", addPermamentEndPoint);
+    canvas.addEventListener("contextmenu", cancelAddingArc);
+}
+
+function detachEvents() {
+    const canvas = document.getElementById(ctx!.canvasId) as HTMLElement;
+
+    canvas.removeEventListener("mousemove", addTemporaryEndPoint);
+    canvas.removeEventListener("click", addPermamentEndPoint);
+    canvas.removeEventListener("contextmenu", cancelAddingArc);
 }

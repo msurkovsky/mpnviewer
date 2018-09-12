@@ -4,48 +4,47 @@ import * as Utils from '../utils'
 import {endAddingArc, startAddingArc} from '../features/addarc'
 import {ArcElement, NetCategory,
         PlaceData, PlaceDataLayout, PlaceElement} from '../netmodel';
-import {NetTool, NetToolbarState} from '../toolbar'
-import {BBox, Dict, Position, Size} from '../types';
+import {NetTool} from '../toolbar'
+import {BBox, Dict, Path, Position, Size} from '../types';
 import {font} from '../visualsetting';
-import {createMovable, MouseTriggers, PositionTriggers} from './movable';
-import {Viewer} from './net'
 import {TextElement} from './textelement';
 
+
+// data
+// path
+// anchorPosition
+// position
+// size
+// relatedPositions
+// triggers
+// ...rest
 
 type PlacePositions = Dict<Position> & {
     type:  Position;
     initExpr: Position;
 }
 
-type Props = PlaceData & Position & Size & MouseTriggers & PositionTriggers & {
-    paths: {
-        base: string[];
-        position: string[];
-    };
+interface Props {
+    data: PlaceData;
+    path: Path;
+    anchorPosition: Position;
+    position: Position;
+    size: Size;
     relatedPositions: PlacePositions;
-    viewerInst: Viewer;
-    netToolbar: NetToolbarState;
-    triggerChangeNetToolbarValue: (value: any) => void;
-    triggerSelect: () => void;
-    triggerAddArc: (arc: ArcElement) => void;
-    triggerRemoveElement: (category: NetCategory) => (id: string) => void;
 };
 
-class CorePlace extends React.PureComponent<Props> {
+export class Place extends React.PureComponent<Props> {
 
     public render () {
 
-        const {paths, name, id, dataType, initExpr, dataLayout, cpLabel,
-               x, y, width, height, relatedPositions,
-               viewerInst, triggerAddArc, triggerRemoveElement,
-               netToolbar, triggerChangeNetToolbarValue,
-               triggerMouseDown, triggerMouseUp, triggerSelect,
-               triggerPositionChanged} = this.props;
+        const {data: place, path,
+               anchorPosition, position, size, relatedPositions} = this.props;
+        const {width, height} = size;
 
         const radius = height / 2;
-        const cssDataLayout = dataLayout === PlaceDataLayout.MULTISET? "bPlace" : "qPlace";
+        const cssDataLayout = `${place.dataLayout}Place`;
 
-        const addRemoveArc = (evt: React.MouseEvent) => {
+        const addRemoveArc = (evt: React.MouseEvent) => { // TODO:
             if (netToolbar.tool !== NetTool.ADD_ARC) {
                 return;
             }
@@ -171,5 +170,3 @@ class CorePlace extends React.PureComponent<Props> {
         );
     }
 }
-
-export const Place = createMovable<Props, PlaceData>(CorePlace);

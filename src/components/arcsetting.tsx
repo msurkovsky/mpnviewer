@@ -22,7 +22,7 @@ export class ArcSetting extends React.Component<Props, any> {
 
         this.state = undefinedToNulls(pickAll([
             "expression",
-            "type"], this.props.data));
+            "type"] as Array<keyof ArcData>, this.props.data));
     }
 
     public render() {

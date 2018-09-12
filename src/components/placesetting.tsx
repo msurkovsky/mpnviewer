@@ -22,7 +22,7 @@ export class PlaceSetting extends React.Component<Props, any> {
             "dataType",
             "initExpr",
             "dataLayout",
-            "cpLabel"], this.props.data));
+            "cpLabel"] as Array<keyof PlaceData>, this.props.data));
     }
 
     public render() {
