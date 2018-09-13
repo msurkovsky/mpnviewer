@@ -140,12 +140,14 @@ export function cancelAddingNetElement(evt?: MouseEvent) {
 }
 
 function attachEvents () {
+    console.log("AHOJ");
     if (ctx === null) {
         return;
     }
 
     const canvas = document.getElementById(ctx.canvasId) as HTMLElement;
-    canvas.addEventListener("mouseenter", addNetElement)
+    console.log("CANVAS: ", canvas);
+    canvas.addEventListener("mouseenter", addNetElement);
     canvas.addEventListener("click", endAddingNetElement);
     canvas.addEventListener("contextmenu", cancelAddingNetElement);
 }

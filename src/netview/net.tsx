@@ -3,22 +3,22 @@ import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
 import * as Utils from '../utils';
 
 
+import {endAddingArc, startAddingArc} from '../features/addarc';
 import {
-    endAddingArc, emptyPlace,
-    emptyTransition, startAddingArc} from '../features/addarc';
-import {
-    startAddingNetElement, endAddingNetElement} from '../features/addnetelement';
+    emptyPlace, emptyTransition,
+    startAddingNetElement
+} from '../features/addnetelements';
 
 import {AppEvents} from '../app';
 import {
-    ArcType, NetCategory, NetElementType,
-    netElementTypeToCategory, NetNode, NetStructure,
+    ArcType, BaseNetElement, NetCategory, NetElementType,
+    netElementTypeToCategory, NetNode, NetStructure
 } from '../netmodel';
 import {
     CanvasToolbarState, NetTool,
     NetToolbarState, Toolbar, ToolbarType
 } from '../toolbar';
-import {Path, Size, Vector2d} from '../types';
+import {Path, Resizable, Size, Vector2d} from '../types';
 
 import {Arc, ArcPositions} from './arc';
 
@@ -58,7 +58,6 @@ export class Net extends React.Component<Props, State> {
                onChangeToolbarValue, onChangeToolbarsTool} = this.props;
 
         return (
-            <div id={CANVAS_ID} style={{position: "relative", width, height}}>
             <CanvasContext.Provider value={this.state.canvasContext}>
             <Toolbar
                 activeCanvasTool={cts.tool}
@@ -66,9 +65,10 @@ export class Net extends React.Component<Props, State> {
                 fitNet={onFitNet}
                 saveNet={onSaveNet}
                 loadNet={onLoadNet}
-                addPlace={this.createNewNode(emptyPlace)}
-                addTransition={this.createNewNode(emptyTransition)}
+                addNewPlace={this.createNetNode(emptyPlace)}
+                addNewTransition={this.createNetNode(emptyTransition)}
                 changeToolbarsTool={onChangeToolbarsTool} />
+            <div id={CANVAS_ID} style={{position: "relative", width, height}}>
             <ReactSVGPanZoom
                 width={width} height={height}
                 background="#ffe"
@@ -117,8 +117,8 @@ export class Net extends React.Component<Props, State> {
                     </g>
                 </svg>
             </ReactSVGPanZoom>
-            </CanvasContext.Provider>
             </div>
+            </CanvasContext.Provider>
         );
     }
 
@@ -243,14 +243,15 @@ export class Net extends React.Component<Props, State> {
         return true;
     }
 
-    private createNewNode = (netNode: NetNode) => () => {
+    private createNetNode = (create: () => BaseNetElement & Resizable) => () => {
         const {onAddNetElement, onRemoveNetElement,
                onChangeNetProperty, onChangeToolbarsTool} = this.props;
-        const {canvasContext{zoom, pan}} = this.state;
+        const {canvasContext: {zoom, pan}} = this.state;
 
+        const netNode = create();
         const netCategory = netElementTypeToCategory(netNode.type);
         startAddingNetElement(
-            CANVAS_ID, zoom, pam,
+            CANVAS_ID, zoom, pan,
             netNode,
             onAddNetElement(netCategory),
             onRemoveNetElement(netCategory),
