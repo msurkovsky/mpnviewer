@@ -9,7 +9,7 @@ let ctx: {
     pan: Position;
     pointerElementDiff: Vector2d; // diff between mouse pointer and element position
     positionPath: Path;
-    triggerPositionChanged: (evt: PositionChanged) => void; // TODO: create sth. like callback/events types
+    changePosition: (evt: PositionChanged) => void;
 } | null = null;
 
 const {v2dSub, v2dScalarMul} = Utils;
@@ -22,14 +22,14 @@ const handleMoving = (evt: MouseEvent) => {
     evt.stopPropagation();
 
     const {pointerElementDiff, zoom, pan,
-           positionPath, triggerPositionChanged} = ctx;
+           positionPath, changePosition} = ctx;
 
     const pos = Utils.getPositionOnCanvas(ctx.canvasId, evt);
     const newPos = v2dSub(
         v2dScalarMul(1/zoom, v2dSub(pos, pan)),
         pointerElementDiff);
 
-    triggerPositionChanged({
+    changePosition({
         path: positionPath,
         value: newPos,
     });
@@ -42,7 +42,7 @@ export const startMoving = (
     zoom: number,
     pan: Position,
     positionPath: Path,
-    triggerPositionChanged: (evt: PositionChanged) => void
+    changePosition: (evt: PositionChanged) => void
 ) => (evt: MouseEvent) => {
 
     evt.stopPropagation();
@@ -53,7 +53,7 @@ export const startMoving = (
         {x, y});
 
     ctx = {canvasId, pointerElementDiff, zoom, pan,
-           positionPath, triggerPositionChanged};
+           positionPath, changePosition};
 
     document.addEventListener('mousemove', handleMoving);
 }

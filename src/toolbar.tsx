@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
+import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom';
 import {Button, ButtonGroup, ButtonToolbar, Input} from 'reactstrap';
 
 export enum NetTool {

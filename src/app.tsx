@@ -79,14 +79,14 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                     resizeForm = <ResizableSetting
                         size={(netElement as Resizable).size}
                         path={selected.path.concat(["size"])}
-                        triggerChangesSubmit={this.onChangeNetProperty} />
+                        submitChanges={this.onChangeNetProperty} />
                 }
 
                 settingForm = <SettingForm
                     data={netElement.data}
                     key={`setting-${netElement.type}-${netElement.data.id}`}
                     path={selected.path.concat(["data"])}
-                    triggerChangesSubmit={this.onChangeNetProperty} />
+                    submitChanges={this.onChangeNetProperty} />
             }
         }
 

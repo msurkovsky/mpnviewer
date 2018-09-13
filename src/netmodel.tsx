@@ -1,4 +1,4 @@
-import {Dict, Position, Positionable, Resizable} from './types'
+import {Dict, Position, Positionable, Resizable} from './types';
 
 export enum AMT {
     UNIT = "unit",

@@ -2,7 +2,7 @@ import * as Ramda from 'ramda';
 import * as React from 'react';
 
 import {ArcElement, BaseNetElement, isArc, isPlace, isTransition,
-        NetCategory, NetElement, NetElementType, NetModel,
+        NetCategory, NetElement, NetElementType, NetStructure,
         PlaceElement, TransitionElement} from './netmodel';
 import {Arc, Place, Transition} from './netview';
 import {BBox, Circle, Dict, ID, Line, Position, Vector2d} from './types';
@@ -17,7 +17,7 @@ export const getId = ((id: number) => (): string => {
 
 export function computeDefaultRelatedPositions(
     element: BaseNetElement,
-    net: NetModel
+    net: NetStructure
 ): Dict<Position> {
 
     if (isPlace(element)) {
@@ -44,15 +44,15 @@ export function computeDefaultRelatedPositions(
 
 export function fillElementDefaultRelatedPosition(
     element: BaseNetElement,
-    net: NetModel
+    net: NetStructure
 ) {
     const relatedPositions = computeDefaultRelatedPositions(element, net);
     return {...element, relatedPositions};
 }
 
-export function fillDefaultRelatedPositions(net: NetModel) {
+export function fillDefaultRelatedPositions(net: NetStructure) {
 
-    const fill = (n: NetModel, category: NetCategory) => {
+    const fill = (n: NetStructure, category: NetCategory) => {
         for (const key of Object.keys(net[category])) {
             const element = net[category][key];
 
@@ -74,15 +74,15 @@ export function fillDefaultRelatedPositions(net: NetModel) {
         return n;
     };
 
-    let newNet: NetModel = net;
+    let newNet: NetStructure = net;
 
-    newNet = fill(newNet, "places");
-    newNet = fill(newNet, "transitions");
-    newNet = fill(newNet, "arcs");
+    newNet = fill(newNet, NetCategory.PLACES);
+    newNet = fill(newNet, NetCategory.TRANSITIONS);
+    newNet = fill(newNet, NetCategory.ARCS);
     return newNet;
 }
 
-export function getArcPoints(arc: ArcElement, net: NetModel): Position[] {
+export function getArcPoints(arc: ArcElement, net: NetStructure): Position[] {
 
     type PT = PlaceElement | TransitionElement;
 
@@ -114,7 +114,7 @@ export function getArcPoints(arc: ArcElement, net: NetModel): Position[] {
     return [startPoint, ...arc.innerPoints, endPoint];
 }
 
-export function getArcId(arc: ArcElement, net: NetModel): string {
+export function getArcId(arc: ArcElement, net: NetStructure): string {
 
     const startElement = Ramda.path(arc.startElementPath, net) as NetElement;
 

@@ -1,30 +1,66 @@
+import * as Ramda from 'ramda';
 import * as React from 'react';
-import * as Utils from '../utils'
+import * as Utils from '../utils';
 
-import {Position} from '../types';
-import {FontSetting, FontSize} from '../visualsetting'
-import {createMovable, MouseTriggers} from './movable';
+import {PositionChanged} from '../events';
+import {startMoving, stopMoving} from '../features/move';
 
-interface Data {id: string, text: string}
-type Props = Data & Position & MouseTriggers & {
-    font: FontSetting;
-    fontSize: FontSize;
-    className?: string;
-};
+import {ID, Path, Position} from '../types';
+import {FontSetting, FontSize} from '../visualsetting';
 
-class CoreTextElement extends React.PureComponent<Props> {
+import {CANVAS_ID} from './net';
 
-    public render() {
-        const {id, text, x, y, className, font, fontSize} = this.props;
-        const {triggerMouseDown, triggerMouseUp} = this.props;
-
-        const jsxText = Utils.textToSVG(id, text, font, fontSize, {
-            x, y, className,
-            onMouseDown: triggerMouseDown,
-            onMouseUp: triggerMouseUp,
-        });
-        return jsxText;
-    }
+interface Data {
+    id: ID;
+    text: string;
 }
 
-export const TextElement = createMovable<Props, Data>(CoreTextElement);
+interface Props {
+    data: Data;
+    path: Path;
+    zoom: number,
+    pan: Position;
+    anchorPosition: Position;
+    position: Position;
+    font: FontSetting;
+    fontSize: FontSize;
+    changePosition: (evt: PositionChanged) => void;
+    svgTextAttrs?: React.SVGProps<SVGTextElement>;
+};
+
+export class TextElement extends React.PureComponent<Props> {
+
+    public static defaultProps = {
+        svgTextAttrs: {}
+    };
+
+    public render() {
+        const {data, anchorPosition, position,
+               font, fontSize, svgTextAttrs} = this.props;
+
+        const {x, y} = Utils.v2dAdd(anchorPosition, position);
+        const jsxText = Utils.textToSVG(
+            data.id,
+            data.text,
+            font,
+            fontSize,
+            Ramda.merge(
+                svgTextAttrs, {
+                    x, y,
+                    onMouseDown: this.onMouseDown,
+                    onMouseUp: stopMoving
+                }
+            ));
+        return jsxText;
+    }
+
+    private onMouseDown = (evt: React.MouseEvent) => {
+        const {path, zoom, pan,
+               position, changePosition} = this.props;
+        // NOTE: Use just x, y in comparison to render method.
+        //       This heps to keep the relative position info.
+        const {x, y} = position;
+
+        startMoving(CANVAS_ID, x, y, zoom, pan, path, changePosition);
+    }
+}

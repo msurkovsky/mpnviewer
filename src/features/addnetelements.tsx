@@ -2,7 +2,7 @@ import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom'
 import {PositionChanged} from '../events';
 import {
     AMT, BaseNetElement, isPlace, isTransition,
-    NetElement, PlaceDataLayout
+    NetElement, NetElementType, PlaceDataLayout
 } from '../netmodel';
 import {NetTool} from '../toolbar'
 import {ID, Position, Resizable} from '../types'
@@ -20,7 +20,7 @@ export function emptyPlace (): BaseNetElement & Resizable {
             initExpr: "",
             dataLayout: PlaceDataLayout.QUEUE,
         },
-        type: "place",
+        type: NetElementType.PLACE,
         size: {
             width: 40,
             height: 40
@@ -34,7 +34,7 @@ export function emptyTransition(): BaseNetElement & Resizable {
             id: Utils.getId(),
             name: "",
         },
-        type: "transition",
+        type: NetElementType.TRANSITION,
         size: {
             width: 60,
             height: 40,

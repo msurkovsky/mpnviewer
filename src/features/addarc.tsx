@@ -1,6 +1,9 @@
-import {dissoc} from 'ramda'
+import {dissoc} from 'ramda';
 
-import {ArcType, FullArcElement, BaseNetElement, PartialArcElement} from '../netmodel';
+import {
+    ArcType, FullArcElement, BaseNetElement,
+    NetElementType, PartialArcElement
+} from '../netmodel';
 import {ID, Path, Position, Positionable, Resizable} from '../types';
 import * as Utils from '../utils';
 
@@ -55,7 +58,7 @@ export function startAddingArc(
             expression: "",
             type: ArcType.SINGLE_HEADED
         },
-        type: "arc",
+        type: NetElementType.ARC,
         startElementPath: [...path],
         endPosition: Utils.computeCenter(
             {...startElement.position, ...startElement.size}),
