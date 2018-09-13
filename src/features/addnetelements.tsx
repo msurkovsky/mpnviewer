@@ -50,7 +50,7 @@ let ctx: {
     triggerAddNetElement: (elem: NetElement) => void;
     triggerRemoveNetElement: (id: string) => void;
     triggerPositionChanged: (evt: PositionChanged) => void;
-    triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
+    triggerChangeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void;
 } | null = null;
 
 const addNetElement = (evt: MouseEvent) => {
@@ -100,13 +100,14 @@ export const startAddingNetElement = (
     triggerAddNetElement: (elem: NetElement) => void,
     triggerRemoveNetElement: (id: string) => void,
     triggerPositionChanged: (evt: PositionChanged) => void,
-    triggerChangeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void,
+    triggerChangeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void,
 ) => (evt: React.MouseEvent) => {
 
     ctx = {canvasId, addingElement, zoom, pan,
            triggerAddNetElement, triggerRemoveNetElement,
-           triggerPositionChanged, triggerChangeToolbarTools};
-    ctx.triggerChangeToolbarTools(TOOL_NONE, null);
+           triggerPositionChanged, triggerChangeToolbarsTool};
+
+    triggerChangeToolbarsTool(TOOL_NONE, null);
     attachEvents();
 }
 
@@ -115,7 +116,7 @@ export function endAddingNetElement(evt: MouseEvent) {
         return;
     }
 
-    ctx.triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE);
+    ctx.triggerChangeToolbarsTool(TOOL_AUTO, NetTool.NONE);
     detachEvents();
     ctx = null;
 }
@@ -131,7 +132,7 @@ export function cancelAddingNetElement(evt?: MouseEvent) {
         evt.preventDefault();
     }
 
-    ctx.triggerChangeToolbarTools(TOOL_AUTO, NetTool.NONE);
+    ctx.triggerChangeToolbarsTool(TOOL_AUTO, NetTool.NONE);
     ctx.triggerRemoveNetElement(ctx.addingElement.data.id);
 
     detachEvents();

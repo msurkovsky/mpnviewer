@@ -3,7 +3,11 @@ import {POSITION_NONE, ReactSVGPanZoom} from 'react-svg-pan-zoom';
 import * as Utils from '../utils';
 
 
-import {endAddingArc, startAddingArc} from '../features/addarc';
+import {
+    endAddingArc, emptyPlace,
+    emptyTransition, startAddingArc} from '../features/addarc';
+import {
+    startAddingNetElement, endAddingNetElement} from '../features/addnetelement';
 
 import {AppEvents} from '../app';
 import {
@@ -49,7 +53,7 @@ export class Net extends React.Component<Props, State> {
 
     public render() {
         const {width, height, canvasToolbarState: cts, netToolbarState: nts,
-               onSelectNetElement, onAddNetElement,
+               onSelectNetElement,
                onFitNet, onSaveNet, onLoadNet,
                onChangeToolbarValue, onChangeToolbarsTool} = this.props;
 
@@ -62,8 +66,8 @@ export class Net extends React.Component<Props, State> {
                 fitNet={onFitNet}
                 saveNet={onSaveNet}
                 loadNet={onLoadNet}
-                addPlace={onAddNetElement(NetCategory.PLACES)}
-                addTransition={onAddNetElement(NetCategory.TRANSITIONS)}
+                addPlace={this.createNewNode(emptyPlace)}
+                addTransition={this.createNewNode(emptyTransition)}
                 changeToolbarsTool={onChangeToolbarsTool} />
             <ReactSVGPanZoom
                 width={width} height={height}
@@ -213,21 +217,21 @@ export class Net extends React.Component<Props, State> {
         }}));
     }
 
-    private createNewArc = (startElement: NetNode, path: Path) => () => {
+    private createNewArc = (startNode: NetNode, path: Path) => () => {
         const {netToolbarState} = this.props;
         if (netToolbarState.tool !== NetTool.ADD_ARC) {
             return false;
         }
 
         const {onAddNetElement, onRemoveNetElement, onChangeToolbarValue} = this.props;
-        const netCategory = netElementTypeToCategory(startElement.type);
+        const netCategory = netElementTypeToCategory(startNode.type);
 
         const {canvasContext: {zoom, pan}} = this.state;
         if (netToolbarState.value === null) {
             // no value is set => start creating arc
             startAddingArc(
                 CANVAS_ID, zoom, pan,
-                startElement, path,
+                startNode, path,
                 onAddNetElement(netCategory),
                 onRemoveNetElement(netCategory),
                 onChangeToolbarValue(ToolbarType.NET)
@@ -239,7 +243,19 @@ export class Net extends React.Component<Props, State> {
         return true;
     }
 
-    private createNewPlace = () => {
-        
+    private createNewNode = (netNode: NetNode) => () => {
+        const {onAddNetElement, onRemoveNetElement,
+               onChangeNetProperty, onChangeToolbarsTool} = this.props;
+        const {canvasContext{zoom, pan}} = this.state;
+
+        const netCategory = netElementTypeToCategory(netNode.type);
+        startAddingNetElement(
+            CANVAS_ID, zoom, pam,
+            netNode,
+            onAddNetElement(netCategory),
+            onRemoveNetElement(netCategory),
+            onChangeNetProperty,
+            onChangeToolbarsTool
+        );
     }
 }
