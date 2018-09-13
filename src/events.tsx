@@ -1,4 +1,3 @@
-import {NetElementData} from './netmodel';
 import {Path, Position, Size} from './types';
 
 export interface NetPropertyChanged {
@@ -15,5 +14,5 @@ export interface SizeChanged extends NetPropertyChanged {
 }
 
 export interface NetElementDataChanged extends NetPropertyChanged {
-    "value": NetElementData;
+    "value": any; // NOTE: it can be any part of the net addresable by the path.
 }

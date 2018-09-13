@@ -1,7 +1,7 @@
 import {dissoc} from 'ramda';
 
 import {
-    ArcType, FullArcElement, BaseNetElement,
+    ArcType, BaseNetElement, FullArcElement,
     NetElementType, PartialArcElement
 } from '../netmodel';
 import {ID, Path, Position, Positionable, Resizable} from '../types';

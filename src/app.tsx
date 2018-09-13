@@ -52,7 +52,7 @@ const initState = {
 
 export class App extends React.Component<any, any> { // TODO: change `any` to specific types
 
-    state = initState;
+    public state = initState;
 
     public render () {
         const {selected, net, canvasToolbar, netToolbar} = this.state;
@@ -95,8 +95,8 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                 <Net
                     width={1600} height={700}
                     net={net}
-                    canvasToolbar={canvasToolbar}
-                    netToolbar={netToolbar}
+                    canvasToolbarState={canvasToolbar}
+                    netToolbarState={netToolbar}
                     onSaveNet={this.onSaveNet}
                     onLoadNet={this.onLoadNet}
                     onFitNet={this.onFitNet}
@@ -104,7 +104,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                     onAddNetElement={this.onAddNetElement}
                     onRemoveNetElement={this.onRemoveNetElement}
                     onChangeNetProperty={this.onChangeNetProperty}
-                    onChnageToolbarValue={this.onChangeToolbarValue}
+                    onChangeToolbarValue={this.onChangeToolbarValue}
                     onChangeToolbarsTool={this.onChangeToolbarsTool} />
                 {settingForm}
                 {resizeForm}

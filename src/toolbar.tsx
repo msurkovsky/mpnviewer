@@ -25,13 +25,13 @@ export enum ToolbarType {
 }
 
 interface Props { // TODO: what about the any arguments of events?
-    activeTool: any;
+    activeCanvasTool: any;
     activeNetTool: NetTool,
-    changeToolbarTools: (canvasTool: any, netTool: NetTool | null) => void;
+    changeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void;
     // TODO: get rid of any
     fitNet: (evt: any) => void;
-    addPlace: (evt: any) => void;
-    addTransition: (evt: any) => void;
+    addNewPlace: () => void;
+    addNewTransition: () => void;
     saveNet: (evt: any) => void;
     loadNet: (evt: any) => void;
 }
@@ -40,29 +40,29 @@ export class Toolbar extends React.Component<Props, any> {
 
     public render () {
         const {
-            activeTool, activeNetTool,
-            changeToolbarTools,
-            addPlace, addTransition,
+            activeCanvasTool, activeNetTool,
+            changeToolbarsTool,
+            addNewPlace, addNewTransition,
             saveNet, loadNet,
         } = this.props;
 
-        const setAddArcTool = () => {changeToolbarTools(TOOL_NONE, NetTool.ADD_ARC)};
-        const setAutoTool = () => {changeToolbarTools(TOOL_AUTO, NetTool.NONE)};
+        const setAddArcTool = () => {changeToolbarsTool(TOOL_NONE, NetTool.ADD_ARC)};
+        const setAutoTool = () => {changeToolbarsTool(TOOL_AUTO, NetTool.NONE)};
 
         return (
           <ButtonToolbar>
             <Button
                 onClick={setAutoTool}
-                active={activeTool === TOOL_AUTO}>
+                active={activeCanvasTool === TOOL_AUTO}>
                 Select
             </Button>
 
             <ButtonGroup>
-                <Button onClick={addPlace}
+                <Button onClick={addNewPlace}
                         active={activeNetTool === NetTool.ADD_PLACE}>
                     Place
                 </Button>
-                <Button onClick={addTransition}
+                <Button onClick={addNewTransition}
                         active={activeNetTool === NetTool.ADD_TRANSITION}>
                     Transition
                 </Button>

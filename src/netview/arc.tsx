@@ -8,7 +8,7 @@ import {Dict, Path, Position} from '../types';
 import {font} from '../visualsetting';
 import {TextElement} from './textelement';
 
-type ArcsPositions = Dict<Position> & {
+export type ArcPositions = Dict<Position> & {
     expression: Position;
 }
 
@@ -19,7 +19,7 @@ interface Props {
     pan: Position;
     anchorPosition: Position;
     points: Array<{x: number, y: number}>;
-    relatedPositions: ArcsPositions;
+    relatedPositions: ArcPositions;
     select: () => void;
     remove: () => void;
     changePosition: (evt: PositionChanged) => void;

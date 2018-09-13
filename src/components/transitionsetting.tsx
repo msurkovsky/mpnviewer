@@ -26,10 +26,10 @@ export class TransitionSetting extends React.Component<Props, any> {
 
     public render() {
         const {name, guard, codeRef} = this.state;
-        const {triggerChangesSubmit, data: {id}, path} = this.props;
+        const {submitChanges, data: {id}, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({
+            submitChanges({
                 path,
                 value: rejectNulls({id, name, guard, codeRef}),
             });

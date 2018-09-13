@@ -27,10 +27,10 @@ export class ArcSetting extends React.Component<Props, any> {
 
     public render() {
         const {expression, type} = this.state;
-        const {triggerChangesSubmit, data: {id}, path} = this.props;
+        const {submitChanges, data: {id}, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({
+            submitChanges({
                 path,
                 value: rejectNulls({id, type, expression}),
             });

@@ -16,12 +16,12 @@ export class ResizableSetting extends React.Component<Props, any> {
 
     public render() {
         const {width, height} = this.state;
-        const {triggerChangesSubmit, path} = this.props;
+        const {submitChanges, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({
+            submitChanges({
                 path,
-                value: {width, height},
+                value: {size: {width, height}},
             });
         };
 

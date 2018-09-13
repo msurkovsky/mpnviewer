@@ -11,12 +11,12 @@ import {
     netElementTypeToCategory, NetNode, NetStructure,
 } from '../netmodel';
 import {
-    CanvasToolbarState,
-    NetTool, NetToolbarState, ToolbarType
+    CanvasToolbarState, NetTool,
+    NetToolbarState, Toolbar, ToolbarType
 } from '../toolbar';
 import {Path, Size, Vector2d} from '../types';
 
-import {Arc} from './arc';
+import {Arc, ArcPositions} from './arc';
 
 
 export const CANVAS_ID = "netcanvas";
@@ -48,12 +48,23 @@ export class Net extends React.Component<Props, State> {
     };
 
     public render() {
-        const {width, height, canvasToolbarState: cts, onSelectNetElement,
+        const {width, height, canvasToolbarState: cts, netToolbarState: nts,
+               onSelectNetElement, onAddNetElement,
+               onFitNet, onSaveNet, onLoadNet,
                onChangeToolbarValue, onChangeToolbarsTool} = this.props;
 
         return (
             <div id={CANVAS_ID} style={{position: "relative", width, height}}>
             <CanvasContext.Provider value={this.state.canvasContext}>
+            <Toolbar
+                activeCanvasTool={cts.tool}
+                activeNetTool={nts.tool}
+                fitNet={onFitNet}
+                saveNet={onSaveNet}
+                loadNet={onLoadNet}
+                addPlace={onAddNetElement(NetCategory.PLACES)}
+                addTransition={onAddNetElement(NetCategory.TRANSITIONS)}
+                changeToolbarsTool={onChangeToolbarsTool} />
             <ReactSVGPanZoom
                 width={width} height={height}
                 background="#ffe"
@@ -135,7 +146,7 @@ export class Net extends React.Component<Props, State> {
                     pan={pan}
                     anchorPosition={{x: 0, y: 0}}
                     points={points}
-                    relatedPositions={relatedPositions}
+                    relatedPositions={relatedPositions as ArcPositions}
                     select={selectArc}
                     remove={removeArc}
                     changePosition={onChangeNetProperty} />);
@@ -226,5 +237,9 @@ export class Net extends React.Component<Props, State> {
             endAddingArc(path);
         }
         return true;
+    }
+
+    private createNewPlace = () => {
+        
     }
 }

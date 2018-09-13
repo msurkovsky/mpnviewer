@@ -27,10 +27,10 @@ export class PlaceSetting extends React.Component<Props, any> {
 
     public render() {
         const {name, dataType, initExpr, dataLayout, cpLabel} = this.state;
-        const {triggerChangesSubmit, data: {id}, path} = this.props;
+        const {submitChanges, data: {id}, path} = this.props;
 
         const submit = () => {
-            triggerChangesSubmit({
+            submitChanges({
                 path,
                 value: rejectNulls({
                     id, name, dataType, initExpr, dataLayout, cpLabel
