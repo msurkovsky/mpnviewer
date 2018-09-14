@@ -40,13 +40,13 @@ interface State {
     canvasContext: CanvasCtxData
 }
 
-export const CanvasContext = React.createContext({zoom: 0.0, pan: {x: 0, y: 0}});
+export const CanvasContext = React.createContext({zoom: 1.0, pan: {x: 0, y: 0}});
 
 export class Net extends React.Component<Props, State> {
 
     public state = {
         canvasContext: {
-            zoom: 0.0,
+            zoom: 1.0,
             pan: {x: 0, y: 0}
         }
     };
@@ -138,7 +138,6 @@ export class Net extends React.Component<Props, State> {
 
             const path = ["arcs", key];
 
-            const selectArc = () => onSelectNetElement(path);
             const removeArc = () => onRemoveNetElement(NetCategory.ARCS)(key);
 
             arcComponents.push(
@@ -151,7 +150,7 @@ export class Net extends React.Component<Props, State> {
                     anchorPosition={{x: 0, y: 0}}
                     points={points}
                     relatedPositions={relatedPositions as ArcPositions}
-                    select={selectArc}
+                    select={onSelectNetElement(path)}
                     remove={removeArc}
                     changePosition={onChangeNetProperty} />);
         }
@@ -176,8 +175,7 @@ export class Net extends React.Component<Props, State> {
             const {data, position, size, relatedPositions} = elements[key];
             const path = [category, key];
 
-            const selectPlace = () => onSelectNetElement(path);
-            const removePlace = () => onRemoveNetElement(category)(key);
+            const removeNetElement = () => onRemoveNetElement(category)(key);
 
             results.push(
                 <Component
@@ -190,8 +188,8 @@ export class Net extends React.Component<Props, State> {
                     position={position}
                     size={size}
                     relatedPositions={relatedPositions}
-                    select={selectPlace}
-                    remove={removePlace}
+                    select={onSelectNetElement(path)}
+                    remove={removeNetElement}
                     createNewArc={this.createNewArc(
                             {data, type, position, size}, path)}
                     changePosition={onChangeNetProperty} />);

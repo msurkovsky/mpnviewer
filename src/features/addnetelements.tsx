@@ -92,7 +92,7 @@ const addNetElement = (evt: MouseEvent) => {
     canvas.removeEventListener("mouseenter", addNetElement);
 }
 
-export const startAddingNetElement = (
+export function startAddingNetElement(
     canvasId: ID,
     zoom: number,
     pan: Position,
@@ -101,7 +101,7 @@ export const startAddingNetElement = (
     triggerRemoveNetElement: (id: string) => void,
     triggerPositionChanged: (evt: PositionChanged) => void,
     triggerChangeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void,
-) => (evt: React.MouseEvent) => {
+) {
 
     ctx = {canvasId, addingElement, zoom, pan,
            triggerAddNetElement, triggerRemoveNetElement,
@@ -111,7 +111,7 @@ export const startAddingNetElement = (
     attachEvents();
 }
 
-export function endAddingNetElement(evt: MouseEvent) {
+export function endAddingNetElement() {
     if (ctx === null) {
         return;
     }
@@ -140,13 +140,11 @@ export function cancelAddingNetElement(evt?: MouseEvent) {
 }
 
 function attachEvents () {
-    console.log("AHOJ");
     if (ctx === null) {
         return;
     }
 
     const canvas = document.getElementById(ctx.canvasId) as HTMLElement;
-    console.log("CANVAS: ", canvas);
     canvas.addEventListener("mouseenter", addNetElement);
     canvas.addEventListener("click", endAddingNetElement);
     canvas.addEventListener("contextmenu", cancelAddingNetElement);

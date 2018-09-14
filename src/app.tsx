@@ -23,7 +23,7 @@ export interface AppEvents {
     onSaveNet: (fileName: string) => void;
     onLoadNet: (file: File) => void;
     onFitNet: () => void;
-    onSelectNetElement: (path: Path | null) => void;
+    onSelectNetElement: (path: Path | null) => () => void;
     onAddNetElement: (category: NetCategory) => (element: NetElement) => void;
     onRemoveNetElement: (category: NetCategory) => (id: ID) => void;
     onChangeNetProperty: (evt: NetPropertyChanged) => void;
