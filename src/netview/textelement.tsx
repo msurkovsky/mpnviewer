@@ -54,13 +54,13 @@ export class TextElement extends React.PureComponent<Props> {
         return jsxText;
     }
 
-    private onMouseDown = (evt: React.MouseEvent) => {
+    private onMouseDown = (evt: MouseEvent) => {
         const {path, zoom, pan,
                position, changePosition} = this.props;
         // NOTE: Use just x, y in comparison to render method.
         //       This heps to keep the relative position info.
         const {x, y} = position;
 
-        startMoving(CANVAS_ID, x, y, zoom, pan, path, changePosition);
+        startMoving(CANVAS_ID, x, y, zoom, pan, path, changePosition)(evt);
     }
 }
