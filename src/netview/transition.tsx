@@ -1,33 +1,24 @@
 import * as React from 'react';
 import * as Utils from '../utils';
 
-import {PositionChanged} from '../events'
-import {startMoving, stopMoving} from '../features/move';
-
 import {TransitionData} from '../netmodel';
-import {BBox, Dict, Path, Position, Size} from '../types';
+import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
-import {TextElement} from './textelement';
 
-import {CANVAS_ID} from './net';
+import {onMouseDown, onMouseUp, PositionableProps} from './positionable';
+import {TextElement} from './textelement';
 
 type TransPositions = Dict<Position> & {
     guard: Position;
 }
 
-interface Props {
+type Props =  PositionableProps & {
     data: TransitionData;
-    path: Path;
-    zoom: number;
-    pan: Position;
-    anchorPosition: Position;
-    position: Position;
-    size: Size;
     relatedPositions: TransPositions;
+    size: Size;
     select: () => void;
     remove: () => void;
     createNewArc: () => boolean;
-    changePosition: (evt: PositionChanged) => void;
 }
 
 export class Transition extends React.PureComponent<Props> {
@@ -111,8 +102,8 @@ export class Transition extends React.PureComponent<Props> {
             <g>
                 <rect className="transition"
                     x={x} y={y} width={width} height={height}
-                    onMouseDown={this.onMouseDown}
-                    onMouseUp={this.onMouseUp}
+                    onMouseDown={onMouseDown(this.props, ["position"])}
+                    onMouseUp={onMouseUp}
                     onClick={this.onClick}
                 />
                 {codeRefElement}
@@ -122,9 +113,9 @@ export class Transition extends React.PureComponent<Props> {
         );
     }
 
+    private onClick = (evt: React.MouseEvent) => { // selectable
+        const { createNewArc, select } = this.props;
 
-    private onClick = (evt: React.MouseEvent) => {
-        const {createNewArc, select} = this.props;
         const successfull = createNewArc();
         if (!successfull) {
             select();
@@ -133,17 +124,5 @@ export class Transition extends React.PureComponent<Props> {
         // stop propagation to prevent canvas unselect
         evt.preventDefault();
         evt.stopPropagation();
-    }
-
-    private onMouseDown = (evt: React.MouseEvent) => {
-        const {path, zoom, pan, position, changePosition} = this.props;
-
-        const {x, y} = position;
-
-        startMoving(CANVAS_ID, x, y, zoom, pan, path, changePosition);
-    }
-
-    private onMouseUp = (evt: React.MouseEvent) => {
-        stopMoving(evt.nativeEvent);
     }
 }

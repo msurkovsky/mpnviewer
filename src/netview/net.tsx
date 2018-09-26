@@ -222,7 +222,6 @@ export class Net extends React.Component<Props, State> {
         }
 
         const {onAddNetElement, onRemoveNetElement, onChangeToolbarValue} = this.props;
-        const netCategory = netElementTypeToCategory(startNode.type);
 
         const {canvasContext: {zoom, pan}} = this.state;
         if (netToolbarState.value === null) {
@@ -230,8 +229,8 @@ export class Net extends React.Component<Props, State> {
             startAddingArc(
                 CANVAS_ID, zoom, pan,
                 startNode, path,
-                onAddNetElement(netCategory),
-                onRemoveNetElement(netCategory),
+                onAddNetElement(NetCategory.ARCS),
+                onRemoveNetElement(NetCategory.ARCS),
                 onChangeToolbarValue(ToolbarType.NET)
             );
         } else {

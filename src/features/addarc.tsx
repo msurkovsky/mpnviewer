@@ -38,9 +38,9 @@ const arcAddNewEndPoint = (saveEndPoint: boolean) => (evt: MouseEvent) => {
     addArc(ctx.partialArc);
 }
 
-const addTemporaryEndPoint = arcAddNewEndPoint(true);
+const addTemporaryEndPoint = arcAddNewEndPoint(false);
 
-const addPermamentEndPoint = arcAddNewEndPoint(false);
+const addPermamentEndPoint = arcAddNewEndPoint(true);
 
 export function startAddingArc(
     canvasId: ID,

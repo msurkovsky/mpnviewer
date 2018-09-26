@@ -2,29 +2,20 @@ import * as Ramda from 'ramda';
 import * as React from 'react';
 import * as Utils from '../utils';
 
-import {PositionChanged} from '../events';
-import {startMoving, stopMoving} from '../features/move';
-
-import {ID, Path, Position} from '../types';
+import {ID} from '../types';
 import {FontSetting, FontSize} from '../visualsetting';
 
-import {CANVAS_ID} from './net';
+import {onMouseDown, onMouseUp, PositionableProps} from './positionable';
 
 interface Data {
     id: ID;
     text: string;
 }
 
-interface Props {
+type Props = PositionableProps & {
     data: Data;
-    path: Path;
-    zoom: number,
-    pan: Position;
-    anchorPosition: Position;
-    position: Position;
     font: FontSetting;
     fontSize: FontSize;
-    changePosition: (evt: PositionChanged) => void;
     svgTextAttrs?: React.SVGProps<SVGTextElement>;
 };
 
@@ -47,20 +38,11 @@ export class TextElement extends React.PureComponent<Props> {
             Ramda.merge(
                 svgTextAttrs, {
                     x, y,
-                    onMouseDown: this.onMouseDown,
-                    onMouseUp: stopMoving
+                    onMouseDown: onMouseDown(this.props, []), // TODO: empty path means the path
+                                                              // already contains position part
+                    onMouseUp
                 }
             ));
         return jsxText;
-    }
-
-    private onMouseDown = (evt: MouseEvent) => {
-        const {path, zoom, pan,
-               position, changePosition} = this.props;
-        // NOTE: Use just x, y in comparison to render method.
-        //       This heps to keep the relative position info.
-        const {x, y} = position;
-
-        startMoving(CANVAS_ID, x, y, zoom, pan, path, changePosition)(evt);
     }
 }

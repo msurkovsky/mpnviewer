@@ -19,8 +19,6 @@ const handleMoving = (evt: MouseEvent) => {
         return;
     }
 
-    evt.stopPropagation();
-
     const {pointerElementDiff, zoom, pan,
            positionPath, changePosition} = ctx;
 
@@ -45,8 +43,6 @@ export const startMoving = (
     changePosition: (evt: PositionChanged) => void
 ) => (evt: MouseEvent) => {
 
-    evt.stopPropagation();
-
     const pos = Utils.getPositionOnCanvas(canvasId, evt);
     const pointerElementDiff = v2dSub(
         v2dScalarMul(1/zoom, v2dSub(pos, pan)),
@@ -62,8 +58,6 @@ export const stopMoving = (evt: MouseEvent) => {
     if (ctx === null) {
         return;
     }
-
-    evt.stopPropagation();
 
     document.removeEventListener('mousemove', handleMoving);
     ctx = null;

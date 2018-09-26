@@ -1,34 +1,25 @@
 import * as React from 'react';
 import * as Utils from '../utils';
 
-import {PositionChanged} from '../events';
-import {startMoving, stopMoving} from '../features/move';
-
 import {PlaceData} from '../netmodel';
-import {BBox, Dict, Path, Position, Size} from '../types';
+import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
-import {TextElement} from './textelement';
 
-import {CANVAS_ID} from './net';
+import {onMouseDown, onMouseUp, PositionableProps} from './positionable';
+import {TextElement} from './textelement';
 
 type PlacePositions = Dict<Position> & {
     type:  Position;
     initExpr: Position;
 }
 
-interface Props {
+type Props = PositionableProps & {
     data: PlaceData;
-    path: Path;
-    zoom: number;
-    pan: Position;
-    anchorPosition: Position;
-    position: Position;
-    size: Size;
     relatedPositions: PlacePositions;
+    size: Size;
     select: () => void;
     remove: () => void;
     createNewArc: () => boolean;
-    changePosition: (evt: PositionChanged) => void;
 };
 
 export class Place extends React.PureComponent<Props> {
@@ -94,6 +85,7 @@ export class Place extends React.PureComponent<Props> {
         }
 
         let dataTypeElement = null;
+        // TODO: path should be just path of the element, but the text element does not know about te position
         if (place.dataType) {
             dataTypeElement = <TextElement
                 path={path.concat(["relatedPositions", "dataType"])}
@@ -125,8 +117,8 @@ export class Place extends React.PureComponent<Props> {
             <g>
                 <rect className={`place ${cssDataLayout}`}
                     x={x} y={y} width={width} height={height} rx={radius} ry={radius}
-                    onMouseDown={this.onMouseDown}
-                    onMouseUp={this.onMouseUp}
+                    onMouseDown={onMouseDown(this.props, ["position"])}
+                    onMouseUp={onMouseUp}
                     onClick={this.onClick}
                 />
                 {cpLabelElement}
@@ -138,7 +130,7 @@ export class Place extends React.PureComponent<Props> {
     }
 
     private onClick = (evt: React.MouseEvent) => {
-        const {createNewArc, select} = this.props;
+        const { createNewArc, select } = this.props;
 
         const successfull = createNewArc();
         if (!successfull) {
@@ -148,17 +140,5 @@ export class Place extends React.PureComponent<Props> {
         // stop propagation to prevent canvas unselect
         evt.preventDefault();
         evt.stopPropagation();
-    }
-
-    private onMouseDown = (evt: React.MouseEvent) => {
-        const {path, zoom, pan, position, changePosition} = this.props;
-
-        const {x, y} = position;
-
-        startMoving(CANVAS_ID, x, y, zoom, pan, path, changePosition);
-    }
-
-    private onMouseUp = (evt: React.MouseEvent) => {
-        stopMoving(evt.nativeEvent);
     }
 }
