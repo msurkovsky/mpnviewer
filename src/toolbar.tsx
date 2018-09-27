@@ -2,6 +2,10 @@ import * as React from 'react';
 import {TOOL_AUTO, TOOL_NONE} from 'react-svg-pan-zoom';
 import {Button, ButtonGroup, ButtonToolbar, Input} from 'reactstrap';
 
+import Download from '@axetroy/react-download';
+
+import {NetStructure} from './netmodel';
+
 export enum NetTool {
     NONE = "none",
     ADD_PLACE = "adding-place",
@@ -25,6 +29,7 @@ export enum ToolbarType {
 }
 
 interface Props { // TODO: what about the any arguments of events?
+    currentNet: NetStructure;
     activeCanvasTool: any;
     activeNetTool: NetTool,
     changeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void;
@@ -32,22 +37,30 @@ interface Props { // TODO: what about the any arguments of events?
     fitNet: (evt: any) => void;
     addNewPlace: () => void;
     addNewTransition: () => void;
-    saveNet: (evt: any) => void;
-    loadNet: (evt: any) => void;
+    loadNet: (data: string) => void;
 }
 
 export class Toolbar extends React.Component<Props, any> {
 
     public render () {
         const {
+            currentNet,
             activeCanvasTool, activeNetTool,
             changeToolbarsTool,
             addNewPlace, addNewTransition,
-            saveNet, loadNet,
+            loadNet,
         } = this.props;
 
         const setAddArcTool = () => {changeToolbarsTool(TOOL_NONE, NetTool.ADD_ARC)};
         const setAutoTool = () => {changeToolbarsTool(TOOL_AUTO, NetTool.NONE)};
+        const onLoadNet = (evt: React.FormEvent<HTMLInputElement>) => {
+            const fr = new FileReader();
+            fr.onload = () => {loadNet(fr.result as string)};
+            const files = evt.currentTarget.files;
+            if (files && files.length > 0) {
+                fr.readAsText(files[0]);
+            }
+        };
 
         return (
           <ButtonToolbar>
@@ -73,11 +86,11 @@ export class Toolbar extends React.Component<Props, any> {
             </ButtonGroup>
 
             <ButtonGroup>
-                <Button onClick={saveNet}>
-                    Save MP net
-                </Button>
+                <Download file="mpnet.json" content={JSON.stringify(currentNet)}>
+                    <Button>Save MP net</Button>
+                </Download>
 
-                <Input id="loadMPNet" type="file" onChange={loadNet}/>
+                <Input id="loadMPNet" type="file" onChange={onLoadNet}/>
             </ButtonGroup>
           </ButtonToolbar>
         );

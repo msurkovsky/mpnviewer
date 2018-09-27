@@ -52,9 +52,9 @@ export class Net extends React.Component<Props, State> {
     };
 
     public render() {
-        const {width, height, canvasToolbarState: cts, netToolbarState: nts,
+        const {net, width, height, canvasToolbarState: cts, netToolbarState: nts,
                onSelectNetElement,
-               onFitNet, onSaveNet, onLoadNet,
+               onFitNet, loadNet,
                onChangeToolbarValue, onChangeToolbarsTool} = this.props;
 
         return (
@@ -63,8 +63,8 @@ export class Net extends React.Component<Props, State> {
                 activeCanvasTool={cts.tool}
                 activeNetTool={nts.tool}
                 fitNet={onFitNet}
-                saveNet={onSaveNet}
-                loadNet={onLoadNet}
+                currentNet={net}
+                loadNet={loadNet}
                 addNewPlace={this.createNetNode(emptyPlace)}
                 addNewTransition={this.createNetNode(emptyTransition)}
                 changeToolbarsTool={onChangeToolbarsTool} />

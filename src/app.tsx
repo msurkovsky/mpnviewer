@@ -5,7 +5,7 @@ import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom';
 import {NetElementSettingForm} from './components/types';
 
 import {isArc, isPlace, isTransition,
-        NetCategory, NetElement} from './netmodel';
+        NetCategory, NetElement, NetStructure} from './netmodel';
 import {Net} from './netview';
 
 import {NetPropertyChanged} from './events';
@@ -20,8 +20,7 @@ import {fillDefaultRelatedPositions,
 
 
 export interface AppEvents {
-    onSaveNet: (fileName: string) => void;
-    onLoadNet: (file: File) => void;
+    loadNet: (data: string) => void;
     onFitNet: () => void;
     onSelectNetElement: (path: Path | null) => () => void;
     onAddNetElement: (category: NetCategory) => (element: NetElement) => void;
@@ -47,7 +46,7 @@ const initState = {
         places: {},
         transitions: {},
         arcs: {},
-    },
+    } as NetStructure,
 };
 
 export class App extends React.Component<any, any> { // TODO: change `any` to specific types
@@ -97,8 +96,7 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
                     net={net}
                     canvasToolbarState={canvasToolbar}
                     netToolbarState={netToolbar}
-                    onSaveNet={this.onSaveNet}
-                    onLoadNet={this.onLoadNet}
+                    loadNet={this.loadNet}
                     onFitNet={this.onFitNet}
                     onSelectNetElement={this.onSelectNetElement}
                     onAddNetElement={this.onAddNetElement}
@@ -112,34 +110,9 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         );
     }
 
-    private onSaveNet = (fileName: string = "mpnet.json") => {
-
-        const data = JSON.stringify(this.state.net, null, 2);
-        const blob = new Blob( [ data ], {
-            type: 'application/octet-stream'
-        });
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', fileName);
-
-        const event = document.createEvent('MouseEvents');
-        event.initMouseEvent(
-            'click', true, true, window, 1, 0, 0, 0, 0,
-            false, false, false, false, 0, null);
-        link.dispatchEvent(event);
-    }
-
-    private onLoadNet = (file: File) => {
-        const fr = new FileReader();
-        fr.onload = () => {
-            const data = fr.result as string;
-            const net = JSON.parse(data);
-            this.setState(() => ({net: fillDefaultRelatedPositions(net)}));
-        };
-        /* fr.readAsText(evt.target.files[0]); */
-        fr.readAsText(file);
+    private loadNet = (data: string) => {
+        const net = JSON.parse(data);
+        this.setState(() => ({net: fillDefaultRelatedPositions(net)}));
     }
 
     private onFitNet = () => {
