@@ -1,9 +1,9 @@
 import { PositionChanged } from '../events';
 import { startMoving, stopMoving } from '../features/move';
-import { Path, Position } from '../types';
-import { CANVAS_ID } from './net';
+import { ID, Path, Position } from '../types';
 
 export interface PositionableProps {
+    canvasId: ID;
     path: Path;
     zoom: number;
     pan: Position;
@@ -17,13 +17,13 @@ export const onMouseDown = (
     relativePositionPath: Path
 ) => (evt: React.MouseEvent) => {
 
-    const { path, zoom, pan, position, changePosition } = props;
+    const { canvasId, path, zoom, pan, position, changePosition } = props;
 
     const { x, y } = position;
     const positionPath = path.concat(relativePositionPath);
 
     evt.stopPropagation();
-    startMoving(CANVAS_ID,
+    startMoving(canvasId,
         x, y,
         zoom, pan,
         positionPath, changePosition)(evt.nativeEvent);

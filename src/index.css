@@ -4,47 +4,6 @@ body {
   font-family: sans-serif;
 }
 
-.net {
-    fill: #ffe;
-}
-
-.transition {
-    stroke: #000;
-    stroke-width: 2px;
-    fill: #fff;
-}
-
-.codeRef {
-    stroke: #000;
-    stroke-width: 2px;
-    fill: #fff;
-}
-
-.place {
-    stroke: #000;
-    stroke-width: 2px;
-}
-
-.cpLabel {
-    stroke: #000;
-    stroke-width: 1px;
-    fill: #f2f2f2;
-}
-
-.queuePlace {
-    fill: #fff;
-}
-
-.multisetPlace {
-    fill: #ccc;
-}
-
-.arc {
-    stroke: #000;
-    stroke-width: 1.5px;
-    pointer-events: stroke;
-}
-
 .small {
     font: normal 8pt sans-serif;
 }

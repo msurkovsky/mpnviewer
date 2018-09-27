@@ -33,8 +33,7 @@ interface Props { // TODO: what about the any arguments of events?
     activeCanvasTool: any;
     activeNetTool: NetTool,
     changeToolbarsTool: (canvasTool: any, netTool: NetTool | null) => void;
-    // TODO: get rid of any
-    fitNet: (evt: any) => void;
+    serializeNetSVG: () => string;
     addNewPlace: () => void;
     addNewTransition: () => void;
     loadNet: (data: string) => void;
@@ -48,7 +47,7 @@ export class Toolbar extends React.Component<Props, any> {
             activeCanvasTool, activeNetTool,
             changeToolbarsTool,
             addNewPlace, addNewTransition,
-            loadNet,
+            loadNet, serializeNetSVG,
         } = this.props;
 
         const setAddArcTool = () => {changeToolbarsTool(TOOL_NONE, NetTool.ADD_ARC)};
@@ -86,8 +85,11 @@ export class Toolbar extends React.Component<Props, any> {
             </ButtonGroup>
 
             <ButtonGroup>
+                <Download file="mpnet.svg" content={serializeNetSVG()}>
+                    <Button>Export MP Net</Button>
+                </Download>
                 <Download file="mpnet.json" content={JSON.stringify(currentNet)}>
-                    <Button>Save MP net</Button>
+                    <Button>Save MP Net</Button>
                 </Download>
 
                 <Input id="loadMPNet" type="file" onChange={onLoadNet}/>

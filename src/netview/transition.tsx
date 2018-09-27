@@ -25,8 +25,7 @@ export class Transition extends React.PureComponent<Props> {
 
     public render() {
 
-        const {
-            data: transition, path, zoom, pan,
+        const {canvasId, data: transition, path, zoom, pan,
             anchorPosition, position, size, relatedPositions,
             changePosition} = this.props;
 
@@ -36,6 +35,7 @@ export class Transition extends React.PureComponent<Props> {
         let guardElement = null;
         if (transition.guard && transition.guard.length > 0) {
             guardElement = <TextElement
+                canvasId={canvasId}
                 path={path.concat(["relatedPositions", "guar"])}
                 data={{
                     id: `${transition.id}-guard`,
@@ -59,7 +59,8 @@ export class Transition extends React.PureComponent<Props> {
             const crY = y;
             codeRefBBox = { x: crX, y: crY, width: crWidth, height: crHeight };
             codeRefElement = (<g>
-                <rect className="codeRef" {...codeRefBBox} />
+                <rect fill="#fff" stroke="#000" strokeWidth="2px"
+                      {...codeRefBBox} />
                 {Utils.textToSVG(
                     `${transition.id}-code-`,
                      Utils.codeRef2String(transition.codeRef),
@@ -100,7 +101,7 @@ export class Transition extends React.PureComponent<Props> {
 
         return (
             <g>
-                <rect className="transition"
+                <rect fill="#fff" stroke="#000" strokeWidth="2px"
                     x={x} y={y} width={width} height={height}
                     onMouseDown={onMouseDown(this.props, ["position"])}
                     onMouseUp={onMouseUp}

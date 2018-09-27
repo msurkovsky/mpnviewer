@@ -4,7 +4,7 @@ import * as Utils from '../utils';
 import {PositionChanged} from '../events';
 
 import {ArcData} from '../netmodel';
-import {Dict, Path, Position} from '../types';
+import {Dict, ID, Path, Position} from '../types';
 import {font} from '../visualsetting';
 import {TextElement} from './textelement';
 
@@ -13,6 +13,7 @@ export type ArcPositions = Dict<Position> & {
 }
 
 interface Props {
+    canvasId: ID;
     data: ArcData;
     path: Path;
     zoom: number;
@@ -28,8 +29,7 @@ interface Props {
 export class Arc extends React.PureComponent<Props> {
 
     public render() {
-        const {
-            data: arc, path, zoom, pan,
+        const {canvasId, data: arc, path, zoom, pan,
             anchorPosition, points, relatedPositions,
             changePosition} = this.props;
 
@@ -37,16 +37,18 @@ export class Arc extends React.PureComponent<Props> {
         return (
             <g>
             <polyline
-                className="arc"
-                fill="transparent"
-                strokeWidth={10}
+                fillOpacity="0.0"
+                stroke="#000"
+                strokeWidth="1.5px"
                 strokeLinejoin="round"
+                pointerEvents="stroke"
                 points={anchoredPoints.map(({x,y}) => ([x, y])).join(" ")}
                 markerEnd={`url(#${arc.type})`}
                 onClick={this.onClick}
             />
 
             <TextElement
+                canvasId={canvasId}
                 path={path.concat(["relatedPositions", "expressions"])}
                 data={{id: `${arc.id}-expression`, text: arc.expression}}
                 zoom={zoom}

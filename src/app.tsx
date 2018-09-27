@@ -1,6 +1,6 @@
 import * as Ramda from 'ramda';
 import * as React from 'react';
-import {fitSelection, TOOL_AUTO} from 'react-svg-pan-zoom';
+import {TOOL_AUTO} from 'react-svg-pan-zoom';
 
 import {NetElementSettingForm} from './components/types';
 
@@ -18,10 +18,11 @@ import {ID, Path, Resizable} from './types';
 import {fillDefaultRelatedPositions,
         fillElementDefaultRelatedPosition} from './utils';
 
+export const CANVAS_ID = "netcanvas";
 
 export interface AppEvents {
     loadNet: (data: string) => void;
-    onFitNet: () => void;
+    serializeNetSVG: () => string;
     onSelectNetElement: (path: Path | null) => () => void;
     onAddNetElement: (category: NetCategory) => (element: NetElement) => void;
     onRemoveNetElement: (category: NetCategory) => (id: ID) => void;
@@ -92,12 +93,13 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         return (
             <div id="app">
                 <Net
+                    canvasId={CANVAS_ID}
                     width={1600} height={700}
                     net={net}
                     canvasToolbarState={canvasToolbar}
                     netToolbarState={netToolbar}
                     loadNet={this.loadNet}
-                    onFitNet={this.onFitNet}
+                    serializeNetSVG={this.serializeNetSVG}
                     onSelectNetElement={this.onSelectNetElement}
                     onAddNetElement={this.onAddNetElement}
                     onRemoveNetElement={this.onRemoveNetElement}
@@ -115,13 +117,43 @@ export class App extends React.Component<any, any> { // TODO: change `any` to sp
         this.setState(() => ({net: fillDefaultRelatedPositions(net)}));
     }
 
-    private onFitNet = () => {
-        // TODO: the bounding box of the net
-        this.setState(({canvasToolbar}: any) => ({canvasToolbar: {
-            // TODO: I can use this to fit selection on net bounding box
-            value: fitSelection(canvasToolbar.value, 40, 40, 200, 200),
-            tool: canvasToolbar.tool,
-        }}));
+    private serializeNetSVG = () => {
+
+        const canvas = document.getElementById(CANVAS_ID);
+        const defs = document.getElementById(`${CANVAS_ID}-defs`);
+        const elements = document.getElementById(`${CANVAS_ID}-netelements`);
+        if (canvas && defs && elements) {
+            const cvsBbox = canvas.getBoundingClientRect();
+            const {top: cvsY, left: cvsX} = cvsBbox;
+
+            const serializer = new XMLSerializer();
+            const defsStr = serializer.serializeToString(defs);
+            const elementsStr = serializer.serializeToString(elements);
+
+            const bbox = elements.getBoundingClientRect();
+            let {top: y, left: x} = bbox;
+            x -= cvsX;
+            y -= cvsY;
+
+            const {width, height} = bbox;
+
+            const canvasValue = this.state.canvasToolbar.value;
+            if (canvasValue) {
+                const {e: panX, f: panY} = canvasValue as {e: number, f: number};
+                x -= panX;
+                y -= panY;
+            }
+            return `<?xml version="1.0" standalone="no"?>
+                    <svg viewBox="${x} ${y} ${width} ${height}"
+                         xmlns="http://www.w3.org/2000/svg"
+                         width="${width}"
+                         heigh="${height}">
+                      ${defsStr}
+                      ${elementsStr}
+                    </svg>`;
+        }
+
+        return "";
     }
 
     private onSelectNetElement = (path: Path | null) => () => {

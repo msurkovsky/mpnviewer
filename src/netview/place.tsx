@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Utils from '../utils';
 
-import {PlaceData} from '../netmodel';
+import {PlaceData, PlaceDataLayout} from '../netmodel';
 import {BBox, Dict, Position, Size} from '../types';
 import {font} from '../visualsetting';
 
@@ -26,8 +26,7 @@ export class Place extends React.PureComponent<Props> {
 
     public render () {
 
-        const {
-            data: place, path, zoom, pan,
+        const {canvasId, data: place, path, zoom, pan,
             anchorPosition, position, size, relatedPositions,
             changePosition} = this.props;
 
@@ -35,8 +34,6 @@ export class Place extends React.PureComponent<Props> {
         const {width, height} = size;
 
         const radius = height / 2;
-        const cssDataLayout = `${place.dataLayout}Place`;
-
 
         let cpLabelElement = null;
         let cpLabelBBox: BBox | null = null;
@@ -48,7 +45,8 @@ export class Place extends React.PureComponent<Props> {
             const cplRadius = cplHeight / 2;
             cpLabelBBox = {x: cplX, y: cplY, width: cplWidth, height: cplHeight};
             cpLabelElement = (<g>
-                <rect className="cpLabel" {...cpLabelBBox} rx={cplRadius} ry={cplRadius} />
+                <rect fill="#f2f2f2" stroke="#000" strokeWidth="1px"
+                      {...cpLabelBBox} rx={cplRadius} ry={cplRadius} />
                 {Utils.textToSVG(
                      `{id}-cpLabel-`,
                      place.cpLabel.replace(/\\n/g, ""),
@@ -88,6 +86,7 @@ export class Place extends React.PureComponent<Props> {
         // TODO: path should be just path of the element, but the text element does not know about te position
         if (place.dataType) {
             dataTypeElement = <TextElement
+                canvasId={canvasId}
                 path={path.concat(["relatedPositions", "dataType"])}
                 data={{id: `${place.id}-datatType`, text: place.dataType}}
                 zoom={zoom}
@@ -102,6 +101,7 @@ export class Place extends React.PureComponent<Props> {
         let initExprElement = null;
         if (place.initExpr) {
             initExprElement = <TextElement
+                canvasId={canvasId}
                 path={path.concat(["relatedPositions", "initExpr"])}
                 data={{id: `${place.id}-initExpr`, text: place.initExpr}}
                 zoom={zoom}
@@ -113,9 +113,11 @@ export class Place extends React.PureComponent<Props> {
                 changePosition={changePosition}/>;
         }
 
+        const fillColor = place.dataLayout === PlaceDataLayout.MULTISET ?
+                          "#ccc" : "#fff";
         return (
             <g>
-                <rect className={`place ${cssDataLayout}`}
+                <rect fill={fillColor} stroke="#000" strokeWidth="2px"
                     x={x} y={y} width={width} height={height} rx={radius} ry={radius}
                     onMouseDown={onMouseDown(this.props, ["position"])}
                     onMouseUp={onMouseUp}
