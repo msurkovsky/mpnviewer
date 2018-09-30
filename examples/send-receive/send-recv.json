@@ -1,0 +1,700 @@
+{
+  "places": {
+    "1538343812665": {
+      "data": {
+        "id": "1538343812665",
+        "name": "Active Send\\nRequests",
+        "dataType": "MessageToken",
+        "initExpr": "",
+        "dataLayout": "queue",
+        "cpLabel": "ASR"
+      },
+      "type": "place",
+      "position": {
+        "x": 806,
+        "y": 179
+      },
+      "size": {
+        "width": 100,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 103,
+          "y": 57
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388405": {
+      "data": {
+        "id": "1538344388405",
+        "name": "EP 1",
+        "dataType": "Unit",
+        "initExpr": "unit",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 547,
+        "y": 31
+      },
+      "size": {
+        "width": 40,
+        "height": 40
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 40,
+          "y": 40
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388410": {
+      "data": {
+        "id": "1538344388410",
+        "name": "",
+        "dataType": "(MPI_Request,\\n MessageRequest)",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 548,
+        "y": 317
+      },
+      "size": {
+        "width": 40,
+        "height": 40
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 40,
+          "y": 40
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388421": {
+      "data": {
+        "id": "1538344388421",
+        "name": "Completed Send\\nRequest",
+        "dataType": "MessageRequest",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 154.64462809917356,
+        "y": 454.26446280991735
+      },
+      "size": {
+        "width": 120,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 113.00312727272728,
+          "y": 65.45454545454544
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388426": {
+      "data": {
+        "id": "1538344388426",
+        "name": "",
+        "dataType": "Unit",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 549.3059936147569,
+        "y": 600.3544788180631
+      },
+      "size": {
+        "width": 40,
+        "height": 40
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 40,
+          "y": 40
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388428": {
+      "data": {
+        "id": "1538344388428",
+        "name": "",
+        "dataType": "MPI_Status",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 645.513566148866,
+        "y": 555.0315727044234
+      },
+      "size": {
+        "width": 40,
+        "height": 40
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 40,
+          "y": 40
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388433": {
+      "data": {
+        "id": "1538344388433",
+        "name": "Active Receive\\n Request",
+        "dataType": "MessageRequest",
+        "initExpr": "",
+        "dataLayout": "queue",
+        "cpLabel": "ARR"
+      },
+      "type": "place",
+      "position": {
+        "x": 828.4697209314254,
+        "y": 703.7876315585354
+      },
+      "size": {
+        "width": 100,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 100.33057851239676,
+          "y": 55.70247933884298
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388436": {
+      "data": {
+        "id": "1538344388436",
+        "name": "",
+        "dataType": "(MPI_Request,\\n MessageRequest)",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 551.4748138948852,
+        "y": 847.2971988286063
+      },
+      "size": {
+        "width": 40,
+        "height": 40
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 40,
+          "y": 40
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388443": {
+      "data": {
+        "id": "1538344388443",
+        "name": "Completed Recv\\nRequests",
+        "dataType": "MessageToken",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 151.03695054168153,
+        "y": 969.7995714991587
+      },
+      "size": {
+        "width": 120,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 115.19937142844532,
+          "y": 60.68841739126583
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538344388446": {
+      "data": {
+        "id": "1538344388446",
+        "name": "",
+        "dataType": "Unit",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 554.109273522209,
+        "y": 1077.8124162194306
+      },
+      "size": {
+        "width": 40,
+        "height": 40
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 40,
+          "y": 40
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    }
+  },
+  "transitions": {
+    "1538343812664": {
+      "data": {
+        "id": "1538343812664",
+        "name": "Send"
+      },
+      "type": "transition",
+      "position": {
+        "x": 537,
+        "y": 183
+      },
+      "size": {
+        "width": 60,
+        "height": 40
+      },
+      "relatedPositions": {
+        "guard": {
+          "x": 0,
+          "y": 50.13333333333333
+        }
+      }
+    },
+    "1538344388422": {
+      "data": {
+        "id": "1538344388422",
+        "name": "Wait"
+      },
+      "type": "transition",
+      "position": {
+        "x": 538.0330578512396,
+        "y": 458.0661157024793
+      },
+      "size": {
+        "width": 60,
+        "height": 40
+      },
+      "relatedPositions": {
+        "guard": {
+          "x": 0,
+          "y": 50.13333333333333
+        }
+      }
+    },
+    "1538344388431": {
+      "data": {
+        "id": "1538344388431",
+        "name": "Recv"
+      },
+      "type": "transition",
+      "position": {
+        "x": 540.916063829527,
+        "y": 709.5219131662283
+      },
+      "size": {
+        "width": 60,
+        "height": 40
+      },
+      "relatedPositions": {
+        "guard": {
+          "x": 0,
+          "y": 50.13333333333333
+        }
+      }
+    },
+    "1538344388440": {
+      "data": {
+        "id": "1538344388440",
+        "name": "Wait"
+      },
+      "type": "transition",
+      "position": {
+        "x": 542.7920437085471,
+        "y": 973.7512609401442
+      },
+      "size": {
+        "width": 60,
+        "height": 40
+      },
+      "relatedPositions": {
+        "guard": {
+          "x": 0,
+          "y": 50.13333333333333
+        }
+      }
+    }
+  },
+  "arcs": {
+    "1538343812666-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538343812664"
+      ],
+      "data": {
+        "id": "1538343812666-full",
+        "type": "singleheaded",
+        "expression": "{value=$read(n),\\n envelope={\\n  id=unique(id),\\n  destination=$read(dst),\\n  tag=0,\\n  buffered=buffered}}"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "places",
+        "1538343812665"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 627.5018425035048,
+          "y": 156.27287293574432
+        },
+        "expressions": {
+          "x": 423.5018425035048,
+          "y": -59.72712706425568
+        }
+      }
+    },
+    "1538344388408-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538344388405"
+      ],
+      "data": {
+        "id": "1538344388408-full",
+        "expression": "",
+        "type": "singleheaded"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "transitions",
+        "1538343812664"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 565.8729281767955,
+          "y": 101
+        }
+      }
+    },
+    "1538344388411-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538343812664"
+      ],
+      "data": {
+        "id": "1538344388411-full",
+        "type": "singleheaded",
+        "expression": "(request, {\\n id=unique(id),\\n destination=$read(dst),\\n tag=0,\\n buffered=buffered})"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "places",
+        "1538344388410"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 582.8321346748769,
+          "y": 274.00122522906804
+        }
+      }
+    },
+    "1538344388423-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538344388410"
+      ],
+      "data": {
+        "id": "1538344388423-full",
+        "type": "singleheaded",
+        "expression": "(request, {\\n id=id,\\n buffered=buffered})"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "transitions",
+        "1538344388422"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 581.519588285585,
+          "y": 414.21487603305786
+        }
+      }
+    },
+    "1538344388425-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538344388421"
+      ],
+      "data": {
+        "id": "1538344388425-full",
+        "type": "doubleheaded",
+        "expression": "[not buffered] {id=id}"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "transitions",
+        "1538344388422"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 315.7066115702479,
+          "y": 470.0638906927582
+        }
+      }
+    },
+    "1538344388427-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538344388422"
+      ],
+      "data": {
+        "id": "1538344388427-full",
+        "expression": "",
+        "type": "singleheaded"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "places",
+        "1538344388426"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 568.8334844934514,
+          "y": 514.9857262734563
+        }
+      }
+    },
+    "1538344388430-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538344388422"
+      ],
+      "data": {
+        "id": "1538344388430-full",
+        "type": "singleheaded",
+        "expression": "status"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "places",
+        "1538344388428"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 627.4191783462943,
+          "y": 523.8205785206528
+        }
+      }
+    },
+    "1538344388432-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538344388426"
+      ],
+      "data": {
+        "id": "1538344388432-full",
+        "expression": "",
+        "type": "singleheaded"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "transitions",
+        "1538344388431"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 567.9844414680313,
+          "y": 663.4381959921457
+        }
+      }
+    },
+    "1538344388434-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538344388431"
+      ],
+      "data": {
+        "id": "1538344388434-full",
+        "type": "singleheaded",
+        "expression": "{id=unique(id), source=1}"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "places",
+        "1538344388433"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 638.3927451074087,
+          "y": 719.5490591269721
+        }
+      }
+    },
+    "1538344388437-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538344388431"
+      ],
+      "data": {
+        "id": "1538344388437-full",
+        "type": "singleheaded",
+        "expression": "(request, {\\n id=unique(id),\\n source=1,\\n tag=0})"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "places",
+        "1538344388436"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 578.0565941995378,
+          "y": 800.0882539838218
+        }
+      }
+    },
+    "1538344388441-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538344388436"
+      ],
+      "data": {
+        "id": "1538344388441-full",
+        "type": "singleheaded",
+        "expression": "(request, {id=id})"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "transitions",
+        "1538344388440"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 582.3363158547003,
+          "y": 934.1723727414866
+        }
+      }
+    },
+    "1538344388442-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538344388440"
+      ],
+      "data": {
+        "id": "1538344388442-full",
+        "expression": "",
+        "type": "singleheaded"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "transitions",
+        "1538344388440"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 572.7920437085471,
+          "y": 993.7512609401442
+        }
+      }
+    },
+    "1538344388444-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538344388443"
+      ],
+      "data": {
+        "id": "1538344388444-full",
+        "type": "doubleheaded",
+        "expression": "{value=$write(matrix),\\n envelope={id=id}}"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "transitions",
+        "1538344388440"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 320.9895366284304,
+          "y": 979.877868522314
+        }
+      }
+    },
+    "1538344388447-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538344388440"
+      ],
+      "data": {
+        "id": "1538344388447-full",
+        "expression": "",
+        "type": "singleheaded"
+      },
+      "innerPoints": [],
+      "endElementPath": [
+        "places",
+        "1538344388446"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 574.3422543331762,
+          "y": 1035.6069478051315
+        }
+      }
+    }
+  }
+}

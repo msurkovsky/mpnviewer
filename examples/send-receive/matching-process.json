@@ -1,0 +1,260 @@
+{
+  "places": {
+    "1538347047878": {
+      "data": {
+        "id": "1538347047878",
+        "name": "Active Send\\nRequests",
+        "dataType": "MessageToken",
+        "initExpr": "",
+        "dataLayout": "queue",
+        "cpLabel": "ASR"
+      },
+      "type": "place",
+      "position": {
+        "x": 896.04,
+        "y": -5.120000000000001
+      },
+      "size": {
+        "width": 110,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 112,
+          "y": 56
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538347047879": {
+      "data": {
+        "id": "1538347047879",
+        "name": "Active Recv\\nRequests",
+        "dataType": "MessageRequest",
+        "initExpr": "",
+        "dataLayout": "queue",
+        "cpLabel": "ARR"
+      },
+      "type": "place",
+      "position": {
+        "x": 897.1,
+        "y": 130
+      },
+      "size": {
+        "width": 110,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 111,
+          "y": 56
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538347047880": {
+      "data": {
+        "id": "1538347047880",
+        "name": "Completed Send\\nRequests",
+        "dataType": "MessageRequest",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 1480.6418181818183,
+        "y": -8.330909090909088
+      },
+      "size": {
+        "width": 110,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 116,
+          "y": 55
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    },
+    "1538347047881": {
+      "data": {
+        "id": "1538347047881",
+        "name": "Completed Recv\\nRequest",
+        "dataType": "MessageToken",
+        "initExpr": "",
+        "dataLayout": "queue"
+      },
+      "type": "place",
+      "position": {
+        "x": 1481.8854545454546,
+        "y": 127.35999999999999
+      },
+      "size": {
+        "width": 110,
+        "height": 50
+      },
+      "relatedPositions": {
+        "dataType": {
+          "x": 115,
+          "y": 57
+        },
+        "initExpr": {
+          "x": 40,
+          "y": 0
+        }
+      }
+    }
+  },
+  "transitions": {
+    "1538347047877": {
+      "data": {
+        "id": "1538347047877",
+        "name": "Match\\nMessages",
+        "guard": []
+      },
+      "type": "transition",
+      "position": {
+        "x": 1218,
+        "y": 62
+      },
+      "size": {
+        "width": 60,
+        "height": 40
+      },
+      "relatedPositions": {
+        "guard": {
+          "x": -47.69999999999982,
+          "y": 80.87333333333333
+        },
+        "guar": {
+          "x": -332.72727272727275,
+          "y": -233.5030303030303
+        }
+      }
+    }
+  },
+  "arcs": {
+    "1538347047882-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538347047878"
+      ],
+      "data": {
+        "id": "1538347047882-full",
+        "type": "doubleheaded",
+        "expression": "{value=value, {\\n id=snd_id,\\n destination=destination,\\n source=source,\\n tag=tag,\\n buffered=buffered}}"
+      },
+      "innerPoints": [
+        {
+          "x": 1214.9,
+          "y": 18.820000000000004
+        }
+      ],
+      "endElementPath": [
+        "transitions",
+        "1538347047877"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 1046.56,
+          "y": -19.655714285714282
+        }
+      }
+    },
+    "1538347047884-full": {
+      "type": "arc",
+      "startElementPath": [
+        "places",
+        "1538347047879"
+      ],
+      "data": {
+        "id": "1538347047884-full",
+        "type": "doubleheaded",
+        "expression": "{id=rcv_id,\\n destination=destination,\\n source=source,\\n tag=tag}"
+      },
+      "innerPoints": [
+        {
+          "x": 1209.4200000000005,
+          "y": 154.12000000000003
+        }
+      ],
+      "endElementPath": [
+        "transitions",
+        "1538347047877"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 1047.8600000000001,
+          "y": 124.6217857142857
+        }
+      }
+    },
+    "1538347586058-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538347047877"
+      ],
+      "data": {
+        "id": "1538347586058-full",
+        "type": "singleheaded",
+        "expression": "[buffered] {\\n id=snd_id,\\n destination=destination\\n source=source,\\n tag=tag}@source"
+      },
+      "innerPoints": [
+        {
+          "x": 1273.82,
+          "y": 17.759999999999998
+        }
+      ],
+      "endElementPath": [
+        "places",
+        "1538347047880"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 1297.9090553458425,
+          "y": -18.459967977825173
+        }
+      }
+    },
+    "1538347586059-full": {
+      "type": "arc",
+      "startElementPath": [
+        "transitions",
+        "1538347047877"
+      ],
+      "data": {
+        "id": "1538347586059-full",
+        "type": "singleheaded",
+        "expression": "{value=value, {\\n id=rcv_id,\\n destination=destination,\\n source=source,\\n tag=tag}}@destination"
+      },
+      "innerPoints": [
+        {
+          "x": 1284.7199999999998,
+          "y": 152.24
+        }
+      ],
+      "endElementPath": [
+        "places",
+        "1538347047881"
+      ],
+      "relatedPositions": {
+        "expression": {
+          "x": 1302.2380159406246,
+          "y": 116.89014603263728
+        }
+      }
+    }
+  }
+}
