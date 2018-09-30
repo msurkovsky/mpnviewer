@@ -44,7 +44,7 @@ export class Transition extends React.PureComponent<Props> {
         if (transition.guard && transition.guard.length > 0) {
             guardElement = <TextElement
                 canvasId={canvasId}
-                path={path.concat(["relatedPositions", "guar"])}
+                path={path.concat(["relatedPositions", "guard"])}
                 data={{
                     id: `${transition.id}-guard`,
                     text: `[${transition.guard.join(', ')}]`

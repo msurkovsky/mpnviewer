@@ -72,7 +72,7 @@ export class Arc extends React.PureComponent<Props> {
 
             <TextElement
                 canvasId={canvasId}
-                path={path.concat(["relatedPositions", "expressions"])}
+                path={path.concat(["relatedPositions", "expression"])}
                 data={{id: `${arc.id}-expression`, text: arc.expression}}
                 zoom={zoom}
                 pan={pan}
