@@ -71,7 +71,7 @@ export class Net extends React.Component<Props, State> {
             <ReactSVGPanZoom
                 width={width} height={height}
                 background="#ffe"
-                SVGBackground="#f0e"
+                SVGBackground="#ffe"
                 miniaturePosition={POSITION_NONE}
                 toolbarPosition={POSITION_NONE}
                 value={cts.value} onChangeValue={onChangeToolbarValue(ToolbarType.CANVAS)}
