@@ -32,7 +32,7 @@ export class PlaceSetting extends React.Component<Props, any> {
         const submit = () => {
             submitChanges({
                 path,
-                value: rejectNulls({
+                value: () => rejectNulls({
                     id, name, dataType, initExpr, dataLayout, cpLabel
                 }),
             });

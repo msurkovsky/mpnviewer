@@ -14,7 +14,8 @@ export interface PositionableProps {
 
 export const onMouseDown = (
     props: PositionableProps,
-    relativePositionPath: Path
+    relativePositionPath: Path,
+    setIndirectPositionValue?: (p: Position) => any
 ) => (evt: React.MouseEvent) => {
 
     const { canvasId, path, zoom, pan, position, changePosition } = props;
@@ -26,7 +27,8 @@ export const onMouseDown = (
     startMoving(canvasId,
         x, y,
         zoom, pan,
-        positionPath, changePosition)(evt.nativeEvent);
+        positionPath, changePosition,
+        setIndirectPositionValue)(evt.nativeEvent);
 }
 
 export const onMouseUp = (evt: React.MouseEvent) => {

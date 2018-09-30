@@ -31,7 +31,7 @@ export class TransitionSetting extends React.Component<Props, any> {
         const submit = () => {
             submitChanges({
                 path,
-                value: rejectNulls({id, name, guard, codeRef}),
+                value: () => rejectNulls({id, name, guard, codeRef}),
             });
         };
 
