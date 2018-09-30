@@ -56,6 +56,7 @@ export interface BaseNetElement {
     data: NetElementData;
     type: NetElementType;
     relatedPositions?: Dict<Position>;
+    style?: object; // TODO: find a proper SVG type
 }
 
 export interface PlaceElement extends BaseNetElement, Positionable, Resizable {

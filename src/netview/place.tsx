@@ -1,3 +1,4 @@
+import * as Ramda from 'ramda';
 import * as React from 'react';
 import * as Utils from '../utils';
 
@@ -20,15 +21,21 @@ type Props = PositionableProps & {
     select: () => void;
     remove: () => void;
     createNewArc: () => boolean;
+    style?: React.SVGProps<SVGRectElement>;
 };
 
 export class Place extends React.PureComponent<Props> {
+
+    public static defaultStyleAttrs = {
+        stroke: "#000",
+        strokeWidth: 2,
+    };
 
     public render () {
 
         const {canvasId, data: place, path, zoom, pan,
             anchorPosition, position, size, relatedPositions,
-            changePosition} = this.props;
+            changePosition, style} = this.props;
 
         const {x, y} = Utils.v2dAdd(anchorPosition, position);
         const {width, height} = size;
@@ -117,7 +124,10 @@ export class Place extends React.PureComponent<Props> {
                           "#ccc" : "#fff";
         return (
             <g>
-                <rect fill={fillColor} stroke="#000" strokeWidth="2px"
+                <rect
+                    {...Ramda.merge(Place.defaultStyleAttrs, style)}
+                    fill={fillColor/* NOTE: color is not reassignable!
+                                      It determines data layout. */}
                     x={x} y={y} width={width} height={height} rx={radius} ry={radius}
                     onMouseDown={onMouseDown(this.props, ["position"])}
                     onMouseUp={onMouseUp}

@@ -134,7 +134,7 @@ export class Net extends React.Component<Props, State> {
         for (const key of Object.keys(net.arcs)) {
             const arc = net.arcs[key];
             const points = Utils.getArcPoints(arc, net);
-            const {data, relatedPositions} = arc;
+            const {data, relatedPositions, style} = arc;
 
             const path = ["arcs", key];
 
@@ -142,6 +142,7 @@ export class Net extends React.Component<Props, State> {
 
             arcComponents.push(
                 <Arc
+                    style={style}
                     canvasId={canvasId}
                     key={`${Utils.getArcId(arc, net)}`}
                     path={path}
@@ -174,13 +175,14 @@ export class Net extends React.Component<Props, State> {
 
         const results = [];
         for (const key of Object.keys(elements)) {
-            const {data, position, size, relatedPositions} = elements[key];
+            const {data, position, size, relatedPositions, style} = elements[key];
             const path = [category, key];
 
             const removeNetElement = () => onRemoveNetElement(category)(key);
 
             results.push(
                 <Component
+                    style={style}
                     canvasId={canvasId}
                     key={data.id}
                     path={path}

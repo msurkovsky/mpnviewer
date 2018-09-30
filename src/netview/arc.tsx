@@ -1,3 +1,4 @@
+import * as Ramda from 'ramda';
 import * as React from 'react';
 import * as Utils from '../utils';
 
@@ -22,14 +23,21 @@ type Props = Omit<PositionableProps, "position"> & { // NOTE: The position is
     relatedPositions: ArcPositions;
     select: () => void;
     remove: () => void;
+    style?: React.SVGProps<SVGPolylineElement>;
 }
 
 export class Arc extends React.PureComponent<Props> {
 
+    public static defaultStyleAttrs = {
+        stroke: "#000",
+        strokeWidth: 1.5,
+        strokeLinejoin: "round",
+    }
+
     public render() {
         const {canvasId, data: arc, path, zoom, pan,
             anchorPosition, points, relatedPositions,
-            changePosition} = this.props;
+            changePosition, style} = this.props;
 
         const anchoredPoints = points.map(p => Utils.v2dAdd(anchorPosition, p));
 
@@ -53,10 +61,8 @@ export class Arc extends React.PureComponent<Props> {
         return (
             <g>
             <polyline
+                {...Ramda.merge(Arc.defaultStyleAttrs, style)}
                 fillOpacity="0.0"
-                stroke="#000"
-                strokeWidth="1.5px"
-                strokeLinejoin="round"
                 pointerEvents="stroke"
                 points={anchoredPoints.map(({x,y}) => ([x, y])).join(" ")}
                 markerEnd={`url(#${arc.type})`}

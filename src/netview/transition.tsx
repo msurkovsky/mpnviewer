@@ -1,3 +1,4 @@
+import * as Ramda from 'ramda';
 import * as React from 'react';
 import * as Utils from '../utils';
 
@@ -19,15 +20,22 @@ type Props =  PositionableProps & {
     select: () => void;
     remove: () => void;
     createNewArc: () => boolean;
+    style?: React.SVGProps<SVGRectElement>;
 }
 
 export class Transition extends React.PureComponent<Props> {
+
+    public static defaultStyleAttrs = {
+        stroke: "#000",
+        strokeWidth: 2,
+        fill: "#fff",
+    };
 
     public render() {
 
         const {canvasId, data: transition, path, zoom, pan,
             anchorPosition, position, size, relatedPositions,
-            changePosition} = this.props;
+            changePosition, style} = this.props;
 
         const {x, y} = Utils.v2dAdd(anchorPosition, position);
         const {width, height} = size;
@@ -101,7 +109,7 @@ export class Transition extends React.PureComponent<Props> {
 
         return (
             <g>
-                <rect fill="#fff" stroke="#000" strokeWidth="2px"
+                <rect {...Ramda.merge(Transition.defaultStyleAttrs, style)}
                     x={x} y={y} width={width} height={height}
                     onMouseDown={onMouseDown(this.props, ["position"])}
                     onMouseUp={onMouseUp}

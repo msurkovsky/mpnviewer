@@ -88,7 +88,7 @@ export class Toolbar extends React.Component<Props, any> {
                 <Download file="mpnet.svg" content={serializeNetSVG()}>
                     <Button>Export MP Net</Button>
                 </Download>
-                <Download file="mpnet.json" content={JSON.stringify(currentNet)}>
+                <Download file="mpnet.json" content={JSON.stringify(currentNet, null, 2)}>
                     <Button>Save MP Net</Button>
                 </Download>
 
