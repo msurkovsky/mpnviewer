@@ -21,7 +21,7 @@ export class ResizableSetting extends React.Component<Props, any> {
         const submit = () => {
             submitChanges({
                 path,
-                value: {width, height},
+                value: () => ({width, height}),
             });
         };
 

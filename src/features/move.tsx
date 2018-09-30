@@ -10,6 +10,7 @@ let ctx: {
     pointerElementDiff: Vector2d; // diff between mouse pointer and element position
     positionPath: Path;
     changePosition: (evt: PositionChanged) => void;
+    setIndirectPositionValue: (p: Position) => any;
 } | null = null;
 
 const {v2dSub, v2dScalarMul} = Utils;
@@ -20,7 +21,7 @@ const handleMoving = (evt: MouseEvent) => {
     }
 
     const {pointerElementDiff, zoom, pan,
-           positionPath, changePosition} = ctx;
+           positionPath, changePosition, setIndirectPositionValue} = ctx;
 
     const pos = Utils.getPositionOnCanvas(ctx.canvasId, evt);
     const newPos = v2dSub(
@@ -29,7 +30,7 @@ const handleMoving = (evt: MouseEvent) => {
 
     changePosition({
         path: positionPath,
-        value: newPos,
+        value: () => setIndirectPositionValue(newPos),
     });
 }
 
@@ -40,7 +41,8 @@ export const startMoving = (
     zoom: number,
     pan: Position,
     positionPath: Path,
-    changePosition: (evt: PositionChanged) => void
+    changePosition: (evt: PositionChanged) => void,
+    setIndirectPositionValue: (p: Position) => any = Utils.identity
 ) => (evt: MouseEvent) => {
 
     const pos = Utils.getPositionOnCanvas(canvasId, evt);
@@ -49,7 +51,7 @@ export const startMoving = (
         {x, y});
 
     ctx = {canvasId, pointerElementDiff, zoom, pan,
-           positionPath, changePosition};
+           positionPath, changePosition, setIndirectPositionValue};
 
     document.addEventListener('mousemove', handleMoving);
 }
